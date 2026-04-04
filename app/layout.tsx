@@ -9,9 +9,8 @@ const _geist = Geist({ subsets: ["latin"] });
 const _geistMono = Geist_Mono({ subsets: ["latin"] });
 
 export const metadata: Metadata = {
-  title: 'v0 App',
-  description: 'Created with v0',
-  generator: 'v0.app',
+  title: 'TradeDaddy - Trade Smarter, Trade Better',
+  description: 'Advanced trading platform with live market data, AI-powered trade analysis, and professional trading tools',
   icons: {
     icon: [
       {
