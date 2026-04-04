@@ -39,23 +39,18 @@ const creditPackages = [
 
 const subscriptionTiers = [
   {
-    id: "basic",
-    name: "Basic",
-    price: 99,
-    features: ["Access to all calculators", "Basic market data", "Trade journal", "Email support"],
-  },
-  {
     id: "pro",
     name: "Pro",
     price: 249,
-    features: ["Everything in Basic", "Advanced academy content", "AI trade analysis (50/mo)", "Priority support", "Custom alerts"],
+    features: ["500 credits/month", "All calculators", "Unlimited journal", "Full academy access", "Priority support"],
     popular: true,
   },
   {
     id: "elite",
     name: "Elite",
     price: 499,
-    features: ["Everything in Pro", "Unlimited AI analysis", "1-on-1 mentorship", "Gold trading masterclass", "Private Discord access"],
+    features: ["Unlimited credits", "All Pro features", "AI trade analysis", "Advanced analytics", "Dedicated support"],
+    popular: false,
   },
 ]
 
@@ -147,8 +142,6 @@ export default function ProfilePage() {
     switch (tier) {
       case "free":
         return <Badge variant="outline" className="border-muted-foreground/30 text-muted-foreground">FREE</Badge>
-      case "basic":
-        return <Badge variant="outline" className="border-terminal-cyan/30 text-terminal-cyan">BASIC</Badge>
       case "pro":
         return <Badge variant="outline" className="border-terminal-yellow/30 text-terminal-yellow">PRO</Badge>
       case "elite":
@@ -358,7 +351,7 @@ export default function ProfilePage() {
               </CardDescription>
             </CardHeader>
             <CardContent>
-              <div className="grid gap-6 md:grid-cols-3">
+              <div className="grid gap-6 md:grid-cols-2">
                 {subscriptionTiers.map((tier) => (
                   <Card 
                     key={tier.id} 
