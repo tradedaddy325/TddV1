@@ -1,12 +1,12 @@
 import { NextResponse } from 'next/server'
-import { fetchAllPrices } from '@/lib/market-data'
+import { getMarketPrices } from '@/lib/market-data'
 
 export const dynamic = 'force-dynamic'
 export const revalidate = 0
 
 export async function GET() {
   try {
-    const prices = await fetchAllPrices()
+    const prices = await getMarketPrices()
     
     return NextResponse.json({
       success: true,
