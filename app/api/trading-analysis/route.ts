@@ -1,6 +1,7 @@
-import { streamText } from 'ai'
-import { xai } from '@ai-sdk/xai'
 import type { NextRequest } from 'next/server'
+
+export const runtime = 'nodejs'
+export const maxDuration = 60
 
 export async function POST(request: NextRequest) {
   try {
@@ -8,6 +9,11 @@ export async function POST(request: NextRequest) {
 
     if (!marketData) {
       return new Response('Market data is required', { status: 400 })
+    }
+
+    const apiKey = process.env.XAI_API_KEY
+    if (!apiKey) {
+      return new Response('XAI API key not configured', { status: 500 })
     }
 
     const systemPrompt = `You are Grok, an advanced trading analysis AI by xAI. Provide expert trading insights and market analysis.
@@ -33,15 +39,49 @@ Provide:
 4. Risk Assessment
 5. Recommended Actions`
 
-    const result = streamText({
-      model: xai('grok-4'),
-      system: systemPrompt,
-      prompt: userPrompt,
+    // Use direct xAI API call instead of SDK
+    const response = await fetch('https://api.x.ai/chat/completions', {
+      method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${apiKey}`,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        model: 'grok-4',
+        messages: [
+          {
+            role: 'system',
+            content: systemPrompt,
+          },
+          {
+            role: 'user',
+            content: userPrompt,
+          },
+        ],
+        temperature: 0.7,
+        max_tokens: 2000,
+        stream: true,
+      }),
     })
 
-    return result.toTextStreamResponse()
+    if (!response.ok) {
+      const error = await response.text()
+      throw new Error(`Grok API error: ${response.status} - ${error}`)
+    }
+
+    // Return the streaming response directly
+    return new Response(response.body, {
+      headers: {
+        'Content-Type': 'text/event-stream',
+        'Cache-Control': 'no-cache',
+        'Connection': 'keep-alive',
+      },
+    })
   } catch (error) {
     console.error('Error in trading analysis:', error)
-    return new Response('Failed to generate trading analysis', { status: 500 })
+    return new Response(
+      `Failed to generate trading analysis: ${error instanceof Error ? error.message : 'Unknown error'}`,
+      { status: 500 }
+    )
   }
 }
