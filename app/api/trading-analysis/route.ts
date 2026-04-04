@@ -39,8 +39,8 @@ Provide:
 4. Risk Assessment
 5. Recommended Actions`
 
-    // Use direct xAI API call instead of SDK
-    const response = await fetch('https://api.x.ai/chat/completions', {
+    // Use direct xAI API call with correct endpoint
+    const response = await fetch('https://api.x.ai/v1/chat/completions', {
       method: 'POST',
       headers: {
         'Authorization': `Bearer ${apiKey}`,
