@@ -2,6 +2,7 @@ import Link from 'next/link'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
+import { LegalFooter } from '@/components/legal-footer'
 import {
   TrendingUp,
   Calculator,
@@ -157,111 +158,9 @@ export default function LandingPage() {
               </div>
             </div>
           </div>
-        </div>
-      </section>
-
-      {/* Features */}
-      <section id="features" className="py-20 border-t border-border/50">
-        <div className="container mx-auto px-4">
-          <div className="text-center mb-16">
-            <h2 className="text-4xl font-bold text-foreground mb-4">Powerful Features</h2>
-            <p className="text-muted-foreground max-w-2xl mx-auto">Everything you need to trade smarter and track your progress</p>
-          </div>
-
-          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {features.map((feature) => {
-              const Icon = feature.icon
-              return (
-                <Card key={feature.title} className="border-border/50 hover:border-border transition-colors">
-                  <CardContent className="pt-6">
-                    <div className="flex items-start justify-between mb-4">
-                      <Icon className="w-8 h-8 text-primary" />
-                      {feature.title === 'Live Market Data' && (
-                        <div className="flex items-center gap-2">
-                          <span className="text-xs text-muted-foreground font-mono">LIVE</span>
-                          <div className="w-2.5 h-2.5 bg-green-500 rounded-full animate-pulse shadow-lg shadow-green-500/50" />
-                        </div>
-                      )}
-                    </div>
-                    <h3 className="font-semibold text-foreground mb-2">{feature.title}</h3>
-                    <p className="text-sm text-muted-foreground">{feature.description}</p>
-                  </CardContent>
-                </Card>
-              )
-            })}
-          </div>
-        </div>
-      </section>
-
-      {/* Pricing */}
-      <section id="pricing" className="py-20 border-t border-border/50">
-        <div className="container mx-auto px-4">
-          <div className="text-center mb-16">
-            <h2 className="text-4xl font-bold text-foreground mb-4">Simple Pricing</h2>
-            <p className="text-muted-foreground max-w-2xl mx-auto">Choose the plan that fits your trading needs</p>
-          </div>
-
-          <div className="grid md:grid-cols-3 gap-6 max-w-5xl mx-auto">
-            {pricingTiers.map((tier) => (
-              <Card
-                key={tier.name}
-                className={`border-border/50 transition-all ${
-                  tier.popular ? 'ring-2 ring-primary scale-105' : ''
-                }`}
-              >
-                <CardHeader>
-                  {tier.popular && (
-                    <div className="inline-block w-fit">
-                      <Badge className="mb-2 bg-primary text-primary-foreground">Most Popular</Badge>
-                    </div>
-                  )}
-                  <CardTitle className="text-2xl">{tier.name}</CardTitle>
-                  <div className="mt-3">
-                    <span className="text-3xl font-bold">{tier.price}</span>
-                    <span className="text-muted-foreground ml-2">{tier.period}</span>
-                  </div>
-                </CardHeader>
-                <CardContent className="space-y-6">
-                  <ul className="space-y-3">
-                    {tier.features.map((feature) => (
-                      <li key={feature} className="flex items-start gap-3 text-sm">
-                        <div className="h-1.5 w-1.5 rounded-full bg-primary mt-1.5 flex-shrink-0" />
-                        <span className="text-foreground">{feature}</span>
-                      </li>
-                    ))}
-                  </ul>
-                  <Link href={tier.name === 'Free' ? '/auth/sign-up' : '/auth/sign-up'} className="block">
-                    <Button className="w-full" variant={tier.popular ? 'default' : 'outline'}>
-                      {tier.cta}
-                    </Button>
-                  </Link>
-                </CardContent>
-              </Card>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* CTA */}
-      <section className="py-16 border-t border-border/50">
-        <div className="container mx-auto px-4 text-center">
-          <h2 className="text-3xl font-bold text-foreground mb-4">Ready to upgrade your trading?</h2>
-          <p className="text-muted-foreground mb-8 max-w-2xl mx-auto">Join traders worldwide using TRADEDADDY</p>
-          <Link href="/auth/sign-up">
-            <Button size="lg">
-              Get Started Now
-              <ChevronRight className="w-4 h-4 ml-2" />
-            </Button>
-          </Link>
-        </div>
-      </section>
-
-      {/* Footer */}
-      <footer className="border-t border-border/50 py-8 bg-card/30">
-        <div className="container mx-auto px-4 text-center text-sm text-muted-foreground">
-          <p>&copy; 2026 TRADEDADDY. All rights reserved.</p>
-        </div>
-      </footer>
+        </section>
+      </main>
+      <LegalFooter />
     </div>
   )
 }
