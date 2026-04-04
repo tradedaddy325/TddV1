@@ -45,10 +45,13 @@ const initialData: Record<string, MarketPrice[]> = {
 export function MarketOverview() {
   const [data, setData] = useState(initialData)
   const [isRefreshing, setIsRefreshing] = useState(false)
-  const [lastUpdate, setLastUpdate] = useState(new Date())
+  const [lastUpdateTime, setLastUpdateTime] = useState<string | null>(null)
 
   // Simulate live price updates
   useEffect(() => {
+    // Set initial time on mount
+    setLastUpdateTime(new Date().toLocaleTimeString())
+
     const interval = setInterval(() => {
       setData((current) => {
         const updated: Record<string, MarketPrice[]> = {}
@@ -67,7 +70,7 @@ export function MarketOverview() {
         }
         return updated
       })
-      setLastUpdate(new Date())
+      setLastUpdateTime(new Date().toLocaleTimeString())
     }, 5000)
 
     return () => clearInterval(interval)
@@ -76,7 +79,7 @@ export function MarketOverview() {
   const handleRefresh = () => {
     setIsRefreshing(true)
     setTimeout(() => {
-      setLastUpdate(new Date())
+      setLastUpdateTime(new Date().toLocaleTimeString())
       setIsRefreshing(false)
     }, 500)
   }
@@ -96,9 +99,11 @@ export function MarketOverview() {
             Market Overview
           </CardTitle>
           <div className="flex items-center gap-2">
-            <span className="text-xs text-muted-foreground">
-              Last: {lastUpdate.toLocaleTimeString()}
-            </span>
+            {lastUpdateTime && (
+              <span className="text-xs text-muted-foreground">
+                Last: {lastUpdateTime}
+              </span>
+            )}
             <Button
               variant="ghost"
               size="icon"
