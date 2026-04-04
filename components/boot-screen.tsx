@@ -60,7 +60,7 @@ export function BootScreen() {
         {/* Logo Animation */}
         <div className="flex justify-center animate-pulse">
           <div className="text-4xl font-bold text-primary font-mono">
-            ▲ TRADEDADDY
+            TRADEDADDY
           </div>
         </div>
 

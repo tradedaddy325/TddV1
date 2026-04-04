@@ -174,7 +174,15 @@ export default function LandingPage() {
               return (
                 <Card key={feature.title} className="border-border/50 hover:border-border transition-colors">
                   <CardContent className="pt-6">
-                    <Icon className="w-8 h-8 text-primary mb-4" />
+                    <div className="flex items-start justify-between mb-4">
+                      <Icon className="w-8 h-8 text-primary" />
+                      {feature.title === 'Live Market Data' && (
+                        <div className="flex items-center gap-2">
+                          <span className="text-xs text-muted-foreground font-mono">LIVE</span>
+                          <div className="w-2.5 h-2.5 bg-green-500 rounded-full animate-pulse shadow-lg shadow-green-500/50" />
+                        </div>
+                      )}
+                    </div>
                     <h3 className="font-semibold text-foreground mb-2">{feature.title}</h3>
                     <p className="text-sm text-muted-foreground">{feature.description}</p>
                   </CardContent>
