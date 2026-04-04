@@ -11,8 +11,8 @@ interface TickerPrice {
   displayName: string
 }
 
-// BiQuote symbols to subscribe to
-const BIQUOTE_SYMBOLS = [
+// Market symbols to display
+const MARKET_SYMBOLS = [
   { symbol: 'BTCUSD', display: 'BTC/USD' },
   { symbol: 'ETHUSD', display: 'ETH/USD' },
   { symbol: 'XAUUSD', display: 'XAU/USD' },
@@ -22,7 +22,7 @@ const BIQUOTE_SYMBOLS = [
 ]
 
 // Demo prices as fallback
-const demoPrices: TickerPrice[] = BIQUOTE_SYMBOLS.map((s) => ({
+const demoPrices: TickerPrice[] = MARKET_SYMBOLS.map((s) => ({
   symbol: s.symbol,
   displayName: s.display,
   price: Math.random() * 100000,
@@ -31,166 +31,123 @@ const demoPrices: TickerPrice[] = BIQUOTE_SYMBOLS.map((s) => ({
 
 export function PriceTicker() {
   const [prices, setPrices] = useState<TickerPrice[]>(demoPrices)
-  const [isConnected, setIsConnected] = useState(false)
-  const [useBiquote, setUseBiquote] = useState(false)
+  const [isLive, setIsLive] = useState(false)
 
   useEffect(() => {
-    const priceCache = new Map<string, TickerPrice>()
-    let connection: WebSocket | null = null
-    let reconnectTimeout: NodeJS.Timeout | null = null
-    let messageTimeout: NodeJS.Timeout | null = null
-    let reconnectAttempts = 0
-    const maxReconnectAttempts = 3
+    const priceMap = new Map<string, TickerPrice>()
+    let fetchInterval: NodeJS.Timeout | null = null
 
-    const initializePrices = () => {
-      BIQUOTE_SYMBOLS.forEach((s) => {
-        priceCache.set(s.symbol, {
-          symbol: s.symbol,
-          displayName: s.display,
-          price: Math.random() * 100000,
-          change: 0,
-        })
+    // Initialize with demo prices
+    MARKET_SYMBOLS.forEach((s) => {
+      priceMap.set(s.symbol, {
+        symbol: s.symbol,
+        displayName: s.display,
+        price: demoPrices.find((p) => p.symbol === s.symbol)?.price || 0,
+        change: 0,
       })
-    }
+    })
 
-    const connectWebSocket = () => {
+    const updatePrices = async () => {
       try {
-        console.log('[BiQuote] Attempting connection...')
-        connection = new WebSocket('wss://biquote.io/hubs/tick')
+        // Fetch market data from the existing API
+        const response = await fetch('/api/market/live')
+        if (!response.ok) throw new Error('Failed to fetch market data')
 
-        connection.onopen = () => {
-          console.log('[BiQuote] WebSocket connected')
-          setIsConnected(true)
-          reconnectAttempts = 0
+        const data = await response.json()
 
-          // Send handshake
-          try {
-            connection?.send(JSON.stringify({ protocol: 'json', version: 1 }) + '\x1e')
-          } catch (e) {
-            console.error('[BiQuote] Handshake failed:', e)
-          }
+        // Update crypto prices
+        if (data.crypto) {
+          Object.entries(data.crypto).forEach(([key, value]: [string, any]) => {
+            const symbol = key.toUpperCase()
+            if (value.price) {
+              const prev = priceMap.get(symbol)
+              const change = prev ? ((value.price - prev.price) / prev.price) * 100 : 0
 
-          // Subscribe to each symbol
-          BIQUOTE_SYMBOLS.forEach(({ symbol }) => {
-            try {
-              const msg = {
-                type: 1,
-                target: 'Subscribe',
-                arguments: [symbol],
+              const found = MARKET_SYMBOLS.find((s) => s.symbol === symbol)
+              if (found) {
+                priceMap.set(symbol, {
+                  symbol,
+                  displayName: found.display,
+                  price: value.price,
+                  change: isNaN(change) ? 0 : change,
+                })
               }
-              connection?.send(JSON.stringify(msg) + '\x1e')
-              console.log('[BiQuote] Subscribed to', symbol)
-            } catch (e) {
-              console.error('[BiQuote] Subscribe failed for', symbol, e)
             }
           })
-
-          // Set a timeout to verify we're receiving data
-          messageTimeout = setTimeout(() => {
-            console.log('[BiQuote] No data received, may need reconnection')
-          }, 5000)
         }
 
-        connection.onmessage = (event) => {
-          try {
-            if (messageTimeout) clearTimeout(messageTimeout)
+        // Update forex prices
+        if (data.forex) {
+          Object.entries(data.forex).forEach(([key, value]: [string, any]) => {
+            const symbol = key.toUpperCase()
+            if (value.price) {
+              const prev = priceMap.get(symbol)
+              const change = prev ? ((value.price - prev.price) / prev.price) * 100 : 0
 
-            const rawData = event.data as string
-            if (!rawData || rawData.length === 0) return
-
-            // Split by SignalR record separator
-            const messages = rawData.split('\x1e').filter((m) => m.length > 0)
-
-            messages.forEach((msg) => {
-              if (msg.length === 0) return
-
-              try {
-                const parsed = JSON.parse(msg)
-                if (parsed.M) {
-                  parsed.M.forEach((method: any) => {
-                    if (method.M === 'tick' && method.A) {
-                      method.A.forEach((tickData: any) => {
-                        if (Array.isArray(tickData) && tickData.length > 0) {
-                          const symbol = tickData[0]
-                          const bid = tickData[1]
-                          const ask = tickData[2]
-                          const lastTrade = tickData[6]
-
-                          const price = lastTrade || ask || bid
-                          if (!price || typeof price !== 'number') return
-
-                          const symConfig = BIQUOTE_SYMBOLS.find((s) => s.symbol === symbol)
-                          if (!symConfig) return
-
-                          const prevPrice = priceCache.get(symbol)?.price || price
-                          const change = ((price - prevPrice) / prevPrice) * 100
-
-                          const tickPrice: TickerPrice = {
-                            symbol,
-                            displayName: symConfig.display,
-                            price,
-                            change: isNaN(change) ? 0 : Math.min(Math.max(change, -100), 100),
-                          }
-
-                          priceCache.set(symbol, tickPrice)
-                          setUseBiquote(true)
-
-                          setPrices((current) => {
-                            const idx = current.findIndex((p) => p.symbol === symbol)
-                            if (idx >= 0) {
-                              const updated = [...current]
-                              updated[idx] = tickPrice
-                              return updated
-                            }
-                            return [...current, tickPrice]
-                          })
-                        }
-                      })
-                    }
-                  })
-                }
-              } catch (parseErr) {
-                // Silent fail on individual message parse errors
+              const found = MARKET_SYMBOLS.find((s) => s.symbol === symbol)
+              if (found) {
+                priceMap.set(symbol, {
+                  symbol,
+                  displayName: found.display,
+                  price: value.price,
+                  change: isNaN(change) ? 0 : change,
+                })
               }
-            })
-          } catch (err) {
-            console.error('[BiQuote] Message error:', err)
-          }
+            }
+          })
         }
 
-        connection.onerror = () => {
-          console.error('[BiQuote] Connection error')
-          setIsConnected(false)
+        // Update commodities
+        if (data.commodities) {
+          Object.entries(data.commodities).forEach(([key, value]: [string, any]) => {
+            const symbol = key.toUpperCase()
+            if (value.price) {
+              const prev = priceMap.get(symbol)
+              const change = prev ? ((value.price - prev.price) / prev.price) * 100 : 0
+
+              const found = MARKET_SYMBOLS.find((s) => s.symbol === symbol)
+              if (found) {
+                priceMap.set(symbol, {
+                  symbol,
+                  displayName: found.display,
+                  price: value.price,
+                  change: isNaN(change) ? 0 : change,
+                })
+              }
+            }
+          })
         }
 
-        connection.onclose = () => {
-          console.log('[BiQuote] Connection closed')
-          setIsConnected(false)
-          if (messageTimeout) clearTimeout(messageTimeout)
+        // Update indices
+        if (data.indices) {
+          Object.entries(data.indices).forEach(([key, value]: [string, any]) => {
+            const symbol = key.toUpperCase()
+            if (value.price) {
+              const prev = priceMap.get(symbol)
+              const change = prev ? ((value.price - prev.price) / prev.price) * 100 : 0
 
-          // Attempt reconnect
-          if (reconnectAttempts < maxReconnectAttempts) {
-            const delay = Math.min(1000 * Math.pow(2, reconnectAttempts), 10000)
-            reconnectAttempts++
-            console.log(`[BiQuote] Reconnecting in ${delay}ms (attempt ${reconnectAttempts})`)
-            reconnectTimeout = setTimeout(connectWebSocket, delay)
-          } else {
-            console.log('[BiQuote] Max reconnect attempts reached, using demo data')
-            setUseBiquote(false)
-          }
+              const found = MARKET_SYMBOLS.find((s) => s.symbol === symbol)
+              if (found) {
+                priceMap.set(symbol, {
+                  symbol,
+                  displayName: found.display,
+                  price: value.price,
+                  change: isNaN(change) ? 0 : change,
+                })
+              }
+            }
+          })
         }
+
+        // Convert to array and update state
+        const updatedPrices = MARKET_SYMBOLS.map((s) => priceMap.get(s.symbol) || demoPrices.find((p) => p.symbol === s.symbol)!)
+        setPrices(updatedPrices)
+        setIsLive(true)
       } catch (err) {
-        console.error('[BiQuote] Connection failed:', err)
-        setIsConnected(false)
-      }
-    }
+        console.error('[PriceTicker] Error fetching prices:', err)
+        setIsLive(false)
 
-    initializePrices()
-    connectWebSocket()
-
-    // Simulate demo price updates if not connected to real data
-    const demoInterval = setInterval(() => {
-      if (!useBiquote) {
+        // Update with demo data on error
         setPrices((current) =>
           current.map((p) => ({
             ...p,
@@ -199,15 +156,18 @@ export function PriceTicker() {
           }))
         )
       }
-    }, 2000)
+    }
+
+    // Initial fetch
+    updatePrices()
+
+    // Fetch every 3 seconds
+    fetchInterval = setInterval(updatePrices, 3000)
 
     return () => {
-      if (reconnectTimeout) clearTimeout(reconnectTimeout)
-      if (messageTimeout) clearTimeout(messageTimeout)
-      if (connection) connection.close()
-      clearInterval(demoInterval)
+      if (fetchInterval) clearInterval(fetchInterval)
     }
-  }, [useBiquote])
+  }, [])
 
   const formatPrice = (price: number) => {
     if (price < 1) return price.toFixed(4)
@@ -245,8 +205,8 @@ export function PriceTicker() {
       </div>
 
       <div className="absolute right-2 top-1/2 -translate-y-1/2 flex items-center gap-1.5 px-2 py-0.5 bg-background rounded text-xs">
-        <span className={`h-2 w-2 rounded-full ${isConnected ? 'bg-primary animate-pulse' : 'bg-muted'}`} />
-        <span className="text-muted-foreground">{isConnected ? 'LIVE' : 'DEMO'}</span>
+        <span className={`h-2 w-2 rounded-full ${isLive ? 'bg-primary animate-pulse' : 'bg-muted'}`} />
+        <span className="text-muted-foreground">{isLive ? 'LIVE' : 'DEMO'}</span>
       </div>
     </div>
   )
