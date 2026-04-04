@@ -128,7 +128,7 @@ export function PriceTicker() {
     }
 
     updatePrices()
-    fetchInterval = setInterval(updatePrices, 5000)
+    fetchInterval = setInterval(updatePrices, 30000)
 
     return () => {
       if (fetchInterval) clearInterval(fetchInterval)
