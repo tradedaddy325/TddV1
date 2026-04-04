@@ -1,16 +1,22 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { Button } from '@/components/ui/button'
 import { AlertTriangle } from 'lucide-react'
 
 export function TermsAcceptanceModal() {
   const [isOpen, setIsOpen] = useState(false)
+  const isMountedRef = useRef(false)
 
   useEffect(() => {
+    isMountedRef.current = true
     const hasAccepted = localStorage.getItem('termsAccepted_v2')
-    if (!hasAccepted) {
+    if (!hasAccepted && isMountedRef.current) {
       setIsOpen(true)
+    }
+
+    return () => {
+      isMountedRef.current = false
     }
   }, [])
 
