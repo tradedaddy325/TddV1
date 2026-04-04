@@ -8,48 +8,133 @@ interface TickerPrice {
   symbol: string
   price: number
   change: number
+  bid?: number
+  ask?: number
 }
 
-// Initial prices that will be updated
-const initialPrices: TickerPrice[] = [
-  { symbol: 'XAU/USD', price: 2350.50, change: 0.45 },
-  { symbol: 'BTC', price: 67500, change: 1.88 },
-  { symbol: 'ETH', price: 3450, change: -1.29 },
-  { symbol: 'EUR/USD', price: 1.0852, change: 0.12 },
-  { symbol: 'GBP/USD', price: 1.2698, change: -0.08 },
-  { symbol: 'USD/JPY', price: 149.52, change: 0.23 },
-  { symbol: 'US30', price: 39485.20, change: 0.35 },
-  { symbol: 'US500', price: 5198.45, change: 0.28 },
-  { symbol: 'SOL', price: 175.20, change: 5.12 },
-  { symbol: 'USD/ZAR', price: 18.25, change: 0.66 },
-]
+// BiQuote symbols to subscribe to
+const BIQUOTE_SYMBOLS = ['BTCUSD', 'ETHUSD', 'XAUUSD', 'EURUSD', 'US30', 'USOIL']
+
+const symbolDisplayNames: Record<string, string> = {
+  BTCUSD: 'BTC/USD',
+  ETHUSD: 'ETH/USD',
+  XAUUSD: 'XAU/USD',
+  EURUSD: 'EUR/USD',
+  US30: 'US30',
+  USOIL: 'USOIL',
+}
 
 export function PriceTicker() {
-  const [prices, setPrices] = useState<TickerPrice[]>(initialPrices)
+  const [prices, setPrices] = useState<TickerPrice[]>([])
+  const [isConnected, setIsConnected] = useState(false)
+  const [error, setError] = useState<string | null>(null)
+  const [reconnectAttempts, setReconnectAttempts] = useState(0)
 
-  // Simulate live price updates
   useEffect(() => {
-    const interval = setInterval(() => {
-      setPrices((current) =>
-        current.map((item) => {
-          // Small random price change
-          const changeAmount = item.price * (Math.random() - 0.5) * 0.001
-          const newPrice = item.price + changeAmount
-          const newChange = item.change + (Math.random() - 0.5) * 0.1
+    const priceCache = new Map<string, TickerPrice>()
+    let connection: WebSocket | null = null
+    let reconnectTimeout: NodeJS.Timeout | null = null
+    const maxReconnectAttempts = 5
 
-          return {
-            ...item,
-            price: parseFloat(newPrice.toFixed(item.price < 10 ? 4 : 2)),
-            change: parseFloat(newChange.toFixed(2)),
+    const connectWebSocket = () => {
+      try {
+        // Create WebSocket connection to BiQuote
+        connection = new WebSocket('wss://biquote.io/hubs/tick')
+
+        connection.onopen = () => {
+          console.log('[BiQuote] WebSocket connected')
+          setIsConnected(true)
+          setError(null)
+          setReconnectAttempts(0)
+
+          // Subscribe to symbols
+          BIQUOTE_SYMBOLS.forEach((symbol) => {
+            const subscribeMessage = {
+              H: 'tick',
+              M: 'Subscribe',
+              A: [symbol],
+            }
+            connection?.send(JSON.stringify(subscribeMessage))
+          })
+        }
+
+        connection.onmessage = (event) => {
+          try {
+            const message = JSON.parse(event.data)
+
+            // Handle tick data from BiQuote
+            if (message.M && message.M.length > 0) {
+              message.M.forEach((method: any) => {
+                if (method.M === 'tick') {
+                  method.A.forEach((data: any) => {
+                    const [symbol, bid, ask, , , , lastTrade] = data
+
+                    const lastPrice = lastTrade || ask || bid || 0
+                    const prevPrice = priceCache.get(symbol)?.price || lastPrice
+                    const change = ((lastPrice - prevPrice) / prevPrice) * 100
+
+                    const tickPrice: TickerPrice = {
+                      symbol,
+                      price: lastPrice,
+                      change: isNaN(change) ? 0 : change,
+                      bid,
+                      ask,
+                    }
+
+                    priceCache.set(symbol, tickPrice)
+                    setPrices((current) => {
+                      const existing = current.findIndex((p) => p.symbol === symbol)
+                      if (existing >= 0) {
+                        const updated = [...current]
+                        updated[existing] = tickPrice
+                        return updated
+                      }
+                      return [...current, tickPrice]
+                    })
+                  })
+                }
+              })
+            }
+          } catch (err) {
+            console.error('[BiQuote] Error parsing message:', err)
           }
-        })
-      )
-    }, 3000)
+        }
 
-    return () => clearInterval(interval)
-  }, [])
+        connection.onerror = (event) => {
+          console.error('[BiQuote] WebSocket error:', event)
+          setError('Connection error')
+          setIsConnected(false)
+        }
 
-  // Format price based on value
+        connection.onclose = () => {
+          console.log('[BiQuote] WebSocket closed')
+          setIsConnected(false)
+
+          // Auto-reconnect logic
+          if (reconnectAttempts < maxReconnectAttempts) {
+            const delay = Math.min(1000 * Math.pow(2, reconnectAttempts), 30000)
+            reconnectTimeout = setTimeout(() => {
+              setReconnectAttempts((prev) => prev + 1)
+              connectWebSocket()
+            }, delay)
+          } else {
+            setError('Connection failed - max reconnect attempts reached')
+          }
+        }
+      } catch (err) {
+        console.error('[BiQuote] Connection error:', err)
+        setError('Failed to establish connection')
+      }
+    }
+
+    connectWebSocket()
+
+    return () => {
+      if (reconnectTimeout) clearTimeout(reconnectTimeout)
+      if (connection) connection.close()
+    }
+  }, [reconnectAttempts])
+
   const formatPrice = (price: number) => {
     if (price < 1) return price.toFixed(4)
     if (price < 100) return price.toFixed(2)
@@ -66,7 +151,9 @@ export function PriceTicker() {
             key={`${item.symbol}-${index}`}
             className="flex items-center gap-2 px-4 border-r border-border h-full"
           >
-            <span className="text-xs text-muted-foreground">{item.symbol}</span>
+            <span className="text-xs text-muted-foreground">
+              {symbolDisplayNames[item.symbol] || item.symbol}
+            </span>
             <span className="text-sm font-medium text-foreground">
               {formatPrice(item.price)}
             </span>
@@ -82,7 +169,7 @@ export function PriceTicker() {
                 <TrendingDown className="w-3 h-3" />
               )}
               {item.change >= 0 ? '+' : ''}
-              {item.change.toFixed(2)}%
+              {Math.abs(item.change).toFixed(2)}%
             </span>
           </div>
         ))}
@@ -90,11 +177,19 @@ export function PriceTicker() {
 
       {/* Live indicator */}
       <div className="absolute right-2 top-1/2 -translate-y-1/2 flex items-center gap-1.5 px-2 py-0.5 bg-background rounded">
-        <span className="relative flex h-2 w-2">
-          <span className="pulse-live absolute inline-flex h-full w-full rounded-full bg-primary opacity-75"></span>
-          <span className="relative inline-flex rounded-full h-2 w-2 bg-primary"></span>
+        <span className={`relative flex h-2 w-2 ${isConnected ? 'animate-pulse' : ''}`}>
+          <span
+            className={`${
+              isConnected ? 'pulse-live absolute inline-flex h-full w-full rounded-full opacity-75' : ''
+            } bg-${isConnected ? 'primary' : 'destructive'}`}
+          ></span>
+          <span
+            className={`relative inline-flex rounded-full h-2 w-2 bg-${isConnected ? 'primary' : 'destructive'}`}
+          ></span>
         </span>
-        <span className="text-xs text-muted-foreground">LIVE</span>
+        <span className="text-xs text-muted-foreground">
+          {isConnected ? 'LIVE' : error ? 'ERROR' : 'OFFLINE'}
+        </span>
       </div>
     </div>
   )
