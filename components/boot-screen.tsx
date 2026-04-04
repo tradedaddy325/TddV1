@@ -83,10 +83,13 @@ export function BootScreen() {
         </div>
 
         {/* Boot Messages */}
-        <div className="space-y-1 text-xs text-muted-foreground font-mono">
-          <p className={displayPercent > 25 ? 'text-blue-400' : 'text-muted-foreground'}>[✓] System Online</p>
-          <p className={displayPercent > 50 ? 'text-cyan-400' : 'text-muted-foreground'}>[✓] Market Feed Active</p>
-          <p className={displayPercent > 75 ? 'text-green-400' : 'text-muted-foreground'}>[...] Loading Dashboard</p>
+        <div className="space-y-1.5 text-xs text-muted-foreground font-mono">
+          <p className={displayPercent > 10 ? 'text-blue-400' : 'text-muted-foreground'}>[✓] System Online</p>
+          <p className={displayPercent > 25 ? 'text-cyan-400' : 'text-muted-foreground'}>[✓] Database Connected</p>
+          <p className={displayPercent > 40 ? 'text-green-400' : 'text-muted-foreground'}>[✓] Market Feed Active</p>
+          <p className={displayPercent > 55 ? 'text-yellow-400' : 'text-muted-foreground'}>[✓] Analytics Initialized</p>
+          <p className={displayPercent > 70 ? 'text-emerald-400' : 'text-muted-foreground'}>[✓] API Ready</p>
+          <p className={displayPercent > 85 ? 'text-lime-400' : 'text-muted-foreground'}>[...] Loading Dashboard</p>
         </div>
       </div>
     </div>

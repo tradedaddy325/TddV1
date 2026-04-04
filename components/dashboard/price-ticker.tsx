@@ -167,7 +167,11 @@ export function PriceTicker() {
   if (prices.length === 0) {
     return (
       <div className="fixed top-0 left-0 right-0 z-50 h-10 bg-card border-b border-border flex items-center px-4">
-        <span className="text-xs text-muted-foreground">Loading market prices...</span>
+        <div className="flex items-center gap-2">
+          <span className="text-xs text-muted-foreground font-mono">[</span>
+          <span className="text-xs text-cyan-400 font-mono animate-pulse">●</span>
+          <span className="text-xs text-muted-foreground font-mono">] Initializing market feed...</span>
+        </div>
       </div>
     )
   }
