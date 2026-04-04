@@ -11,7 +11,6 @@ interface TickerPrice {
   displayName: string
 }
 
-// Market symbols to display
 const MARKET_SYMBOLS = [
   { symbol: 'BTCUSD', display: 'BTC/USD' },
   { symbol: 'ETHUSD', display: 'ETH/USD' },
@@ -21,7 +20,6 @@ const MARKET_SYMBOLS = [
   { symbol: 'USOIL', display: 'USOIL' },
 ]
 
-// Demo prices as fallback
 const demoPrices: TickerPrice[] = MARKET_SYMBOLS.map((s) => ({
   symbol: s.symbol,
   displayName: s.display,
@@ -37,7 +35,6 @@ export function PriceTicker() {
     const priceMap = new Map<string, TickerPrice>()
     let fetchInterval: NodeJS.Timeout | null = null
 
-    // Initialize with demo prices
     MARKET_SYMBOLS.forEach((s) => {
       priceMap.set(s.symbol, {
         symbol: s.symbol,
@@ -49,23 +46,21 @@ export function PriceTicker() {
 
     const updatePrices = async () => {
       try {
-        // Fetch market data from the existing API
         const response = await fetch('/api/market/live')
         if (!response.ok) throw new Error('Failed to fetch market data')
 
         const data = await response.json()
+        const updatedMap = new Map(priceMap)
 
-        // Update crypto prices
         if (data.crypto) {
           Object.entries(data.crypto).forEach(([key, value]: [string, any]) => {
             const symbol = key.toUpperCase()
             if (value.price) {
-              const prev = priceMap.get(symbol)
+              const prev = updatedMap.get(symbol)
               const change = prev ? ((value.price - prev.price) / prev.price) * 100 : 0
-
               const found = MARKET_SYMBOLS.find((s) => s.symbol === symbol)
               if (found) {
-                priceMap.set(symbol, {
+                updatedMap.set(symbol, {
                   symbol,
                   displayName: found.display,
                   price: value.price,
@@ -76,17 +71,15 @@ export function PriceTicker() {
           })
         }
 
-        // Update forex prices
         if (data.forex) {
           Object.entries(data.forex).forEach(([key, value]: [string, any]) => {
             const symbol = key.toUpperCase()
             if (value.price) {
-              const prev = priceMap.get(symbol)
+              const prev = updatedMap.get(symbol)
               const change = prev ? ((value.price - prev.price) / prev.price) * 100 : 0
-
               const found = MARKET_SYMBOLS.find((s) => s.symbol === symbol)
               if (found) {
-                priceMap.set(symbol, {
+                updatedMap.set(symbol, {
                   symbol,
                   displayName: found.display,
                   price: value.price,
@@ -97,17 +90,15 @@ export function PriceTicker() {
           })
         }
 
-        // Update commodities
         if (data.commodities) {
           Object.entries(data.commodities).forEach(([key, value]: [string, any]) => {
             const symbol = key.toUpperCase()
             if (value.price) {
-              const prev = priceMap.get(symbol)
+              const prev = updatedMap.get(symbol)
               const change = prev ? ((value.price - prev.price) / prev.price) * 100 : 0
-
               const found = MARKET_SYMBOLS.find((s) => s.symbol === symbol)
               if (found) {
-                priceMap.set(symbol, {
+                updatedMap.set(symbol, {
                   symbol,
                   displayName: found.display,
                   price: value.price,
@@ -118,17 +109,15 @@ export function PriceTicker() {
           })
         }
 
-        // Update indices
         if (data.indices) {
           Object.entries(data.indices).forEach(([key, value]: [string, any]) => {
             const symbol = key.toUpperCase()
             if (value.price) {
-              const prev = priceMap.get(symbol)
+              const prev = updatedMap.get(symbol)
               const change = prev ? ((value.price - prev.price) / prev.price) * 100 : 0
-
               const found = MARKET_SYMBOLS.find((s) => s.symbol === symbol)
               if (found) {
-                priceMap.set(symbol, {
+                updatedMap.set(symbol, {
                   symbol,
                   displayName: found.display,
                   price: value.price,
@@ -139,15 +128,11 @@ export function PriceTicker() {
           })
         }
 
-        // Convert to array and update state
-        const updatedPrices = MARKET_SYMBOLS.map((s) => priceMap.get(s.symbol) || demoPrices.find((p) => p.symbol === s.symbol)!)
+        const updatedPrices = MARKET_SYMBOLS.map((s) => updatedMap.get(s.symbol) || demoPrices.find((p) => p.symbol === s.symbol)!)
         setPrices(updatedPrices)
         setIsLive(true)
       } catch (err) {
-        console.error('[PriceTicker] Error fetching prices:', err)
         setIsLive(false)
-
-        // Update with demo data on error
         setPrices((current) =>
           current.map((p) => ({
             ...p,
@@ -158,10 +143,7 @@ export function PriceTicker() {
       }
     }
 
-    // Initial fetch
     updatePrices()
-
-    // Fetch every 3 seconds
     fetchInterval = setInterval(updatePrices, 3000)
 
     return () => {
