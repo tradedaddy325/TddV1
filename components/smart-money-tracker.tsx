@@ -81,22 +81,29 @@ export function SmartMoneyTracker() {
         ) : error ? (
           <p className="text-sm text-red-400">{error}</p>
         ) : data ? (
-          <div className="space-y-3">
-            <div className="flex items-center justify-between">
+          <div className="space-y-4">
+            <div className="flex items-center justify-between py-3 border-b border-border/50">
               <p className="text-sm text-muted-foreground">Asset</p>
-              <Badge variant="outline">{data.symbol}</Badge>
+              <Badge variant="outline" className="text-sm">{data.symbol}</Badge>
             </div>
             
-            <div className="grid grid-cols-2 gap-2">
-              <div>
-                <p className="text-xs text-muted-foreground">Price</p>
-                <p className="text-sm font-mono text-accent">${data.price.toLocaleString()}</p>
-              </div>
-              <div>
-                <p className="text-xs text-muted-foreground">Flow Score</p>
-                <p className="text-sm font-mono text-accent">{data.flowScore.toFixed(1)}%</p>
-              </div>
+            <div className="py-3 border-b border-border/50 flex items-center justify-between">
+              <p className="text-sm text-muted-foreground">Price</p>
+              <p className="text-lg font-semibold text-foreground">${data.price.toLocaleString()}</p>
             </div>
+            
+            <div className="py-3 border-b border-border/50 flex items-center justify-between">
+              <p className="text-sm text-muted-foreground">Flow Score</p>
+              <p className="text-lg font-semibold text-accent">{data.flowScore.toFixed(1)}%</p>
+            </div>
+            
+            <div className="py-3 flex items-center justify-between">
+              <p className="text-sm text-muted-foreground">Trend</p>
+              <Badge className={`${getTrendColor(data.trend)}`}>
+                {data.trend.toUpperCase()}
+              </Badge>
+            </div>
+          </div>
 
             <div>
               <p className="text-xs text-muted-foreground mb-1">Market Trend</p>

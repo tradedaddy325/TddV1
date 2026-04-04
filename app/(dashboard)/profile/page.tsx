@@ -322,7 +322,7 @@ export default function ProfilePage() {
                       <p className="mb-4 text-2xl font-bold">R{pkg.price}</p>
                       <Button 
                         onClick={() => handleBuyCredits(pkg.id)}
-                        className="w-full bg-accent text-background hover:bg-accent/90"
+                        className="w-full bg-white text-black hover:bg-white/90 font-semibold"
                       >
                         Buy Now
                       </Button>
@@ -389,10 +389,10 @@ export default function ProfilePage() {
                       </ul>
                       <Button 
                         onClick={() => handleSubscribe(tier.id)}
-                        className={`w-full ${
+                        className={`w-full font-semibold ${
                           profile?.subscription_tier === tier.id
                             ? "bg-muted text-muted-foreground cursor-not-allowed"
-                            : "bg-accent text-background hover:bg-accent/90"
+                            : "bg-white text-black hover:bg-white/90"
                         }`}
                         disabled={profile?.subscription_tier === tier.id}
                       >
