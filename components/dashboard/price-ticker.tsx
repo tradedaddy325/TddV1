@@ -8,132 +8,206 @@ interface TickerPrice {
   symbol: string
   price: number
   change: number
-  bid?: number
-  ask?: number
+  displayName: string
 }
 
 // BiQuote symbols to subscribe to
-const BIQUOTE_SYMBOLS = ['BTCUSD', 'ETHUSD', 'XAUUSD', 'EURUSD', 'US30', 'USOIL']
+const BIQUOTE_SYMBOLS = [
+  { symbol: 'BTCUSD', display: 'BTC/USD' },
+  { symbol: 'ETHUSD', display: 'ETH/USD' },
+  { symbol: 'XAUUSD', display: 'XAU/USD' },
+  { symbol: 'EURUSD', display: 'EUR/USD' },
+  { symbol: 'US30', display: 'US30' },
+  { symbol: 'USOIL', display: 'USOIL' },
+]
 
-const symbolDisplayNames: Record<string, string> = {
-  BTCUSD: 'BTC/USD',
-  ETHUSD: 'ETH/USD',
-  XAUUSD: 'XAU/USD',
-  EURUSD: 'EUR/USD',
-  US30: 'US30',
-  USOIL: 'USOIL',
-}
+// Demo prices as fallback
+const demoPrices: TickerPrice[] = BIQUOTE_SYMBOLS.map((s) => ({
+  symbol: s.symbol,
+  displayName: s.display,
+  price: Math.random() * 100000,
+  change: (Math.random() - 0.5) * 5,
+}))
 
 export function PriceTicker() {
-  const [prices, setPrices] = useState<TickerPrice[]>([])
+  const [prices, setPrices] = useState<TickerPrice[]>(demoPrices)
   const [isConnected, setIsConnected] = useState(false)
-  const [error, setError] = useState<string | null>(null)
-  const [reconnectAttempts, setReconnectAttempts] = useState(0)
+  const [useBiquote, setUseBiquote] = useState(false)
 
   useEffect(() => {
     const priceCache = new Map<string, TickerPrice>()
     let connection: WebSocket | null = null
     let reconnectTimeout: NodeJS.Timeout | null = null
-    const maxReconnectAttempts = 5
+    let messageTimeout: NodeJS.Timeout | null = null
+    let reconnectAttempts = 0
+    const maxReconnectAttempts = 3
+
+    const initializePrices = () => {
+      BIQUOTE_SYMBOLS.forEach((s) => {
+        priceCache.set(s.symbol, {
+          symbol: s.symbol,
+          displayName: s.display,
+          price: Math.random() * 100000,
+          change: 0,
+        })
+      })
+    }
 
     const connectWebSocket = () => {
       try {
-        // Create WebSocket connection to BiQuote
+        console.log('[BiQuote] Attempting connection...')
         connection = new WebSocket('wss://biquote.io/hubs/tick')
 
         connection.onopen = () => {
           console.log('[BiQuote] WebSocket connected')
           setIsConnected(true)
-          setError(null)
-          setReconnectAttempts(0)
+          reconnectAttempts = 0
 
-          // Subscribe to symbols
-          BIQUOTE_SYMBOLS.forEach((symbol) => {
-            const subscribeMessage = {
-              H: 'tick',
-              M: 'Subscribe',
-              A: [symbol],
+          // Send handshake
+          try {
+            connection?.send(JSON.stringify({ protocol: 'json', version: 1 }) + '\x1e')
+          } catch (e) {
+            console.error('[BiQuote] Handshake failed:', e)
+          }
+
+          // Subscribe to each symbol
+          BIQUOTE_SYMBOLS.forEach(({ symbol }) => {
+            try {
+              const msg = {
+                type: 1,
+                target: 'Subscribe',
+                arguments: [symbol],
+              }
+              connection?.send(JSON.stringify(msg) + '\x1e')
+              console.log('[BiQuote] Subscribed to', symbol)
+            } catch (e) {
+              console.error('[BiQuote] Subscribe failed for', symbol, e)
             }
-            connection?.send(JSON.stringify(subscribeMessage))
           })
+
+          // Set a timeout to verify we're receiving data
+          messageTimeout = setTimeout(() => {
+            console.log('[BiQuote] No data received, may need reconnection')
+          }, 5000)
         }
 
         connection.onmessage = (event) => {
           try {
-            const message = JSON.parse(event.data)
+            if (messageTimeout) clearTimeout(messageTimeout)
 
-            // Handle tick data from BiQuote
-            if (message.M && message.M.length > 0) {
-              message.M.forEach((method: any) => {
-                if (method.M === 'tick') {
-                  method.A.forEach((data: any) => {
-                    const [symbol, bid, ask, , , , lastTrade] = data
+            const rawData = event.data as string
+            if (!rawData || rawData.length === 0) return
 
-                    const lastPrice = lastTrade || ask || bid || 0
-                    const prevPrice = priceCache.get(symbol)?.price || lastPrice
-                    const change = ((lastPrice - prevPrice) / prevPrice) * 100
+            // Split by SignalR record separator
+            const messages = rawData.split('\x1e').filter((m) => m.length > 0)
 
-                    const tickPrice: TickerPrice = {
-                      symbol,
-                      price: lastPrice,
-                      change: isNaN(change) ? 0 : change,
-                      bid,
-                      ask,
+            messages.forEach((msg) => {
+              if (msg.length === 0) return
+
+              try {
+                const parsed = JSON.parse(msg)
+                if (parsed.M) {
+                  parsed.M.forEach((method: any) => {
+                    if (method.M === 'tick' && method.A) {
+                      method.A.forEach((tickData: any) => {
+                        if (Array.isArray(tickData) && tickData.length > 0) {
+                          const symbol = tickData[0]
+                          const bid = tickData[1]
+                          const ask = tickData[2]
+                          const lastTrade = tickData[6]
+
+                          const price = lastTrade || ask || bid
+                          if (!price || typeof price !== 'number') return
+
+                          const symConfig = BIQUOTE_SYMBOLS.find((s) => s.symbol === symbol)
+                          if (!symConfig) return
+
+                          const prevPrice = priceCache.get(symbol)?.price || price
+                          const change = ((price - prevPrice) / prevPrice) * 100
+
+                          const tickPrice: TickerPrice = {
+                            symbol,
+                            displayName: symConfig.display,
+                            price,
+                            change: isNaN(change) ? 0 : Math.min(Math.max(change, -100), 100),
+                          }
+
+                          priceCache.set(symbol, tickPrice)
+                          setUseBiquote(true)
+
+                          setPrices((current) => {
+                            const idx = current.findIndex((p) => p.symbol === symbol)
+                            if (idx >= 0) {
+                              const updated = [...current]
+                              updated[idx] = tickPrice
+                              return updated
+                            }
+                            return [...current, tickPrice]
+                          })
+                        }
+                      })
                     }
-
-                    priceCache.set(symbol, tickPrice)
-                    setPrices((current) => {
-                      const existing = current.findIndex((p) => p.symbol === symbol)
-                      if (existing >= 0) {
-                        const updated = [...current]
-                        updated[existing] = tickPrice
-                        return updated
-                      }
-                      return [...current, tickPrice]
-                    })
                   })
                 }
-              })
-            }
+              } catch (parseErr) {
+                // Silent fail on individual message parse errors
+              }
+            })
           } catch (err) {
-            console.error('[BiQuote] Error parsing message:', err)
+            console.error('[BiQuote] Message error:', err)
           }
         }
 
-        connection.onerror = (event) => {
-          console.error('[BiQuote] WebSocket error:', event)
-          setError('Connection error')
+        connection.onerror = () => {
+          console.error('[BiQuote] Connection error')
           setIsConnected(false)
         }
 
         connection.onclose = () => {
-          console.log('[BiQuote] WebSocket closed')
+          console.log('[BiQuote] Connection closed')
           setIsConnected(false)
+          if (messageTimeout) clearTimeout(messageTimeout)
 
-          // Auto-reconnect logic
+          // Attempt reconnect
           if (reconnectAttempts < maxReconnectAttempts) {
-            const delay = Math.min(1000 * Math.pow(2, reconnectAttempts), 30000)
-            reconnectTimeout = setTimeout(() => {
-              setReconnectAttempts((prev) => prev + 1)
-              connectWebSocket()
-            }, delay)
+            const delay = Math.min(1000 * Math.pow(2, reconnectAttempts), 10000)
+            reconnectAttempts++
+            console.log(`[BiQuote] Reconnecting in ${delay}ms (attempt ${reconnectAttempts})`)
+            reconnectTimeout = setTimeout(connectWebSocket, delay)
           } else {
-            setError('Connection failed - max reconnect attempts reached')
+            console.log('[BiQuote] Max reconnect attempts reached, using demo data')
+            setUseBiquote(false)
           }
         }
       } catch (err) {
-        console.error('[BiQuote] Connection error:', err)
-        setError('Failed to establish connection')
+        console.error('[BiQuote] Connection failed:', err)
+        setIsConnected(false)
       }
     }
 
+    initializePrices()
     connectWebSocket()
+
+    // Simulate demo price updates if not connected to real data
+    const demoInterval = setInterval(() => {
+      if (!useBiquote) {
+        setPrices((current) =>
+          current.map((p) => ({
+            ...p,
+            price: p.price * (1 + (Math.random() - 0.5) * 0.001),
+            change: p.change + (Math.random() - 0.5) * 0.1,
+          }))
+        )
+      }
+    }, 2000)
 
     return () => {
       if (reconnectTimeout) clearTimeout(reconnectTimeout)
+      if (messageTimeout) clearTimeout(messageTimeout)
       if (connection) connection.close()
+      clearInterval(demoInterval)
     }
-  }, [reconnectAttempts])
+  }, [useBiquote])
 
   const formatPrice = (price: number) => {
     if (price < 1) return price.toFixed(4)
@@ -145,18 +219,13 @@ export function PriceTicker() {
   return (
     <div className="fixed top-0 left-0 right-0 z-50 h-10 bg-card border-b border-border overflow-hidden">
       <div className="flex items-center h-full ticker-animate" style={{ width: 'max-content' }}>
-        {/* Duplicate prices for seamless loop */}
         {[...prices, ...prices].map((item, index) => (
           <div
             key={`${item.symbol}-${index}`}
-            className="flex items-center gap-2 px-4 border-r border-border h-full"
+            className="flex items-center gap-2 px-4 border-r border-border h-full whitespace-nowrap"
           >
-            <span className="text-xs text-muted-foreground">
-              {symbolDisplayNames[item.symbol] || item.symbol}
-            </span>
-            <span className="text-sm font-medium text-foreground">
-              {formatPrice(item.price)}
-            </span>
+            <span className="text-xs text-muted-foreground">{item.displayName}</span>
+            <span className="text-sm font-medium text-foreground">{formatPrice(item.price)}</span>
             <span
               className={cn(
                 'flex items-center gap-0.5 text-xs font-medium',
@@ -175,21 +244,9 @@ export function PriceTicker() {
         ))}
       </div>
 
-      {/* Live indicator */}
-      <div className="absolute right-2 top-1/2 -translate-y-1/2 flex items-center gap-1.5 px-2 py-0.5 bg-background rounded">
-        <span className={`relative flex h-2 w-2 ${isConnected ? 'animate-pulse' : ''}`}>
-          <span
-            className={`${
-              isConnected ? 'pulse-live absolute inline-flex h-full w-full rounded-full opacity-75' : ''
-            } bg-${isConnected ? 'primary' : 'destructive'}`}
-          ></span>
-          <span
-            className={`relative inline-flex rounded-full h-2 w-2 bg-${isConnected ? 'primary' : 'destructive'}`}
-          ></span>
-        </span>
-        <span className="text-xs text-muted-foreground">
-          {isConnected ? 'LIVE' : error ? 'ERROR' : 'OFFLINE'}
-        </span>
+      <div className="absolute right-2 top-1/2 -translate-y-1/2 flex items-center gap-1.5 px-2 py-0.5 bg-background rounded text-xs">
+        <span className={`h-2 w-2 rounded-full ${isConnected ? 'bg-primary animate-pulse' : 'bg-muted'}`} />
+        <span className="text-muted-foreground">{isConnected ? 'LIVE' : 'DEMO'}</span>
       </div>
     </div>
   )
