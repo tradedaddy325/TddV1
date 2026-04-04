@@ -1,9 +1,9 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { Globe, TrendingUp, TrendingDown, Clock, Calendar, RefreshCw } from 'lucide-react'
+import { Globe, TrendingUp, TrendingDown, RefreshCw } from 'lucide-react'
 import { Button } from '@/components/ui/button'
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 
@@ -11,16 +11,21 @@ interface MarketPrice {
   symbol: string
   name: string
   price: number
-  change: number
-  high?: number
-  low?: number
-  category?: string
+  changePercent: number
+  category: string
 }
 
 export default function MacroPage() {
+  const [isLoading, setIsLoading] = useState(false)
   const [prices, setPrices] = useState<MarketPrice[]>([])
-  const [isLoading, setIsLoading] = useState(true)
   const [lastUpdate, setLastUpdate] = useState<Date | null>(null)
+  const [selectedCategory, setSelectedCategory] = useState('all')
+
+  const categories = ['all', 'crypto', 'forex', 'commodities', 'indices']
+
+  const filteredPrices = selectedCategory === 'all' 
+    ? prices 
+    : prices.filter(p => p.category === selectedCategory)
 
   const fetchPrices = async () => {
     setIsLoading(true)
@@ -46,11 +51,11 @@ export default function MacroPage() {
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="font-mono text-2xl font-bold">
+          <h1 className="font-mono text-2xl font-bold text-primary">
             {'>'} MACRO_TERMINAL
           </h1>
           <p className="text-muted-foreground font-mono text-sm">
-            Live markets and global data
+            Live markets, economic calendar, and global news
           </p>
         </div>
         <div className="flex items-center gap-2">
@@ -59,11 +64,12 @@ export default function MacroPage() {
               Updated: {lastUpdate.toLocaleTimeString()}
             </span>
           )}
-          <Button
-            variant="outline"
-            size="sm"
+          <Button 
+            variant="outline" 
+            size="sm" 
             onClick={fetchPrices}
             disabled={isLoading}
+            className="border-accent/30"
           >
             <RefreshCw className={`mr-2 h-4 w-4 ${isLoading ? 'animate-spin' : ''}`} />
             Refresh
@@ -77,17 +83,32 @@ export default function MacroPage() {
             <Globe className="mr-2 h-4 w-4" />
             Markets
           </TabsTrigger>
-          <TabsTrigger value="calendar" className="font-mono">
-            <Calendar className="mr-2 h-4 w-4" />
-            Calendar
-          </TabsTrigger>
         </TabsList>
 
         <TabsContent value="markets" className="mt-6 space-y-6">
+          {/* Category Filter */}
+          <div className="flex gap-2 flex-wrap">
+            {categories.map((cat) => (
+              <Button
+                key={cat}
+                variant={selectedCategory === cat ? 'default' : 'outline'}
+                size="sm"
+                onClick={() => setSelectedCategory(cat)}
+                className={selectedCategory === cat 
+                  ? 'bg-accent text-background' 
+                  : 'border-accent/30'
+                }
+              >
+                {cat.charAt(0).toUpperCase() + cat.slice(1)}
+              </Button>
+            ))}
+          </div>
+
+          {/* Price Grid */}
           <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
             {isLoading && prices.length === 0 ? (
               Array.from({ length: 8 }).map((_, i) => (
-                <Card key={i} className="border-border/50 bg-card/50 animate-pulse">
+                <Card key={i} className="border-accent/20 bg-card/50 animate-pulse">
                   <CardContent className="p-4">
                     <div className="h-4 bg-muted rounded w-1/2 mb-2" />
                     <div className="h-8 bg-muted rounded w-3/4 mb-2" />
@@ -95,76 +116,47 @@ export default function MacroPage() {
                   </CardContent>
                 </Card>
               ))
-            ) : (
-              prices.map((price) => (
-                <Card key={price.symbol} className="border-border/50 bg-card/50 hover:border-border transition-colors">
+            ) : filteredPrices.length > 0 ? (
+              filteredPrices.map((price) => (
+                <Card key={price.symbol} className="border-accent/20 bg-card/50 hover:bg-card/70 transition-colors">
                   <CardContent className="p-4">
                     <div className="flex items-center justify-between mb-2">
-                      <span className="font-mono font-bold text-sm">{price.symbol}</span>
-                      {price.category && (
-                        <Badge variant="outline" className="text-xs">
+                      <div className="flex items-center gap-2">
+                        <span className="font-mono font-bold text-primary">{price.symbol}</span>
+                        <Badge variant="outline" className="border-accent/30 text-xs">
                           {price.category}
                         </Badge>
-                      )}
+                      </div>
                     </div>
-                    <div className="mt-2">
+                    <div className="mt-2 flex items-baseline gap-2">
                       <span className="font-mono text-2xl font-bold">
-                        {price.price.toLocaleString(undefined, {
+                        {price.price.toLocaleString(undefined, { 
                           minimumFractionDigits: 2,
-                          maximumFractionDigits: 2,
+                          maximumFractionDigits: price.symbol.includes('BTC') ? 2 : 4,
                         })}
                       </span>
                     </div>
-                    <div className={`mt-2 flex items-center gap-1 font-mono text-sm ${
-                      price.change >= 0 ? 'text-green-400' : 'text-red-400'
+                    <div className={`mt-1 flex items-center gap-1 font-mono text-sm ${
+                      price.changePercent >= 0 ? 'text-green-400' : 'text-red-400'
                     }`}>
-                      {price.change >= 0 ? (
+                      {price.changePercent >= 0 ? (
                         <TrendingUp className="h-4 w-4" />
                       ) : (
                         <TrendingDown className="h-4 w-4" />
                       )}
-                      <span>{price.change >= 0 ? '+' : ''}{price.change.toFixed(2)}%</span>
+                      <span>{price.changePercent >= 0 ? '+' : ''}{price.changePercent.toFixed(2)}%</span>
                     </div>
                   </CardContent>
                 </Card>
               ))
+            ) : (
+              <Card className="col-span-full border-accent/20 bg-card/50">
+                <CardContent className="p-8 text-center text-muted-foreground">
+                  No market data available
+                </CardContent>
+              </Card>
             )}
           </div>
-        </TabsContent>
-
-        <TabsContent value="calendar" className="mt-6">
-          <Card className="border-border/50 bg-card/50">
-            <CardHeader>
-              <CardTitle className="font-mono">Economic Calendar</CardTitle>
-              <CardDescription>Monitor key economic indicators and events</CardDescription>
-            </CardHeader>
-            <CardContent>
-              <div className="space-y-3">
-                <div className="flex items-center justify-between rounded-lg border border-border/50 bg-background/30 p-4">
-                  <div className="flex items-center gap-4">
-                    <div className="flex flex-col items-center">
-                      <Clock className="h-4 w-4 text-muted-foreground" />
-                      <span className="font-mono text-sm mt-1">14:30 UTC</span>
-                    </div>
-                    <div>
-                      <p className="font-medium">US Core CPI</p>
-                      <Badge variant="outline" className="text-xs mt-1">High Impact</Badge>
-                    </div>
-                  </div>
-                  <div className="flex items-center gap-6 text-sm">
-                    <div className="text-center">
-                      <p className="text-xs text-muted-foreground">Forecast</p>
-                      <p className="font-mono font-medium text-cyan-400">3.2%</p>
-                    </div>
-                    <div className="text-center">
-                      <p className="text-xs text-muted-foreground">Previous</p>
-                      <p className="font-mono font-medium">3.3%</p>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
         </TabsContent>
       </Tabs>
     </div>
