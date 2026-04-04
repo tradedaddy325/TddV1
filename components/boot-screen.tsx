@@ -25,18 +25,21 @@ export function BootScreen() {
   const displayPercent = Math.min(Math.round(progress), 100)
 
   useEffect(() => {
-    // Simulate progress
+    // Simulate smooth progress
     const progressInterval = setInterval(() => {
       setProgress((prev) => {
-        if (prev < 100) {
-          return prev + Math.random() * 30
+        if (prev < 95) {
+          // Slower increments at the beginning, faster in the middle
+          const increment = prev < 30 ? Math.random() * 8 : prev < 70 ? Math.random() * 12 : Math.random() * 5
+          return Math.min(prev + increment, 95)
         }
-        return 100
+        return 95
       })
-    }, 200)
+    }, 100)
 
     // Hide boot screen after 4 seconds
     const hideTimer = setTimeout(() => {
+      setProgress(100)
       setIsVisible(false)
     }, 4000)
 
@@ -75,11 +78,13 @@ export function BootScreen() {
         </div>
 
         {/* Colorful Progress Bar */}
-        <div className="w-full h-2 bg-card border border-muted rounded-sm overflow-hidden">
+        <div className="w-full h-3 bg-gray-900 border border-gray-700 rounded-full overflow-hidden shadow-inner">
           <div
-            className={`h-full bg-gradient-to-r ${barGradient} transition-all duration-300 shadow-lg`}
+            className={`h-full bg-gradient-to-r ${barGradient} transition-all duration-100 shadow-lg relative`}
             style={{ width: `${Math.min(progress, 100)}%` }}
-          />
+          >
+            <div className="absolute inset-0 bg-white/20 animate-pulse" />
+          </div>
         </div>
 
         {/* Boot Messages */}
