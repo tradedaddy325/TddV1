@@ -117,9 +117,9 @@ export default function ProfilePage() {
       }),
     })
 
-    const { checkoutUrl } = await response.json()
-    if (checkoutUrl) {
-      window.location.href = checkoutUrl
+    const { paymentUrl } = await response.json()
+    if (paymentUrl) {
+      window.location.href = paymentUrl
     }
   }
 
@@ -137,9 +137,9 @@ export default function ProfilePage() {
       }),
     })
 
-    const { checkoutUrl } = await response.json()
-    if (checkoutUrl) {
-      window.location.href = checkoutUrl
+    const { paymentUrl } = await response.json()
+    if (paymentUrl) {
+      window.location.href = paymentUrl
     }
   }
 
@@ -169,10 +169,10 @@ export default function ProfilePage() {
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="font-mono text-2xl font-bold text-terminal-green">
-          {">"} USER_PROFILE
+        <h1 className="text-3xl font-bold tracking-tight">
+          User Profile
         </h1>
-        <p className="text-muted-foreground font-mono text-sm">
+        <p className="text-muted-foreground mt-2">
           Manage your account, credits, and subscription
         </p>
       </div>
@@ -198,21 +198,21 @@ export default function ProfilePage() {
         </TabsList>
 
         <TabsContent value="account" className="mt-6 space-y-6">
-          <Card className="border-terminal-green/20 bg-card/50">
+          <Card>
             <CardHeader>
-              <CardTitle className="font-mono text-terminal-green">Profile Information</CardTitle>
+              <CardTitle>Profile Information</CardTitle>
               <CardDescription>Update your account details</CardDescription>
             </CardHeader>
             <CardContent className="space-y-6">
               <div className="flex items-center gap-6">
-                <Avatar className="h-20 w-20 border-2 border-terminal-green/30">
+                <Avatar className="h-20 w-20 border-2 border-accent">
                   <AvatarImage src={profile?.avatar_url || ""} />
-                  <AvatarFallback className="bg-terminal-green/10 font-mono text-terminal-green">
+                  <AvatarFallback className="bg-accent text-background">
                     {profile?.display_name?.charAt(0) || profile?.email?.charAt(0) || "U"}
                   </AvatarFallback>
                 </Avatar>
                 <div>
-                  <Button variant="outline" size="sm" className="border-terminal-green/30">
+                  <Button variant="outline" size="sm">
                     Change Avatar
                   </Button>
                 </div>
@@ -224,7 +224,7 @@ export default function ProfilePage() {
                   <Input
                     value={displayName}
                     onChange={(e) => setDisplayName(e.target.value)}
-                    className="border-terminal-green/30 font-mono"
+                    className="border-border"
                   />
                 </div>
                 <div className="space-y-2">
@@ -232,7 +232,7 @@ export default function ProfilePage() {
                   <Input
                     value={username}
                     onChange={(e) => setUsername(e.target.value)}
-                    className="border-terminal-green/30 font-mono"
+                    className="border-border"
                   />
                 </div>
                 <div className="space-y-2">
@@ -240,7 +240,7 @@ export default function ProfilePage() {
                   <Input
                     value={profile?.email || ""}
                     disabled
-                    className="border-terminal-green/30 font-mono opacity-50"
+                    className="border-border opacity-50"
                   />
                 </div>
                 <div className="space-y-2">
@@ -248,27 +248,27 @@ export default function ProfilePage() {
                   <Input
                     value={profile?.created_at ? new Date(profile.created_at).toLocaleDateString() : ""}
                     disabled
-                    className="border-terminal-green/30 font-mono opacity-50"
+                    className="border-border opacity-50"
                   />
                 </div>
               </div>
 
-              <div className="flex items-center justify-between rounded-lg border border-terminal-green/20 bg-terminal-green/5 p-4">
+              <div className="flex items-center justify-between rounded-lg border border-accent/30 bg-accent/5 p-4">
                 <div className="flex items-center gap-3">
-                  <Zap className="h-5 w-5 text-terminal-yellow" />
+                  <Zap className="h-5 w-5 text-accent" />
                   <div>
-                    <p className="font-mono font-medium">Available Credits</p>
+                    <p className="font-medium">Available Credits</p>
                     <p className="text-sm text-muted-foreground">Use credits for AI analysis</p>
                   </div>
                 </div>
-                <span className="font-mono text-2xl font-bold text-terminal-yellow">{profile?.credits || 0}</span>
+                <span className="text-2xl font-bold text-accent">{profile?.credits || 0}</span>
               </div>
 
-              <div className="flex items-center justify-between rounded-lg border border-terminal-green/20 bg-terminal-green/5 p-4">
+              <div className="flex items-center justify-between rounded-lg border border-accent/30 bg-accent/5 p-4">
                 <div className="flex items-center gap-3">
-                  <Crown className="h-5 w-5 text-terminal-cyan" />
+                  <Crown className="h-5 w-5 text-accent" />
                   <div>
-                    <p className="font-mono font-medium">Subscription Tier</p>
+                    <p className="font-medium">Subscription Tier</p>
                     <p className="text-sm text-muted-foreground">Your current plan</p>
                   </div>
                 </div>
@@ -279,7 +279,7 @@ export default function ProfilePage() {
                 <Button
                   onClick={handleUpdateProfile}
                   disabled={isUpdating}
-                  className="bg-terminal-green text-background hover:bg-terminal-green/90"
+                  className="bg-accent text-background hover:bg-accent/90"
                 >
                   {isUpdating ? "Saving..." : "Save Changes"}
                 </Button>
@@ -289,10 +289,10 @@ export default function ProfilePage() {
         </TabsContent>
 
         <TabsContent value="credits" className="mt-6 space-y-6">
-          <Card className="border-terminal-green/20 bg-card/50">
+          <Card>
             <CardHeader>
-              <CardTitle className="font-mono text-terminal-green">
-                <Zap className="mr-2 inline h-5 w-5 text-terminal-yellow" />
+              <CardTitle>
+                <Zap className="mr-2 inline h-5 w-5 text-accent" />
                 Buy Credits
               </CardTitle>
               <CardDescription>
@@ -304,25 +304,25 @@ export default function ProfilePage() {
                 {creditPackages.map((pkg) => (
                   <Card 
                     key={pkg.id} 
-                    className={`relative border-terminal-green/20 bg-background/50 transition-all hover:border-terminal-green/40 ${
-                      pkg.popular ? "ring-2 ring-terminal-green" : ""
+                    className={`relative border-border transition-all hover:border-accent/50 ${
+                      pkg.popular ? "ring-2 ring-accent" : ""
                     }`}
                   >
                     {pkg.popular && (
-                      <Badge className="absolute -top-2 left-1/2 -translate-x-1/2 bg-terminal-green text-background">
+                      <Badge className="absolute -top-2 left-1/2 -translate-x-1/2 bg-accent text-background">
                         POPULAR
                       </Badge>
                     )}
                     <CardContent className="pt-6 text-center">
-                      <h3 className="font-mono text-lg font-bold">{pkg.name}</h3>
+                      <h3 className="text-lg font-bold">{pkg.name}</h3>
                       <div className="my-4">
-                        <span className="font-mono text-3xl font-bold text-terminal-yellow">{pkg.credits}</span>
+                        <span className="text-3xl font-bold text-accent">{pkg.credits}</span>
                         <span className="text-muted-foreground"> credits</span>
                       </div>
-                      <p className="mb-4 font-mono text-2xl font-bold text-terminal-green">R{pkg.price}</p>
+                      <p className="mb-4 text-2xl font-bold">R{pkg.price}</p>
                       <Button 
                         onClick={() => handleBuyCredits(pkg.id)}
-                        className="w-full bg-terminal-green text-background hover:bg-terminal-green/90"
+                        className="w-full bg-accent text-background hover:bg-accent/90"
                       >
                         Buy Now
                       </Button>
@@ -333,9 +333,9 @@ export default function ProfilePage() {
             </CardContent>
           </Card>
 
-          <Card className="border-terminal-green/20 bg-card/50">
+          <Card>
             <CardHeader>
-              <CardTitle className="font-mono text-terminal-green">
+              <CardTitle>
                 <History className="mr-2 inline h-5 w-5" />
                 Credit History
               </CardTitle>
@@ -347,9 +347,9 @@ export default function ProfilePage() {
         </TabsContent>
 
         <TabsContent value="subscription" className="mt-6 space-y-6">
-          <Card className="border-terminal-green/20 bg-card/50">
+          <Card>
             <CardHeader>
-              <CardTitle className="font-mono text-terminal-green">
+              <CardTitle>
                 <Crown className="mr-2 inline h-5 w-5" />
                 Subscription Plans
               </CardTitle>
@@ -362,27 +362,27 @@ export default function ProfilePage() {
                 {subscriptionTiers.map((tier) => (
                   <Card 
                     key={tier.id} 
-                    className={`relative border-terminal-green/20 bg-background/50 transition-all hover:border-terminal-green/40 ${
-                      tier.popular ? "ring-2 ring-terminal-green" : ""
+                    className={`relative border-border transition-all hover:border-accent/50 ${
+                      tier.popular ? "ring-2 ring-accent" : ""
                     }`}
                   >
                     {tier.popular && (
-                      <Badge className="absolute -top-2 left-1/2 -translate-x-1/2 bg-terminal-green text-background">
+                      <Badge className="absolute -top-2 left-1/2 -translate-x-1/2 bg-accent text-background">
                         MOST POPULAR
                       </Badge>
                     )}
                     <CardContent className="pt-6">
                       <div className="text-center">
-                        <h3 className="font-mono text-xl font-bold">{tier.name}</h3>
+                        <h3 className="text-xl font-bold">{tier.name}</h3>
                         <div className="my-4">
-                          <span className="font-mono text-4xl font-bold text-terminal-green">R{tier.price}</span>
+                          <span className="text-4xl font-bold text-accent">R{tier.price}</span>
                           <span className="text-muted-foreground">/month</span>
                         </div>
                       </div>
                       <ul className="mb-6 space-y-3">
                         {tier.features.map((feature, i) => (
                           <li key={i} className="flex items-center gap-2 text-sm">
-                            <div className="h-1.5 w-1.5 rounded-full bg-terminal-green" />
+                            <div className="h-1.5 w-1.5 rounded-full bg-accent" />
                             {feature}
                           </li>
                         ))}
@@ -392,7 +392,7 @@ export default function ProfilePage() {
                         className={`w-full ${
                           profile?.subscription_tier === tier.id
                             ? "bg-muted text-muted-foreground cursor-not-allowed"
-                            : "bg-terminal-green text-background hover:bg-terminal-green/90"
+                            : "bg-accent text-background hover:bg-accent/90"
                         }`}
                         disabled={profile?.subscription_tier === tier.id}
                       >
@@ -407,9 +407,9 @@ export default function ProfilePage() {
         </TabsContent>
 
         <TabsContent value="settings" className="mt-6 space-y-6">
-          <Card className="border-terminal-green/20 bg-card/50">
+          <Card>
             <CardHeader>
-              <CardTitle className="font-mono text-terminal-green">Preferences</CardTitle>
+              <CardTitle>Preferences</CardTitle>
             </CardHeader>
             <CardContent className="space-y-6">
               <div className="flex items-center justify-between">
@@ -435,9 +435,9 @@ export default function ProfilePage() {
             </CardContent>
           </Card>
 
-          <Card className="border-terminal-red/30 bg-card/50">
+          <Card>
             <CardHeader>
-              <CardTitle className="font-mono text-terminal-red">Danger Zone</CardTitle>
+              <CardTitle>Danger Zone</CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
               <div className="flex items-center justify-between">
@@ -448,7 +448,7 @@ export default function ProfilePage() {
                 <Button 
                   variant="outline" 
                   onClick={handleSignOut}
-                  className="border-terminal-red/30 text-terminal-red hover:bg-terminal-red/10"
+                  className="text-red-500 hover:bg-red-500/10 hover:text-red-500"
                 >
                   <LogOut className="mr-2 h-4 w-4" />
                   Sign Out
