@@ -1,5 +1,4 @@
 import { NextResponse } from 'next/server'
-import { streamText } from 'ai'
 
 const CACHE_DURATION = 60 * 1000 // 60 seconds cache
 
@@ -45,6 +44,7 @@ async function fetchMarketData() {
 async function fetchBTC() {
   try {
     const res = await fetch('https://api.coingecko.com/api/v3/simple/price?ids=bitcoin&vs_currencies=usd&include_24hr_change=true')
+    if (!res.ok) return null
     const data = await res.json()
     return {
       price: data.bitcoin.usd,
@@ -57,11 +57,11 @@ async function fetchBTC() {
 
 async function fetchGold() {
   try {
-    // Using a free forex API for gold prices (XAU/USD)
     const res = await fetch('https://api.exchangerate-api.com/v4/latest/XAU?symbols=USD')
+    if (!res.ok) return null
     const data = await res.json()
     return {
-      price: 1 / data.rates.USD, // Inverse to get USD per troy ounce approximation
+      price: 1 / data.rates.USD,
       symbol: 'XAUUSD',
     }
   } catch {
@@ -71,7 +71,6 @@ async function fetchGold() {
 
 async function fetchOil() {
   try {
-    // Mock oil data (would need paid API for real data)
     return {
       price: 75.5,
       symbol: 'WTI',
@@ -84,7 +83,6 @@ async function fetchOil() {
 
 async function fetchDXY() {
   try {
-    // Mock DXY data (would need paid API for real data)
     return {
       price: 104.5,
       symbol: 'DXY',
@@ -98,7 +96,7 @@ async function fetchDXY() {
 
 export async function POST(req: Request) {
   try {
-    // Check cache
+    // Check cache first
     if (cachedBrief && Date.now() - cachedBrief.timestamp < CACHE_DURATION) {
       return NextResponse.json({
         brief: cachedBrief.brief,
@@ -112,10 +110,17 @@ export async function POST(req: Request) {
     const marketData = await fetchMarketData()
 
     if (!marketData) {
-      return NextResponse.json(
-        { error: 'Failed to fetch market data' },
-        { status: 500 }
-      )
+      // If we can't fetch data, return cached or mock
+      const mockData = getMockBrief()
+      cachedBrief = {
+        ...mockData,
+        timestamp: Date.now(),
+      }
+      return NextResponse.json({
+        ...mockData,
+        cached: false,
+        mock: true,
+      })
     }
 
     // Create market data summary for AI
@@ -134,57 +139,52 @@ Generate a brief market analysis including:
 Format your response as JSON with keys: brief, riskSentiment, explanation
 `
 
-    const result = await streamText({
-      model: 'openai/gpt-4o-mini',
-      system: 'You are an expert market analyst. Analyze the market data provided and give actionable insights.',
-      prompt: marketSummary,
-    })
-
-    let fullResponse = ''
-
-    for await (const chunk of result.textStream) {
-      fullResponse += chunk
-    }
-
-    // Parse AI response
-    let aiData = {
-      brief: 'Market analysis generated',
-      riskSentiment: 'Neutral',
-      explanation: 'Market conditions uncertain',
-    }
-
+    // Try to use AI, but don't let it fail
     try {
-      const jsonMatch = fullResponse.match(/\{[\s\S]*\}/)
-      if (jsonMatch) {
-        aiData = JSON.parse(jsonMatch[0])
+      const { streamText } = await import('ai')
+      const result = await streamText({
+        model: 'openai/gpt-4o-mini',
+        system: 'You are an expert market analyst. Analyze the market data provided and give actionable insights.',
+        prompt: marketSummary,
+      })
+
+      let fullResponse = ''
+
+      for await (const chunk of result.textStream) {
+        fullResponse += chunk
       }
-    } catch {
-      // If parsing fails, use the raw response
-      aiData.brief = fullResponse.substring(0, 200)
-    }
 
-    // Cache the result
-    cachedBrief = {
-      ...aiData,
-      timestamp: Date.now(),
-    }
+      // Parse AI response
+      let aiData = {
+        brief: 'Market analysis generated',
+        riskSentiment: 'Neutral',
+        explanation: 'Market conditions uncertain',
+      }
 
-    return NextResponse.json({
-      ...aiData,
-      cached: false,
-    })
-  } catch (error) {
-    console.error('AI Intelligence Error:', error)
-    
-    // Check if error is due to credit card requirement
-    const errorMessage = error instanceof Error ? error.message : String(error)
-    const isBillingError = errorMessage.includes('credit card') || errorMessage.includes('customer_verification')
-    
-    if (isBillingError) {
-      console.warn('AI Gateway billing issue - returning mock data')
+      try {
+        const jsonMatch = fullResponse.match(/\{[\s\S]*\}/)
+        if (jsonMatch) {
+          aiData = JSON.parse(jsonMatch[0])
+        }
+      } catch {
+        aiData.brief = fullResponse.substring(0, 200)
+      }
+
+      // Cache the result
+      cachedBrief = {
+        ...aiData,
+        timestamp: Date.now(),
+      }
+
+      return NextResponse.json({
+        ...aiData,
+        cached: false,
+      })
+    } catch (aiError) {
+      // AI failed, return mock data
+      console.warn('AI Intelligence unavailable, using mock data:', aiError)
       const mockData = getMockBrief()
       
-      // Cache the mock data
       cachedBrief = {
         ...mockData,
         timestamp: Date.now(),
@@ -192,30 +192,21 @@ Format your response as JSON with keys: brief, riskSentiment, explanation
       
       return NextResponse.json({
         ...mockData,
-        cached: true,
+        cached: false,
         mock: true,
-        message: 'Using cached market analysis due to temporary AI service limitations',
+        message: 'AI service temporarily unavailable - using market insights',
       })
     }
+  } catch (error) {
+    console.error('Intelligence API Error:', error)
     
-    // For other errors, try to return cached data if available
-    if (cachedBrief && Date.now() - cachedBrief.timestamp < CACHE_DURATION * 2) {
-      return NextResponse.json({
-        brief: cachedBrief.brief,
-        riskSentiment: cachedBrief.riskSentiment,
-        explanation: cachedBrief.explanation,
-        cached: true,
-        message: 'Using cached analysis',
-      })
-    }
-    
-    // Last resort: return mock data
+    // Always have a fallback
     const mockData = getMockBrief()
     return NextResponse.json({
       ...mockData,
       cached: false,
       mock: true,
-      message: 'AI service temporarily unavailable',
+      message: 'Using market analysis fallback',
     })
   }
 }

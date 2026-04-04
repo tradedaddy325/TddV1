@@ -231,6 +231,21 @@ export async function getAllMarketData() {
   return { crypto, forex, gold, indices }
 }
 
+// Get all market prices as a single array (for macro page compatibility)
+export async function getMarketPrices(): Promise<MarketPrice[]> {
+  const { crypto, forex, gold, indices } = await getAllMarketData()
+  
+  // Combine all prices into a single array
+  const allPrices: MarketPrice[] = [
+    ...crypto,
+    ...forex,
+    gold,
+    ...indices,
+  ]
+  
+  return allPrices
+}
+
 // Format price with appropriate decimal places
 export function formatPrice(price: number, symbol: string): string {
   if (symbol.includes('JPY') || symbol.startsWith('US') || symbol.startsWith('UK') || symbol.startsWith('GER')) {
