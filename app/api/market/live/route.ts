@@ -79,11 +79,6 @@ async function fetchForex() {
     return null
   }
 }
-  } catch (error) {
-    console.error('Error fetching forex:', error)
-    return null
-  }
-}
 
 async function fetchCommodities() {
   try {
