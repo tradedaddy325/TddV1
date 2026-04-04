@@ -1,7 +1,6 @@
 'use client'
 
-import { useEffect, useState } from 'react'
-import * as signalR from '@microsoft/signalr'
+import { useEffect, useState, useRef } from 'react'
 import { cn } from '@/lib/utils'
 import { TrendingUp, TrendingDown } from 'lucide-react'
 
@@ -24,108 +23,137 @@ const MARKET_SYMBOLS = [
 export function PriceTicker() {
   const [prices, setPrices] = useState<TickerPrice[]>([])
   const [isLive, setIsLive] = useState(false)
-  const priceMapRef = React.useRef(new Map<string, { price: number; lastPrice: number }>())
+  const priceMapRef = useRef(new Map<string, { price: number; lastPrice: number }>())
+  const pollIntervalRef = useRef<NodeJS.Timeout | null>(null)
 
   useEffect(() => {
-    let connection: signalR.HubConnection | null = null
-    let reconnectTimeout: NodeJS.Timeout | null = null
-    let reconnectAttempts = 0
-    const maxReconnectAttempts = 5
-
-    const connectSignalR = async () => {
+    const fetchPrices = async () => {
       try {
-        connection = new signalR.HubConnectionBuilder()
-          .withUrl('https://biquote.io/hubs/tick')
-          .withAutomaticReconnect([0, 0, 3000, 5000, 10000, 15000])
-          .withHubProtocol(new signalR.JsonHubProtocol())
-          .build()
-
-        connection.on('ReceiveTick', (tick) => {
-          handleTickData(tick)
+        const response = await fetch('/api/market/live', {
+          cache: 'no-store',
         })
 
-        connection.onreconnecting(() => {
-          console.log('[BiQuote] Reconnecting...')
-          setIsLive(false)
-        })
-
-        connection.onreconnected(() => {
-          console.log('[BiQuote] Reconnected')
-          setIsLive(true)
-        })
-
-        connection.onclose(async () => {
-          console.log('[BiQuote] Connection closed')
-          setIsLive(false)
-          
-          // Manual reconnect with backoff
-          if (reconnectAttempts < maxReconnectAttempts) {
-            const delay = Math.min(1000 * Math.pow(2, reconnectAttempts), 30000)
-            reconnectAttempts++
-            console.log(`[BiQuote] Reconnecting in ${delay}ms (attempt ${reconnectAttempts})`)
-            reconnectTimeout = setTimeout(connectSignalR, delay)
-          }
-        })
-
-        await connection.start()
-        console.log('[BiQuote] Connected')
-        setIsLive(true)
-        reconnectAttempts = 0
-
-        // Subscribe to symbols
-        await connection.invoke('Subscribe', MARKET_SYMBOLS.map((s) => s.symbol))
-        console.log('[BiQuote] Subscribed to market symbols')
-      } catch (err) {
-        console.error('[BiQuote] Connection error:', err)
-        setIsLive(false)
-
-        if (reconnectAttempts < maxReconnectAttempts) {
-          const delay = Math.min(1000 * Math.pow(2, reconnectAttempts), 30000)
-          reconnectAttempts++
-          reconnectTimeout = setTimeout(connectSignalR, delay)
+        if (!response.ok) {
+          console.warn('[PriceTicker] API error:', response.status)
+          return
         }
+
+        const data = await response.json()
+        setIsLive(true)
+
+        const priceMap = priceMapRef.current
+        const updatedPrices: TickerPrice[] = []
+
+        // Process crypto
+        if (data.crypto) {
+          Object.entries(data.crypto).forEach(([key, value]: [string, any]) => {
+            const symbol = key.startsWith('BTC') ? 'BTCUSD' : key.startsWith('ETH') ? 'ETHUSD' : null
+            if (symbol && value.price) {
+              const prev = priceMap.get(symbol)
+              const prevPrice = prev?.lastPrice || value.price
+              const change = ((value.price - prevPrice) / prevPrice) * 100
+
+              priceMap.set(symbol, { price: value.price, lastPrice: value.price })
+
+              const symConfig = MARKET_SYMBOLS.find((s) => s.symbol === symbol)
+              if (symConfig) {
+                updatedPrices.push({
+                  symbol,
+                  displayName: symConfig.display,
+                  price: value.price,
+                  change: isNaN(change) ? 0 : Math.min(Math.max(change, -100), 100),
+                })
+              }
+            }
+          })
+        }
+
+        // Process forex
+        if (data.forex) {
+          Object.entries(data.forex).forEach(([key, value]: [string, any]) => {
+            const symbol = key.toUpperCase()
+            if (value.price && MARKET_SYMBOLS.some((s) => s.symbol === symbol)) {
+              const prev = priceMap.get(symbol)
+              const prevPrice = prev?.lastPrice || value.price
+              const change = ((value.price - prevPrice) / prevPrice) * 100
+
+              priceMap.set(symbol, { price: value.price, lastPrice: value.price })
+
+              const symConfig = MARKET_SYMBOLS.find((s) => s.symbol === symbol)
+              if (symConfig) {
+                updatedPrices.push({
+                  symbol,
+                  displayName: symConfig.display,
+                  price: value.price,
+                  change: isNaN(change) ? 0 : Math.min(Math.max(change, -100), 100),
+                })
+              }
+            }
+          })
+        }
+
+        // Process commodities
+        if (data.commodities) {
+          Object.entries(data.commodities).forEach(([key, value]: [string, any]) => {
+            const symbol = key.toUpperCase()
+            if (value.price && MARKET_SYMBOLS.some((s) => s.symbol === symbol)) {
+              const prev = priceMap.get(symbol)
+              const prevPrice = prev?.lastPrice || value.price
+              const change = ((value.price - prevPrice) / prevPrice) * 100
+
+              priceMap.set(symbol, { price: value.price, lastPrice: value.price })
+
+              const symConfig = MARKET_SYMBOLS.find((s) => s.symbol === symbol)
+              if (symConfig) {
+                updatedPrices.push({
+                  symbol,
+                  displayName: symConfig.display,
+                  price: value.price,
+                  change: isNaN(change) ? 0 : Math.min(Math.max(change, -100), 100),
+                })
+              }
+            }
+          })
+        }
+
+        // Process indices
+        if (data.indices) {
+          Object.entries(data.indices).forEach(([key, value]: [string, any]) => {
+            const symbol = key.toUpperCase()
+            if (value.price && MARKET_SYMBOLS.some((s) => s.symbol === symbol)) {
+              const prev = priceMap.get(symbol)
+              const prevPrice = prev?.lastPrice || value.price
+              const change = ((value.price - prevPrice) / prevPrice) * 100
+
+              priceMap.set(symbol, { price: value.price, lastPrice: value.price })
+
+              const symConfig = MARKET_SYMBOLS.find((s) => s.symbol === symbol)
+              if (symConfig) {
+                updatedPrices.push({
+                  symbol,
+                  displayName: symConfig.display,
+                  price: value.price,
+                  change: isNaN(change) ? 0 : Math.min(Math.max(change, -100), 100),
+                })
+              }
+            }
+          })
+        }
+
+        if (updatedPrices.length > 0) {
+          setPrices(updatedPrices)
+        }
+      } catch (err) {
+        console.error('[PriceTicker] Error:', err)
+        setIsLive(false)
       }
     }
 
-    const handleTickData = (tick: any) => {
-      const symbol = tick.symbol
-      const lastPrice = tick.last || tick.ask || tick.bid
-
-      if (!lastPrice) return
-
-      const symConfig = MARKET_SYMBOLS.find((s) => s.symbol === symbol)
-      if (!symConfig) return
-
-      const priceMap = priceMapRef.current
-      const prev = priceMap.get(symbol)
-      const prevPrice = prev?.lastPrice || lastPrice
-      const change = ((lastPrice - prevPrice) / prevPrice) * 100
-
-      priceMap.set(symbol, { price: lastPrice, lastPrice })
-
-      setPrices((current) => {
-        const existing = current.find((p) => p.symbol === symbol)
-        const newPrice: TickerPrice = {
-          symbol,
-          displayName: symConfig.display,
-          price: lastPrice,
-          change: isNaN(change) ? 0 : Math.min(Math.max(change, -100), 100),
-        }
-
-        if (existing) {
-          return current.map((p) => (p.symbol === symbol ? newPrice : p))
-        }
-        return [...current, newPrice]
-      })
-    }
-
-    connectSignalR()
+    fetchPrices()
+    pollIntervalRef.current = setInterval(fetchPrices, 30000)
 
     return () => {
-      if (reconnectTimeout) clearTimeout(reconnectTimeout)
-      if (connection) {
-        connection.stop().catch((err) => console.error('[BiQuote] Error stopping connection:', err))
-      }
+      if (pollIntervalRef.current) clearInterval(pollIntervalRef.current)
     }
   }, [])
 
@@ -139,7 +167,7 @@ export function PriceTicker() {
   if (prices.length === 0) {
     return (
       <div className="fixed top-0 left-0 right-0 z-50 h-10 bg-card border-b border-border flex items-center px-4">
-        <span className="text-xs text-muted-foreground">Connecting to live market data...</span>
+        <span className="text-xs text-muted-foreground">Loading market prices...</span>
       </div>
     )
   }
@@ -176,11 +204,8 @@ export function PriceTicker() {
 
       <div className="absolute right-2 top-1/2 -translate-y-1/2 flex items-center gap-1.5 px-2 py-0.5 bg-background rounded text-xs">
         <span className={`h-2 w-2 rounded-full ${isLive ? 'bg-primary animate-pulse' : 'bg-muted'}`} />
-        <span className="text-muted-foreground text-xs">{isLive ? 'LIVE' : 'CONNECTING'}</span>
+        <span className="text-muted-foreground text-xs">{isLive ? 'LIVE' : 'OFFLINE'}</span>
       </div>
     </div>
   )
 }
-
-// Add React to the imports at the top
-import React from 'react'
