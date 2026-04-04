@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32">
+  <!-- Light background -->
+  <rect width="32" height="32" fill="#FFFFFF" rx="8"/>
+  
+  <!-- Golden triangle -->
+  <path d="M16 4 L25 22 L7 22 Z" fill="#FFD700"/>
+  
+  <!-- Highlight -->
+  <path d="M16 4 L21 15 L11 15 Z" fill="#000000" opacity="0.15"/>
+</svg>
