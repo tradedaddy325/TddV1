@@ -10,9 +10,20 @@ interface TerminalGreetingProps {
 export function TerminalGreeting({ profile }: TerminalGreetingProps) {
   const [displayText, setDisplayText] = useState('')
   const [showCursor, setShowCursor] = useState(true)
+  const [currentTime, setCurrentTime] = useState<string | null>(null)
 
   const greeting = getGreeting()
   const fullText = `${greeting}, ${profile?.display_name || 'Trader'}. System operational.`
+
+  useEffect(() => {
+    // Set initial time and update every second
+    setCurrentTime(new Date().toLocaleTimeString())
+    const timeTimer = setInterval(() => {
+      setCurrentTime(new Date().toLocaleTimeString())
+    }, 1000)
+
+    return () => clearInterval(timeTimer)
+  }, [])
 
   useEffect(() => {
     let index = 0
@@ -51,7 +62,7 @@ export function TerminalGreeting({ profile }: TerminalGreetingProps) {
         <span className={showCursor ? 'opacity-100' : 'opacity-0'}>_</span>
       </p>
       <div className="mt-2 text-xs text-muted-foreground">
-        <span className="text-accent">[{new Date().toLocaleTimeString()}]</span>{' '}
+        {currentTime && <span className="text-accent">[{currentTime}]</span>}{' '}
         Session active | Tier: <span className="text-primary uppercase">{profile?.subscription_tier || 'free'}</span> |{' '}
         Credits: <span className="text-warning">{profile?.credits || 0}</span>
       </div>
