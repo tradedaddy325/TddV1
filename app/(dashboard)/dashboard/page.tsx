@@ -5,6 +5,7 @@ import { QuickStats } from '@/components/dashboard/quick-stats'
 import { RecentTrades } from '@/components/dashboard/recent-trades'
 import { QuickActions } from '@/components/dashboard/quick-actions'
 import { TerminalGreeting } from '@/components/dashboard/terminal-greeting'
+import { AIIntelligence } from '@/components/dashboard/ai-intelligence'
 import type { Profile, JournalEntry } from '@/lib/types'
 
 export const metadata = {
@@ -61,11 +62,14 @@ export default async function DashboardPage() {
           <MarketOverview />
         </div>
 
-        {/* Quick Actions */}
+        {/* AI Intelligence */}
         <div>
-          <QuickActions />
+          <AIIntelligence />
         </div>
       </div>
+
+      {/* Quick Actions */}
+      <QuickActions />
 
       {/* Recent Trades */}
       <RecentTrades trades={(recentTrades || []) as JournalEntry[]} />
