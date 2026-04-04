@@ -2,41 +2,22 @@
 
 import { useState, useEffect } from 'react'
 import { Button } from '@/components/ui/button'
-import { Checkbox } from '@/components/ui/checkbox'
 import { AlertTriangle } from 'lucide-react'
 
 export function TermsAcceptanceModal() {
   const [isOpen, setIsOpen] = useState(false)
-  const [accepted, setAccepted] = useState({
-    riskDisclaimer: false,
-    substancialRisk: false,
-    signalsNotGuarantee: false,
-    notFinancialAdvice: false,
-    mayLoseAll: false,
-    termsAccepted: false,
-    liabilityAccepted: false,
-    fullResponsibility: false,
-    ageConfirmed: false,
-    disputeResolution: false,
-    sueLiability: false,
-    ownRisk: false,
-  })
 
   useEffect(() => {
-    const hasAccepted = localStorage.getItem('termsAccepted_v1')
+    const hasAccepted = localStorage.getItem('termsAccepted_v2')
     if (!hasAccepted) {
       setIsOpen(true)
     }
   }, [])
 
-  const allAccepted = Object.values(accepted).every((v) => v)
-
   const handleAccept = () => {
-    if (allAccepted) {
-      localStorage.setItem('termsAccepted_v1', 'true')
-      localStorage.setItem('termsAcceptedDate', new Date().toISOString())
-      setIsOpen(false)
-    }
+    localStorage.setItem('termsAccepted_v2', 'true')
+    localStorage.setItem('termsAcceptedDate', new Date().toISOString())
+    setIsOpen(false)
   }
 
   if (!isOpen) return null
@@ -49,8 +30,8 @@ export function TermsAcceptanceModal() {
           <div className="flex items-center gap-3">
             <AlertTriangle className="w-8 h-8 text-red-400 flex-shrink-0" />
             <div>
-              <h2 className="text-2xl font-bold text-foreground">TERMS & LEGAL ACCEPTANCE</h2>
-              <p className="text-sm text-muted-foreground">Please read and accept all terms before proceeding</p>
+              <h2 className="text-2xl font-bold text-foreground">TERMS & LEGAL ACKNOWLEDGMENT</h2>
+              <p className="text-sm text-muted-foreground">By using TradeDaddy, you accept the following</p>
             </div>
           </div>
         </div>
@@ -59,157 +40,67 @@ export function TermsAcceptanceModal() {
         <div className="p-6 space-y-6">
           {/* Critical Warning */}
           <div className="bg-red-900/30 border border-red-700/50 p-4 rounded">
-            <p className="text-red-400 font-bold mb-2">⚠️ CRITICAL WARNING</p>
-            <p className="text-sm text-foreground">
-              Trading involves SUBSTANTIAL RISK OF LOSS. You may lose ALL of your investment and possibly more. This is not investment advice. You assume all responsibility for trading decisions.
+            <p className="text-red-400 font-bold mb-2">⚠️ CRITICAL RISK WARNING</p>
+            <p className="text-sm text-foreground leading-relaxed">
+              Trading involves SUBSTANTIAL RISK OF LOSS. You may lose ALL of your investment and possibly more. Past performance does not guarantee future results. TradeDaddy is NOT a financial advisor and this is EDUCATIONAL CONTENT ONLY.
             </p>
           </div>
 
-          {/* Checkboxes */}
-          <div className="space-y-4">
-            <div className="flex items-start gap-3">
-              <Checkbox
-                id="risk1"
-                checked={accepted.riskDisclaimer}
-                onCheckedChange={(checked) => setAccepted({ ...accepted, riskDisclaimer: !!checked })}
-              />
-              <label htmlFor="risk1" className="text-sm cursor-pointer flex-1 leading-relaxed">
-                I have read and understand the <a href="/risk-disclosure" target="_blank" className="text-cyan-400 hover:underline">Risk Disclaimer</a>
-              </label>
-            </div>
+          {/* Key Points */}
+          <div className="space-y-3">
+            <h3 className="font-semibold text-foreground">By using this site, you acknowledge and accept:</h3>
+            
+            <ul className="space-y-2 text-sm">
+              <li className="flex gap-3 items-start">
+                <span className="text-red-400 font-bold mt-0.5">•</span>
+                <span className="text-foreground leading-relaxed">Trading involves substantial risk of loss - you may lose 100% of your investment</span>
+              </li>
+              <li className="flex gap-3 items-start">
+                <span className="text-red-400 font-bold mt-0.5">•</span>
+                <span className="text-foreground leading-relaxed">Signals and analysis provided are for educational purposes only, not financial advice</span>
+              </li>
+              <li className="flex gap-3 items-start">
+                <span className="text-red-400 font-bold mt-0.5">•</span>
+                <span className="text-foreground leading-relaxed">You are solely responsible for all trading decisions and any losses</span>
+              </li>
+              <li className="flex gap-3 items-start">
+                <span className="text-red-400 font-bold mt-0.5">•</span>
+                <span className="text-foreground leading-relaxed">TradeDaddy assumes no liability for losses, regardless of cause</span>
+              </li>
+              <li className="flex gap-3 items-start">
+                <span className="text-red-400 font-bold mt-0.5">•</span>
+                <span className="text-foreground leading-relaxed">You are 18+ and legally permitted to trade in your jurisdiction</span>
+              </li>
+              <li className="flex gap-3 items-start">
+                <span className="text-red-400 font-bold mt-0.5">•</span>
+                <span className="text-foreground leading-relaxed">You waive the right to hold TradeDaddy liable for any trading losses</span>
+              </li>
+            </ul>
+          </div>
 
-            <div className="flex items-start gap-3">
-              <Checkbox
-                id="risk2"
-                checked={accepted.substancialRisk}
-                onCheckedChange={(checked) => setAccepted({ ...accepted, substancialRisk: !!checked })}
-              />
-              <label htmlFor="risk2" className="text-sm cursor-pointer flex-1 leading-relaxed">
-                I understand trading involves substantial risk of loss
-              </label>
-            </div>
-
-            <div className="flex items-start gap-3">
-              <Checkbox
-                id="signals"
-                checked={accepted.signalsNotGuarantee}
-                onCheckedChange={(checked) => setAccepted({ ...accepted, signalsNotGuarantee: !!checked })}
-              />
-              <label htmlFor="signals" className="text-sm cursor-pointer flex-1 leading-relaxed">
-                I understand signals are not guarantees and may not be profitable
-              </label>
-            </div>
-
-            <div className="flex items-start gap-3">
-              <Checkbox
-                id="advice"
-                checked={accepted.notFinancialAdvice}
-                onCheckedChange={(checked) => setAccepted({ ...accepted, notFinancialAdvice: !!checked })}
-              />
-              <label htmlFor="advice" className="text-sm cursor-pointer flex-1 leading-relaxed">
-                I am not relying on TradeDaddy for financial advice - this is educational only
-              </label>
-            </div>
-
-            <div className="flex items-start gap-3">
-              <Checkbox
-                id="loss"
-                checked={accepted.mayLoseAll}
-                onCheckedChange={(checked) => setAccepted({ ...accepted, mayLoseAll: !!checked })}
-              />
-              <label htmlFor="loss" className="text-sm cursor-pointer flex-1 leading-relaxed">
-                I understand I may lose all my investment
-              </label>
-            </div>
-
-            <div className="border-t border-border pt-4 mt-4">
-              <p className="text-xs text-muted-foreground mb-4 font-semibold">FINAL ACKNOWLEDGMENTS - PLEASE CHECK ALL:</p>
-
-              <div className="space-y-4">
-                <div className="flex items-start gap-3">
-                  <Checkbox
-                    id="terms"
-                    checked={accepted.termsAccepted}
-                    onCheckedChange={(checked) => setAccepted({ ...accepted, termsAccepted: !!checked })}
-                  />
-                  <label htmlFor="terms" className="text-sm cursor-pointer flex-1 leading-relaxed">
-                    I accept all <a href="/terms" target="_blank" className="text-cyan-400 hover:underline">Terms of Service</a> and <a href="/privacy" target="_blank" className="text-cyan-400 hover:underline">Privacy Policy</a>
-                  </label>
-                </div>
-
-                <div className="flex items-start gap-3">
-                  <Checkbox
-                    id="liability"
-                    checked={accepted.liabilityAccepted}
-                    onCheckedChange={(checked) => setAccepted({ ...accepted, liabilityAccepted: !!checked })}
-                  />
-                  <label htmlFor="liability" className="text-sm cursor-pointer flex-1 leading-relaxed">
-                    I accept the limitation of liability clause - TradeDaddy is not liable for losses
-                  </label>
-                </div>
-
-                <div className="flex items-start gap-3">
-                  <Checkbox
-                    id="responsibility"
-                    checked={accepted.fullResponsibility}
-                    onCheckedChange={(checked) => setAccepted({ ...accepted, fullResponsibility: !!checked })}
-                  />
-                  <label htmlFor="responsibility" className="text-sm cursor-pointer flex-1 leading-relaxed">
-                    I accept full responsibility for my trading decisions and any losses
-                  </label>
-                </div>
-
-                <div className="flex items-start gap-3">
-                  <Checkbox
-                    id="age"
-                    checked={accepted.ageConfirmed}
-                    onCheckedChange={(checked) => setAccepted({ ...accepted, ageConfirmed: !!checked })}
-                  />
-                  <label htmlFor="age" className="text-sm cursor-pointer flex-1 leading-relaxed">
-                    I am 18+ years old and legally permitted to trade in my jurisdiction
-                  </label>
-                </div>
-
-                <div className="flex items-start gap-3">
-                  <Checkbox
-                    id="dispute"
-                    checked={accepted.disputeResolution}
-                    onCheckedChange={(checked) => setAccepted({ ...accepted, disputeResolution: !!checked })}
-                  />
-                  <label htmlFor="dispute" className="text-sm cursor-pointer flex-1 leading-relaxed">
-                    I agree to resolve disputes as stated in the terms (South African jurisdiction)
-                  </label>
-                </div>
-
-                <div className="flex items-start gap-3">
-                  <Checkbox
-                    id="sue"
-                    checked={accepted.sueLiability}
-                    onCheckedChange={(checked) => setAccepted({ ...accepted, sueLiability: !!checked })}
-                  />
-                  <label htmlFor="sue" className="text-sm cursor-pointer flex-1 leading-relaxed">
-                    I waive my right to sue TradeDaddy for trading losses, regardless of cause
-                  </label>
-                </div>
-
-                <div className="flex items-start gap-3">
-                  <Checkbox
-                    id="risk"
-                    checked={accepted.ownRisk}
-                    onCheckedChange={(checked) => setAccepted({ ...accepted, ownRisk: !!checked })}
-                  />
-                  <label htmlFor="risk" className="text-sm cursor-pointer flex-1 leading-relaxed">
-                    I understand I am trading at my own risk and my own expense
-                  </label>
-                </div>
-              </div>
+          {/* Links to Full Terms */}
+          <div className="bg-blue-900/20 border border-blue-700/50 p-4 rounded text-sm">
+            <p className="text-muted-foreground mb-3">For complete legal information, please review:</p>
+            <div className="flex flex-wrap gap-2">
+              <a href="/terms" target="_blank" className="text-cyan-400 hover:underline text-xs px-3 py-1 border border-cyan-400/30 rounded">
+                Terms of Service
+              </a>
+              <a href="/privacy" target="_blank" className="text-cyan-400 hover:underline text-xs px-3 py-1 border border-cyan-400/30 rounded">
+                Privacy Policy
+              </a>
+              <a href="/risk-disclosure" target="_blank" className="text-cyan-400 hover:underline text-xs px-3 py-1 border border-cyan-400/30 rounded">
+                Risk Disclosure
+              </a>
+              <a href="/signal-disclaimer" target="_blank" className="text-cyan-400 hover:underline text-xs px-3 py-1 border border-cyan-400/30 rounded">
+                Signal Disclaimer
+              </a>
             </div>
           </div>
 
-          {/* Final Acknowledgment */}
-          <div className="bg-blue-900/20 border border-blue-700/50 p-4 rounded">
-            <p className="text-sm text-foreground">
-              I acknowledge that I have read and fully understand these terms and disclaimers. I understand that trading involves SUBSTANTIAL RISK OF LOSS and I may lose MORE than I invest. I understand that TradeDaddy provides EDUCATIONAL SIGNALS AND ANALYSIS, not financial advice. I understand that I ALONE AM RESPONSIBLE for all trading decisions and any losses resulting from those decisions. I WAIVE MY RIGHT TO HOLD TRADEDADDY LIABLE for losses, regardless of cause. I am trading at my own risk and my own expense. I accept all terms as written.
+          {/* Final Statement */}
+          <div className="bg-yellow-900/20 border border-yellow-700/50 p-4 rounded">
+            <p className="text-sm text-foreground leading-relaxed">
+              <span className="font-semibold">By clicking "I Accept & Continue" below, you confirm that:</span> You have read and understood these terms and all associated legal documents. You understand and accept all risks of trading. You assume full responsibility for your trading decisions. You will not hold TradeDaddy liable for losses.
             </p>
           </div>
         </div>
@@ -220,19 +111,18 @@ export function TermsAcceptanceModal() {
             variant="outline"
             className="flex-1"
             onClick={() => {
-              if (confirm('Are you sure? You will not be able to access TradeDaddy without accepting these terms.')) {
-                window.location.href = '/'
+              if (confirm('You must accept these terms to use TradeDaddy. Are you sure you want to exit?')) {
+                window.location.href = 'https://www.google.com'
               }
             }}
           >
             Decline & Exit
           </Button>
           <Button
-            className="flex-1 bg-green-600 hover:bg-green-700"
-            disabled={!allAccepted}
+            className="flex-1 bg-green-600 hover:bg-green-700 text-white font-semibold text-lg py-6"
             onClick={handleAccept}
           >
-            {allAccepted ? 'Accept All & Continue' : `Accept All (${Object.values(accepted).filter(Boolean).length}/${Object.keys(accepted).length})`}
+            I Accept & Continue
           </Button>
         </div>
       </div>
