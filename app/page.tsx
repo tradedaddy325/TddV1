@@ -129,7 +129,7 @@ export default function LandingPage() {
             <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
               <Link href="/auth/sign-up">
                 <Button size="lg" className="w-full sm:w-auto">
-                  Start Trading Free
+                  Start Learning
                   <ChevronRight className="w-4 h-4 ml-2" />
                 </Button>
               </Link>
