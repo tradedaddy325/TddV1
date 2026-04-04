@@ -69,21 +69,21 @@ export function BootScreen() {
           <p className="text-sm text-muted-foreground font-mono">
             Initializing Market Systems...
           </p>
-          <div className="flex items-center justify-center gap-2">
-            <p className="text-xs text-muted-foreground font-mono">[████████░░]</p>
-            <p className={`text-lg font-bold font-mono ${percentColor}`}>
+          <div className="flex items-center justify-center gap-4 mt-6">
+            {/* Dynamic inline progress bar */}
+            <div className="flex items-center gap-2 flex-1">
+              <span className="text-xs text-muted-foreground font-mono">[</span>
+              <div className="flex-1 h-2 bg-gray-800 border border-gray-700 rounded-sm overflow-hidden">
+                <div
+                  className={`h-full bg-gradient-to-r ${barGradient} transition-all duration-100`}
+                  style={{ width: `${Math.min(progress, 100)}%` }}
+                />
+              </div>
+              <span className="text-xs text-muted-foreground font-mono">]</span>
+            </div>
+            <p className={`text-lg font-bold font-mono ${percentColor} min-w-12`}>
               {displayPercent}%
             </p>
-          </div>
-        </div>
-
-        {/* Colorful Progress Bar */}
-        <div className="w-full h-3 bg-gray-900 border border-gray-700 rounded-full overflow-hidden shadow-inner">
-          <div
-            className={`h-full bg-gradient-to-r ${barGradient} transition-all duration-100 shadow-lg relative`}
-            style={{ width: `${Math.min(progress, 100)}%` }}
-          >
-            <div className="absolute inset-0 bg-white/20 animate-pulse" />
           </div>
         </div>
 
