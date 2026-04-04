@@ -3,12 +3,14 @@
 import { useEffect, useState } from 'react'
 import { createClient } from '@/lib/supabase/client'
 import { TerminalGreeting } from '@/components/dashboard/terminal-greeting'
+import { LiveStreamModal } from '@/components/dashboard/live-stream-modal'
 import { GrokTradingSignals } from '@/components/grok-trading-signals'
 import type { Profile } from '@/lib/types'
 
 export default function DashboardPage() {
   const [profile, setProfile] = useState<Profile | null>(null)
   const [loading, setLoading] = useState(true)
+  const [showStream, setShowStream] = useState(false)
 
   useEffect(() => {
     const fetchProfile = async () => {
@@ -65,7 +67,7 @@ export default function DashboardPage() {
             <span className="text-gray-400 text-sm font-mono">Global</span>
           </div>
           
-          <div className="flex items-center gap-2 px-4 py-2 rounded-full border border-green-600 bg-green-900/20">
+          <div className="flex items-center gap-2 px-4 py-2 rounded-full border border-green-600 bg-green-900/20 cursor-pointer hover:bg-green-900/40 transition-colors" onClick={() => setShowStream(true)}>
             <span className="text-green-400 text-sm">📺</span>
             <span className="text-green-400 text-sm font-mono">Start News Live Stream</span>
             <span className="text-green-400 ml-auto">▶</span>
@@ -228,6 +230,9 @@ export default function DashboardPage() {
           <GrokTradingSignals />
         </div>
       </div>
+
+      {/* Live Stream Modal */}
+      <LiveStreamModal isOpen={showStream} onClose={() => setShowStream(false)} />
     </main>
   )
 }
