@@ -156,7 +156,7 @@ export function PriceTicker() {
         {[...prices, ...prices].map((item, index) => (
           <div
             key={`${item.symbol}-${index}`}
-            className="flex items-center gap-3 px-6 border-r border-border h-full whitespace-nowrap"
+            className="flex items-center gap-2 px-3 border-r border-border h-full whitespace-nowrap"
           >
             <span className="text-xs text-muted-foreground font-medium">{item.displayName}</span>
             <span className="text-sm font-semibold text-foreground">{formatPrice(item.price)}</span>
@@ -171,8 +171,10 @@ export function PriceTicker() {
               ) : (
                 <TrendingDown className="w-3 h-3" />
               )}
-              {item.change >= 0 ? '+' : ''}
-              {Math.abs(item.change).toFixed(2)}%
+              <span className="hidden sm:inline">
+                {item.change >= 0 ? '+' : ''}
+                {Math.abs(item.change).toFixed(2)}%
+              </span>
             </span>
           </div>
         ))}

@@ -122,23 +122,23 @@ export default function DashboardPage() {
 
           {/* Dollar Index */}
           <div className="p-6 rounded-xl border border-gray-800 bg-gray-900/50 space-y-4">
-            <div className="flex items-center justify-between">
+            <div className="flex flex-col gap-3">
               <div>
-                <h3 className="text-lg font-bold text-white">Dollar Index (DXY)</h3>
-                <div className="flex items-center gap-2 mt-2">
-                  <span className="text-3xl font-bold text-white">27.86</span>
-                  <span className="text-green-400 text-lg font-mono">↗ 0.47%</span>
+                <h3 className="text-lg font-bold text-white">(DXY)</h3>
+                <div className="flex items-center gap-3 mt-3">
+                  <span className="text-4xl font-bold text-white">27.86</span>
+                  <span className="text-green-400 text-xl font-mono">↗ 0.47%</span>
                 </div>
               </div>
-              <div className="flex items-center gap-2 px-3 py-1 rounded-full border border-green-600 bg-green-900/20">
-                <span className="text-green-400 text-xs font-mono">Healthy positive curve</span>
+              <div className="flex items-center gap-2 px-3 py-1 rounded-full border border-green-600 bg-green-900/20 w-fit">
+                <span className="text-green-400 text-xs font-mono whitespace-nowrap">Healthy positive curve</span>
               </div>
             </div>
 
             {/* Metric Cards with Circular Indicators */}
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-2 gap-4 pt-2">
               <CircularMetric label="Dollar pressure" sublabel="Momentum" value="64" color="blue" />
-              <CircularMetric label="10Y-2Y spread" sublabel="Healthy positive curve" value="0.52%" color="orange" />
+              <CircularMetric label="10Y-2Y spread" sublabel="Healthy curve" value="0.52%" color="orange" />
             </div>
           </div>
 
@@ -249,9 +249,14 @@ function CircularMetric({ label, sublabel, value, color }: { label: string; subl
   const c = colorMap[color] || colorMap.blue
 
   return (
-    <div className={`p-4 rounded-lg ${c.bg} border border-gray-700 flex items-center gap-4`}>
-      <div className="relative w-20 h-20 flex-shrink-0">
-        <svg className="w-20 h-20" viewBox="0 0 100 100">
+    <div className={`p-4 rounded-lg ${c.bg} border border-gray-700 flex flex-col items-center gap-3`}>
+      <div className="w-full">
+        <div className="text-xs text-gray-400 uppercase tracking-wide text-center truncate">{label}</div>
+        <div className="text-xs text-gray-500 mt-0.5 text-center truncate">{sublabel}</div>
+      </div>
+      
+      <div className="relative w-24 h-24 flex-shrink-0">
+        <svg className="w-24 h-24" viewBox="0 0 100 100">
           <circle cx="50" cy="50" r="45" fill="none" stroke="#374151" strokeWidth="2" />
           <circle
             cx="50"
@@ -265,14 +270,10 @@ function CircularMetric({ label, sublabel, value, color }: { label: string; subl
             strokeLinecap="round"
             className="animate-pulse"
           />
-          <text x="50" y="57" textAnchor="middle" className="text-sm font-bold" fill="white">
+          <text x="50" y="58" textAnchor="middle" className="text-lg font-bold" fill="white" fontSize="18">
             {value}
           </text>
         </svg>
-      </div>
-      <div>
-        <div className="text-sm font-mono text-gray-400">{c.dot}{label}</div>
-        <div className="text-xs text-gray-500 mt-1">{sublabel}</div>
       </div>
     </div>
   )
