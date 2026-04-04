@@ -39,8 +39,11 @@ export default function LoginPage() {
       return
     }
 
-    router.push(redirectTo)
-    router.refresh()
+    // Wrap router operations to ensure they happen after initialization
+    setTimeout(() => {
+      router.push(redirectTo)
+      router.refresh()
+    }, 0)
   }
 
   return (

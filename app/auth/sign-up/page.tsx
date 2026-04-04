@@ -58,7 +58,10 @@ export default function SignUpPage() {
       return
     }
 
-    router.push('/auth/sign-up-success')
+    // Wrap router operations to ensure they happen after initialization
+    setTimeout(() => {
+      router.push('/auth/sign-up-success')
+    }, 0)
   }
 
   return (

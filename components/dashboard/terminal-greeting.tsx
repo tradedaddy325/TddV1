@@ -7,17 +7,27 @@ interface TerminalGreetingProps {
   profile: Profile
 }
 
+function getGreeting(hourOverride?: number): string {
+  const hour = hourOverride ?? new Date().getHours()
+  if (hour < 12) return 'Good morning'
+  if (hour < 17) return 'Good afternoon'
+  return 'Good evening'
+}
+
 export function TerminalGreeting({ profile }: TerminalGreetingProps) {
   const [displayText, setDisplayText] = useState('')
   const [showCursor, setShowCursor] = useState(true)
   const [currentTime, setCurrentTime] = useState<string | null>(null)
+  const [greeting, setGreeting] = useState('Good day')
 
-  const greeting = getGreeting()
   const fullText = `${greeting}, ${profile?.display_name || 'Trader'}. System operational.`
 
+  // Initialize time and greeting only on client
   useEffect(() => {
-    // Set initial time and update every second
-    setCurrentTime(new Date().toLocaleTimeString())
+    const now = new Date()
+    setCurrentTime(now.toLocaleTimeString())
+    setGreeting(getGreeting(now.getHours()))
+
     const timeTimer = setInterval(() => {
       setCurrentTime(new Date().toLocaleTimeString())
     }, 1000)
@@ -68,11 +78,4 @@ export function TerminalGreeting({ profile }: TerminalGreetingProps) {
       </div>
     </div>
   )
-}
-
-function getGreeting(): string {
-  const hour = new Date().getHours()
-  if (hour < 12) return 'Good morning'
-  if (hour < 17) return 'Good afternoon'
-  return 'Good evening'
 }

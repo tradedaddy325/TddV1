@@ -94,7 +94,11 @@ export default function ProfilePage() {
   const handleSignOut = async () => {
     const supabase = createClient()
     await supabase.auth.signOut()
-    router.push("/")
+    // Wrap router operations in setTimeout to ensure they happen after initialization
+    setTimeout(() => {
+      router.push("/")
+      router.refresh()
+    }, 0)
   }
 
   const handleBuyCredits = async (packageId: string) => {
