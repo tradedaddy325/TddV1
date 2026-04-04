@@ -1,4 +1,4 @@
-import { CreditsPageContent } from '@/components/credits-page-content'
+import { CreditsContent } from '@/components/credits-content'
 import { createClient } from '@/lib/supabase/server'
 import { redirect } from 'next/navigation'
 
@@ -18,25 +18,6 @@ export default async function CreditsPage() {
     redirect('/auth/login')
   }
 
-  // Fetch user's credit balance
-  const { data: profile } = await supabase
-    .from('profiles')
-    .select('credits')
-    .eq('id', user.id)
-    .single()
-
-  // Fetch transaction history
-  const { data: transactions } = await supabase
-    .from('credit_transactions')
-    .select('*')
-    .eq('user_id', user.id)
-    .order('created_at', { ascending: false })
-    .limit(10)
-
-  const totalSpent = transactions?.reduce((sum, t) => {
-    return sum + (t.type === 'purchase' ? t.amount : 0)
-  }, 0) || 0
-
   return (
     <div className="space-y-6">
       <div>
@@ -46,7 +27,7 @@ export default async function CreditsPage() {
         </p>
       </div>
 
-      <CreditsPageContent />
+      <CreditsContent />
     </div>
   )
 }

@@ -6,7 +6,14 @@ import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
-import { getMarketPrices, type MarketPrice } from "@/lib/market-data"
+
+interface MarketPrice {
+  symbol: string
+  name: string
+  price: number
+  change24h: number
+  changePercent24h: number
+}
 
 interface EconomicEvent {
   id: string
@@ -46,14 +53,18 @@ export default function MacroPage() {
   const fetchPrices = async () => {
     setIsLoading(true)
     try {
-      const data = await getMarketPrices()
-      setPrices(data)
+      const response = await fetch('/api/market/live')
+      const data = await response.json()
+      if (data.prices) {
+        setPrices(data.prices)
+      }
       setLastUpdate(new Date())
     } catch (error) {
-      console.error("Failed to fetch prices:", error)
+      console.error('Error fetching market prices:', error)
     } finally {
       setIsLoading(false)
     }
+  }
   }
 
   useEffect(() => {

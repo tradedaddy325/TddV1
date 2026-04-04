@@ -1,4 +1,4 @@
-import { SettingsPageContent } from '@/components/settings-page-content'
+import { SettingsContent } from '@/components/settings-content'
 import { createClient } from '@/lib/supabase/server'
 import { redirect } from 'next/navigation'
 
@@ -27,7 +27,7 @@ export default async function SettingsPage() {
         </p>
       </div>
 
-      <SettingsPageContent />
+      <SettingsContent />
     </div>
   )
 }

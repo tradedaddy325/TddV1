@@ -51,7 +51,7 @@ export async function POST(request: NextRequest) {
     const checkoutData = await yocoResponse.json()
 
     return NextResponse.json({
-      checkoutUrl: checkoutData.redirectUrl,
+      paymentUrl: checkoutData.redirectUrl,
       checkoutId: checkoutData.id,
     })
   } catch (error) {

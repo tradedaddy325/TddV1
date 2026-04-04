@@ -25,6 +25,7 @@ import {
 } from 'lucide-react'
 import type { Profile } from '@/lib/types'
 import { PriceTicker } from './price-ticker'
+import { DashboardNav } from './nav-dropdown'
 
 interface DashboardShellProps {
   children: React.ReactNode
@@ -194,6 +195,11 @@ export function DashboardShell({ children, profile }: DashboardShellProps) {
             <span className="text-lg font-bold text-primary glow-green">TRADEDADDY</span>
             <div className="w-10" /> {/* Spacer for centering */}
           </header>
+
+          {/* Desktop Dropdown Navigation */}
+          <div className="hidden lg:block">
+            <DashboardNav />
+          </div>
 
           {/* Page Content */}
           <div className="p-4 lg:p-6">
