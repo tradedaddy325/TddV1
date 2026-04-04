@@ -3,6 +3,7 @@
 import { useEffect, useState } from 'react'
 import { createClient } from '@/lib/supabase/client'
 import { TerminalGreeting } from '@/components/dashboard/terminal-greeting'
+import { GrokTradingSignals } from '@/components/grok-trading-signals'
 import type { Profile } from '@/lib/types'
 
 export default function DashboardPage() {
@@ -220,6 +221,11 @@ export default function DashboardPage() {
               <div className="text-xs text-purple-300 mt-1">▲ 0.18%</div>
             </div>
           </div>
+        </div>
+
+        {/* Grok Trading Signals */}
+        <div className="mt-8">
+          <GrokTradingSignals />
         </div>
       </div>
     </main>

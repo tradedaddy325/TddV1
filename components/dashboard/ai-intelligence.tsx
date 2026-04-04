@@ -25,15 +25,61 @@ export function AIIntelligence() {
     setLoading(true)
     setError(null)
     try {
-      const response = await fetch('/api/intelligence', {
+      // First, fetch market data
+      const marketResponse = await fetch('/api/market/live')
+      const marketData = await marketResponse.json()
+      
+      // Then use Grok for trading analysis
+      const analysisResponse = await fetch('/api/trading-analysis', {
         method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          marketData: {
+            crypto: marketData.crypto || {},
+            forex: marketData.forex || {},
+            commodities: marketData.commodities || {},
+            indices: marketData.indices || {},
+          },
+          analysisType: 'daily-brief',
+        }),
       })
-      if (!response.ok) throw new Error('Failed to fetch intelligence')
-      const result = await response.json()
-      setData(result)
+      
+      if (!analysisResponse.ok) throw new Error('Failed to fetch analysis')
+      
+      const reader = analysisResponse.body?.getReader()
+      const decoder = new TextDecoder()
+      let fullAnalysis = ''
+      
+      if (reader) {
+        while (true) {
+          const { done, value } = await reader.read()
+          if (done) break
+          fullAnalysis += decoder.decode(value, { stream: true })
+        }
+      }
+      
+      // Parse Grok response
+      const riskMatch = fullAnalysis.match(/Risk[:\s-]+([^.\n]+)/i)
+      const riskSentiment = riskMatch ? riskMatch[1].trim().split('\n')[0] : 'Neutral'
+      
+      setData({
+        brief: fullAnalysis.substring(0, 300) + '...',
+        riskSentiment: riskSentiment,
+        explanation: fullAnalysis,
+        cached: false,
+        mock: false,
+      })
       setLastUpdated(new Date())
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Unknown error')
+      // Fallback to cached/mock data
+      setData({
+        brief: 'Market analysis powered by Grok AI',
+        riskSentiment: 'Neutral',
+        explanation: 'Grok is analyzing current market conditions...',
+        cached: true,
+        mock: true,
+      })
     } finally {
       setLoading(false)
     }
@@ -63,10 +109,10 @@ export function AIIntelligence() {
       <CardHeader className="pb-3">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">
-            <CardTitle className="text-lg">AI Market Intelligence</CardTitle>
+            <CardTitle className="text-lg">Grok Trading Analysis</CardTitle>
             {data?.cached && (
               <Badge variant="outline" className="text-xs">
-                {data.mock ? 'Mock' : 'Cached'}
+                {data.mock ? 'Demo' : 'Cached'}
               </Badge>
             )}
           </div>
