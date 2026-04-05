@@ -9,8 +9,8 @@ const _geist = Geist({ subsets: ["latin"] });
 const _geistMono = Geist_Mono({ subsets: ["latin"] });
 
 export const metadata: Metadata = {
-  title: 'TradeDaddy - Trade Smarter, Trade Better',
-  description: 'Advanced trading platform with live market data, AI-powered trade analysis, and professional trading tools',
+  title: 'TradeDaddy Terminal',
+  description: 'Professional Trading Workspace',
   icons: {
     icon: [
       {

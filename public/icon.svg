@@ -1,10 +1,14 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 192 192">
-  <!-- Dark background -->
-  <rect width="192" height="192" fill="#000000" rx="45"/>
+<svg viewBox="0 0 32 32" xmlns="http://www.w3.org/2000/svg">
+  <!-- Background -->
+  <rect width="32" height="32" rx="6" fill="#0a0e27"/>
   
-  <!-- Golden upward arrow/triangle representing trading growth -->
-  <path d="M96 30 L150 130 L42 130 Z" fill="#FFD700" opacity="0.95"/>
+  <!-- Outer border with glow -->
+  <rect width="32" height="32" rx="6" fill="none" stroke="#00ff88" stroke-width="1.5" opacity="0.8"/>
   
-  <!-- White highlight for depth -->
-  <path d="M96 30 L125 90 L67 90 Z" fill="#FFFFFF" opacity="0.25"/>
+  <!-- Upward arrow (trading up) -->
+  <path d="M 16 8 L 16 22 M 12 18 L 16 22 L 20 18" stroke="#00ff88" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+  
+  <!-- Dollar sign -->
+  <circle cx="16" cy="16" r="8" fill="none" stroke="#00ff88" stroke-width="1" opacity="0.6"/>
+  <text x="16" y="18" font-size="10" font-weight="bold" fill="#00ff88" text-anchor="middle" font-family="monospace">$</text>
 </svg>

@@ -1,10 +1,14 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32">
-  <!-- Light background -->
-  <rect width="32" height="32" fill="#FFFFFF" rx="8"/>
+<svg viewBox="0 0 32 32" xmlns="http://www.w3.org/2000/svg">
+  <!-- Light theme background -->
+  <rect width="32" height="32" rx="6" fill="#ffffff"/>
   
-  <!-- Golden triangle -->
-  <path d="M16 4 L25 22 L7 22 Z" fill="#FFD700"/>
+  <!-- Border -->
+  <rect width="32" height="32" rx="6" fill="none" stroke="#00ff88" stroke-width="1.5" opacity="0.8"/>
   
-  <!-- Highlight -->
-  <path d="M16 4 L21 15 L11 15 Z" fill="#000000" opacity="0.15"/>
+  <!-- Upward arrow (trading up) -->
+  <path d="M 16 8 L 16 22 M 12 18 L 16 22 L 20 18" stroke="#00cc6a" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+  
+  <!-- Dollar sign -->
+  <circle cx="16" cy="16" r="8" fill="none" stroke="#00cc6a" stroke-width="1" opacity="0.6"/>
+  <text x="16" y="18" font-size="10" font-weight="bold" fill="#00cc6a" text-anchor="middle" font-family="monospace">$</text>
 </svg>
