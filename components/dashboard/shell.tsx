@@ -279,7 +279,7 @@ export function DashboardShell({ children, profile }: DashboardShellProps) {
                           </div>
                           <ChevronDown className={cn('w-4 h-4 transition-transform', isExpanded && 'rotate-180')} />
                         </button>
-                        {isExpanded && (
+                        {isExpanded && item.children && (
                           <div className="pl-6 py-1 space-y-1">
                             {item.children.map((child: any) => (
                               <Link
