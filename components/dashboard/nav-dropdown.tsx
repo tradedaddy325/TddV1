@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import { cn } from '@/lib/utils'
@@ -51,8 +51,14 @@ const profileNavItems = [
 export function DashboardNav() {
   const pathname = usePathname()
   const [openMenu, setOpenMenu] = useState<string | null>(null)
+  const [mounted, setMounted] = useState(false)
+
+  useEffect(() => {
+    setMounted(true)
+  }, [])
 
   const getActiveLabel = () => {
+    if (!mounted) return 'Menu'
     for (const item of [...mainNavItems, ...profileNavItems]) {
       if (pathname === item.href || pathname.startsWith(`${item.href}/`)) {
         return item.title
@@ -61,10 +67,18 @@ export function DashboardNav() {
     return 'Menu'
   }
 
+  const handleOpenChange = (isOpen: boolean, menuType: 'main' | 'profile') => {
+    setOpenMenu(isOpen ? menuType : null)
+  }
+
+  if (!mounted) {
+    return null
+  }
+
   return (
     <div className="flex items-center gap-2 px-4 py-3 border-b border-border bg-card">
       {/* Main Navigation Dropdown */}
-      <DropdownMenu open={openMenu === 'main'} onOpenChange={(open) => setOpenMenu(open ? 'main' : null)}>
+      <DropdownMenu open={openMenu === 'main'} onOpenChange={(open) => handleOpenChange(open, 'main')}>
         <DropdownMenuTrigger asChild>
           <Button variant="outline" size="sm" className="gap-2">
             {getActiveLabel()}
@@ -110,7 +124,7 @@ export function DashboardNav() {
       <div className="flex-1" />
 
       {/* Profile Dropdown */}
-      <DropdownMenu open={openMenu === 'profile'} onOpenChange={(open) => setOpenMenu(open ? 'profile' : null)}>
+      <DropdownMenu open={openMenu === 'profile'} onOpenChange={(open) => handleOpenChange(open, 'profile')}>
         <DropdownMenuTrigger asChild>
           <Button variant="outline" size="sm" className="gap-2">
             <User className="w-4 h-4" />
