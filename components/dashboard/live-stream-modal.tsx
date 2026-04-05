@@ -43,7 +43,7 @@ export function LiveStreamModal({ isOpen, onClose }: LiveStreamModalProps) {
             <iframe
               width="100%"
               height="100%"
-              src="https://www.youtube.com/embed/KQp-e_XQnDE?autoplay=1"
+              src="https://www.youtube.com/live/iEpJwprxDdk?si=SbMiAVK3aPQEzdh0"
               title="Live News Stream"
               frameBorder="0"
               allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
