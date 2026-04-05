@@ -247,7 +247,8 @@ export function DashboardShell({ children, profile }: DashboardShellProps) {
           {sidebarOpen && (
             <div className="fixed inset-0 z-50 flex flex-col bg-background lg:hidden" style={{ top: '40px' }}>
               {/* Header with close button */}
-              <div className="flex items-center justify-end px-4 py-4 border-b border-border">
+              <div className="flex items-center justify-between px-4 py-4 border-b border-border">
+                <span className="text-sm text-muted-foreground">traders for traders by traders</span>
                 <Button
                   variant="ghost"
                   size="icon"
