@@ -23,7 +23,6 @@ import {
   BookOpen,
   FileText,
   Users,
-  MessageSquare,
   CreditCard,
   Settings,
   User,

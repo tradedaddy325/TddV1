@@ -85,14 +85,14 @@ export default function MarketPsychologyPage() {
 
             <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
               {[
-                { label: 'Fear', value: sentiment.fear, color: 'red' },
-                { label: 'Greed', value: sentiment.greed, color: 'green' },
-                { label: 'FOMO', value: sentiment.fomo, color: 'yellow' },
-                { label: 'Uncertainty', value: sentiment.uncertainty, color: 'cyan' },
+                { label: 'Fear', value: sentiment.fear, colorClass: 'text-red-400' },
+                { label: 'Greed', value: sentiment.greed, colorClass: 'text-green-400' },
+                { label: 'FOMO', value: sentiment.fomo, colorClass: 'text-yellow-400' },
+                { label: 'Uncertainty', value: sentiment.uncertainty, colorClass: 'text-cyan-400' },
               ].map((metric) => (
                 <div key={metric.label} className="border border-gray-700/50 bg-gray-900/30 rounded-lg p-4">
                   <p className="text-gray-400 font-mono text-xs mb-2">{metric.label}</p>
-                  <p className="text-2xl font-bold text-green-400">{metric.value}</p>
+                  <p className={`text-2xl font-bold ${metric.colorClass}`}>{metric.value}</p>
                 </div>
               ))}
             </div>
