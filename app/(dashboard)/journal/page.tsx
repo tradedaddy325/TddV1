@@ -357,6 +357,7 @@ export default function JournalPage() {
         <TabsList className="bg-muted/50">
           <TabsTrigger value="list" className="font-mono">List View</TabsTrigger>
           <TabsTrigger value="calendar" className="font-mono">Calendar</TabsTrigger>
+          <TabsTrigger value="coach" className="font-mono">AI Coach</TabsTrigger>
         </TabsList>
         <TabsContent value="list" className="mt-4">
           {isLoading ? (
@@ -447,6 +448,41 @@ export default function JournalPage() {
               </p>
             </CardContent>
           </Card>
+        </TabsContent>
+        <TabsContent value="coach" className="mt-4">
+          <div className="space-y-4">
+            <Card className="border-terminal-green/20 bg-gradient-to-br from-terminal-green/10 to-card/50">
+              <CardHeader>
+                <CardTitle className="font-mono text-terminal-green">{">"} AI_TRADING_COACH</CardTitle>
+                <CardDescription>Get personalized feedback on your trades</CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                {entries && entries.length > 0 ? (
+                  <div className="space-y-4">
+                    <div className="bg-card/50 border border-terminal-green/20 rounded p-4 space-y-2">
+                      <p className="text-sm text-gray-300"><span className="text-terminal-green font-mono">→</span> Win Rate: <span className="text-terminal-green font-mono">{((stats.winRate / stats.totalTrades) * 100).toFixed(1)}%</span></p>
+                      <p className="text-sm text-gray-300"><span className="text-terminal-green font-mono">→</span> Total P&L: <span className={stats.totalPnL >= 0 ? "text-terminal-green" : "text-terminal-red"} + " font-mono">${stats.totalPnL.toFixed(2)}</span></p>
+                      <p className="text-sm text-gray-300"><span className="text-terminal-green font-mono">→</span> Average Trade: <span className="text-terminal-cyan font-mono">${(stats.totalPnL / stats.totalTrades).toFixed(2)}</span></p>
+                    </div>
+                    <div className="bg-card/50 border border-terminal-cyan/20 rounded p-4">
+                      <p className="text-terminal-cyan font-mono text-sm mb-2">AI_FEEDBACK:</p>
+                      <p className="text-gray-300 text-sm leading-relaxed">
+                        Your trading shows {stats.winRate > stats.totalTrades * 0.5 ? "positive" : "neutral"} results. Focus on risk management and maintaining consistency. Review your losing trades to identify patterns and improve entry timing.
+                      </p>
+                    </div>
+                  </div>
+                ) : (
+                  <Card className="border-terminal-green/20 bg-card/50">
+                    <CardContent className="py-8 text-center">
+                      <p className="font-mono text-muted-foreground">
+                        No trades logged yet. Start logging trades to receive AI coaching feedback.
+                      </p>
+                    </CardContent>
+                  </Card>
+                )}
+              </CardContent>
+            </Card>
+          </div>
         </TabsContent>
       </Tabs>
     </div>

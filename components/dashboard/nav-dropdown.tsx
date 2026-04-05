@@ -14,10 +14,15 @@ import {
 } from '@/components/ui/dropdown-menu'
 import {
   LayoutDashboard,
-  Globe,
+  Gauge,
+  Brain,
+  Eye,
+  TrendingUp,
   Wrench,
+  BarChart3,
   BookOpen,
   FileText,
+  Users,
   MessageSquare,
   CreditCard,
   Settings,
@@ -26,20 +31,20 @@ import {
 } from 'lucide-react'
 
 const mainNavItems = [
-  { title: 'Dashboard', href: '/dashboard', icon: LayoutDashboard, submenu: [
-    { title: 'Macro Desk Terminal', href: '/dashboard?tab=macro' },
-    { title: 'Market Psychology', href: '/dashboard?tab=psychology' },
-    { title: 'Trading Signals', href: '/dashboard?tab=signals' },
-  ]},
-  { title: 'Macro Hub', href: '/macro', icon: Globe },
-  { title: 'Tools', href: '/tools', icon: Wrench },
-  { title: 'Academy', href: '/academy', icon: BookOpen },
-  { title: 'Journal', href: '/journal', icon: FileText },
-  { title: 'AI Chat', href: '/chat', icon: MessageSquare },
+  { title: 'Dashboard', href: '/dashboard', icon: LayoutDashboard, badge: 'Free' },
+  { title: 'Macro Desk', href: '/macro-desk', icon: Gauge, badge: 'PAID' },
+  { title: 'Market Psychology', href: '/market-psychology', icon: Brain },
+  { title: 'Predictive Markets', href: '/predictive-markets', icon: Eye },
+  { title: 'Signals', href: '/signals', icon: TrendingUp },
+  { title: 'Trading Tools', href: '/tools', icon: Wrench },
+  { title: 'Charting', href: '/charting', icon: BarChart3 },
+  { title: 'Trade Journal', href: '/journal', icon: FileText },
+  { title: 'Education Suite', href: '/academy', icon: BookOpen },
+  { title: 'Community', href: '/community', icon: Users },
+  { title: 'Profile', href: '/profile', icon: User },
 ]
 
 const profileNavItems = [
-  { title: 'Profile', href: '/profile', icon: User },
   { title: 'Credits', href: '/credits', icon: CreditCard },
   { title: 'Settings', href: '/settings', icon: Settings },
 ]
@@ -68,7 +73,7 @@ export function DashboardNav() {
           </Button>
         </DropdownMenuTrigger>
         <DropdownMenuContent align="start" className="w-56">
-          {mainNavItems.map((item) => {
+          {mainNavItems.map((item, index) => {
             const isActive = pathname === item.href || pathname.startsWith(`${item.href}/`)
             const Icon = item.icon
             return (
@@ -77,30 +82,25 @@ export function DashboardNav() {
                   <Link
                     href={item.href}
                     className={cn(
-                      'flex items-center gap-2 cursor-pointer',
+                      'flex items-center gap-2 cursor-pointer justify-between',
                       isActive && 'bg-accent text-accent-foreground'
                     )}
                   >
-                    <Icon className="w-4 h-4" />
-                    {item.title}
+                    <span className="flex items-center gap-2">
+                      <Icon className="w-4 h-4" />
+                      {item.title}
+                    </span>
+                    {item.badge && (
+                      <span className={cn(
+                        'text-xs px-2 py-0.5 rounded font-semibold',
+                        item.badge === 'PAID' ? 'bg-amber-900/50 text-amber-300' : 'bg-green-900/50 text-green-300'
+                      )}>
+                        {item.badge}
+                      </span>
+                    )}
                   </Link>
                 </DropdownMenuItem>
-                {item.submenu && (
-                  <>
-                    <DropdownMenuSeparator />
-                    {item.submenu.map((subitem) => (
-                      <DropdownMenuItem key={subitem.href} asChild>
-                        <Link
-                          href={subitem.href}
-                          className="flex items-center gap-2 cursor-pointer pl-8 text-xs"
-                        >
-                          {subitem.title}
-                        </Link>
-                      </DropdownMenuItem>
-                    ))}
-                    <DropdownMenuSeparator />
-                  </>
-                )}
+                {index === 0 || index === 4 || index === 10 ? <DropdownMenuSeparator /> : null}
               </div>
             )
           })}
