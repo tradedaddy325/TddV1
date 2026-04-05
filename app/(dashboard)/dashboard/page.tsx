@@ -1,6 +1,7 @@
 'use client'
 
 import { useEffect, useState } from 'react'
+import { useSearchParams } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
 import { TerminalGreeting } from '@/components/dashboard/terminal-greeting'
 import { LiveStreamModal } from '@/components/dashboard/live-stream-modal'
@@ -13,11 +14,20 @@ import { AIPauseBanner } from '@/components/ai-pause-banner'
 import type { Profile } from '@/lib/types'
 
 export default function DashboardPage() {
+  const searchParams = useSearchParams()
+  const tabParam = searchParams.get('tab')
+  
   const [profile, setProfile] = useState<Profile | null>(null)
   const [loading, setLoading] = useState(true)
   const [showStream, setShowStream] = useState(false)
   const [activeTab, setActiveTab] = useState<'home' | 'macro' | 'psychology' | 'signals'>('home')
-  const [dropdownOpen, setDropdownOpen] = useState(false)
+
+  useEffect(() => {
+    // Set active tab from URL parameter
+    if (tabParam === 'macro' || tabParam === 'psychology' || tabParam === 'signals') {
+      setActiveTab(tabParam)
+    }
+  }, [tabParam])
 
   useEffect(() => {
     const fetchProfile = async () => {
@@ -49,78 +59,6 @@ export default function DashboardPage() {
         {/* HOME PAGE - Default view */}
         {activeTab === 'home' && (
           <div className="space-y-6">
-            {/* Header with TradeHub Terminal and Dropdown */}
-            <div className="flex items-center justify-between mb-8">
-              <div className="space-y-1">
-                <div className="flex items-center gap-3">
-                  <div className="w-10 h-10 rounded-lg bg-gradient-to-br from-orange-400 to-pink-400 flex items-center justify-center">
-                    <span className="text-xl">📈</span>
-                  </div>
-                  <div>
-                    <h1 className="text-2xl font-bold text-white">
-                      TradeHub <span className="text-purple-400">Terminal</span>
-                    </h1>
-                    <p className="text-xs text-gray-400">Powered by Claude & Gemini</p>
-                  </div>
-                </div>
-              </div>
-
-              {/* Right-Side Dropdown Menu */}
-              <div className="relative">
-                <button
-                  onClick={() => setDropdownOpen(!dropdownOpen)}
-                  className="px-4 py-2 rounded-lg border border-gray-700 bg-gray-900 text-gray-300 hover:text-green-400 font-mono text-sm transition-colors flex items-center gap-2"
-                >
-                  ≡
-                </button>
-
-                {/* Dropdown Items */}
-                {dropdownOpen && (
-                  <div className="absolute right-0 mt-2 w-56 rounded-lg border border-gray-700 bg-gray-900 shadow-xl z-50">
-                    <button
-                      onClick={() => {
-                        setActiveTab('macro')
-                        setDropdownOpen(false)
-                      }}
-                      className={`w-full text-left px-4 py-3 text-sm font-mono transition-colors border-b border-gray-800 last:border-b-0 ${
-                        activeTab === 'macro'
-                          ? 'bg-green-900/30 text-green-400'
-                          : 'text-gray-300 hover:bg-gray-800 hover:text-green-400'
-                      }`}
-                    >
-                      Macro Desk Terminal
-                    </button>
-                    <button
-                      onClick={() => {
-                        setActiveTab('psychology')
-                        setDropdownOpen(false)
-                      }}
-                      className={`w-full text-left px-4 py-3 text-sm font-mono transition-colors border-b border-gray-800 last:border-b-0 ${
-                        activeTab === 'psychology'
-                          ? 'bg-green-900/30 text-green-400'
-                          : 'text-gray-300 hover:bg-gray-800 hover:text-green-400'
-                      }`}
-                    >
-                      Market Psychology
-                    </button>
-                    <button
-                      onClick={() => {
-                        setActiveTab('signals')
-                        setDropdownOpen(false)
-                      }}
-                      className={`w-full text-left px-4 py-3 text-sm font-mono transition-colors border-b border-gray-800 last:border-b-0 ${
-                        activeTab === 'signals'
-                          ? 'bg-green-900/30 text-green-400'
-                          : 'text-gray-300 hover:bg-gray-800 hover:text-green-400'
-                      }`}
-                    >
-                      Trading Signals
-                    </button>
-                  </div>
-                )}
-              </div>
-            </div>
-
             {/* Markets Closed Alert */}
             <div className="px-4 py-3 rounded-lg border border-yellow-600 bg-yellow-900/20 flex items-center gap-3">
               <span className="text-yellow-400 text-lg">🌙</span>
