@@ -11,6 +11,7 @@
   "dependencies": {
     "@ai-sdk/react": "^3.0.0",
     "@ai-sdk/xai": "^3.0.77",
+    "@anthropic-ai/sdk": "^0.82.0",
     "@hookform/resolvers": "^3.9.1",
     "@microsoft/signalr": "^8.0.0",
     "@radix-ui/react-accordion": "1.2.12",
