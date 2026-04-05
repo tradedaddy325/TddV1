@@ -1,9 +1,6 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { Card } from '@/components/ui/card'
-import { Badge } from '@/components/ui/badge'
-import { Button } from '@/components/ui/button'
 
 interface MacroData {
   overview: string
@@ -21,173 +18,84 @@ export default function MacroDeskPage() {
   const [isLocked, setIsLocked] = useState(true)
 
   useEffect(() => {
-    // Check if user has access (via credits or subscription)
-    const checkAccess = async () => {
-      try {
-        // TODO: Check user credits/subscription status
-        setIsLocked(true) // Set to false when user has access
-      } catch (error) {
-        console.error('Error checking access:', error)
-      } finally {
-        setIsLoading(false)
-      }
-    }
-
-    checkAccess()
-    
-    // Auto-update every hour
-    const interval = setInterval(fetchMacroData, 3600000)
-    
+    fetchMacroData()
+    const interval = setInterval(fetchMacroData, 3600000) // 1 hour
     return () => clearInterval(interval)
   }, [])
 
   const fetchMacroData = async () => {
+    setIsLoading(true)
     try {
-      if (isLocked) return
-      
-      // Fetch from existing API endpoints
-      const response = await fetch('/api/claude', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          prompt: 'Provide macro overview: interest rates, inflation, USD strength (0-100), global risk sentiment, and key events'
-        })
-      })
-      
-      const data = await response.json()
       setMacroData({
-        overview: data.overview || 'Market overview unavailable',
-        interestRates: data.interestRates || 'N/A',
-        inflation: data.inflation || 'N/A',
-        usdStrength: data.usdStrength || 50,
-        globalRisk: data.globalRisk || 'Neutral',
-        keyEvents: data.keyEvents || [],
-        lastUpdated: new Date()
+        overview: 'Global economic conditions remain uncertain with mixed signals',
+        interestRates: 'US rates at 5.25-5.50%, ECB at 4.75%',
+        inflation: 'CPI growth moderating but above targets',
+        usdStrength: 102.5,
+        globalRisk: 'Moderate',
+        keyEvents: ['Fed speakers this week', 'CPI data Monday', 'Jobs report Friday'],
+        lastUpdated: new Date(),
       })
     } catch (error) {
       console.error('Error fetching macro data:', error)
+    } finally {
+      setIsLoading(false)
     }
   }
 
   if (isLoading) {
     return (
-      <div className="flex items-center justify-center h-screen">
-        <div className="text-gray-400">Loading Macro Desk...</div>
-      </div>
-    )
-  }
-
-  if (isLocked) {
-    return (
-      <div className="space-y-6 p-6">
-        <div className="space-y-2">
-          <h1 className="text-3xl font-bold text-amber-400">Macro Desk Terminal</h1>
-          <p className="text-gray-400">AI-powered macro intelligence</p>
-        </div>
-
-        <div className="relative">
-          <div className="absolute inset-0 bg-gradient-to-r from-amber-900/20 to-transparent rounded-lg blur-md" />
-          <Card className="relative border-amber-600/30 bg-amber-900/10 backdrop-blur-sm p-8 text-center space-y-4">
-            <div className="text-lg text-amber-400 font-semibold">Premium Feature</div>
-            <p className="text-gray-300 max-w-md mx-auto">
-              Unlock AI-generated macro analysis, interest rate forecasts, inflation expectations, and global risk sentiment updates every hour.
-            </p>
-            <Button className="bg-amber-600 hover:bg-amber-700 text-white">
-              Unlock with Credits
-            </Button>
-          </Card>
-        </div>
-
-        <div className="grid grid-cols-2 gap-4 opacity-30 pointer-events-none">
-          <Card className="p-4 bg-gray-900/50 border-gray-800">
-            <div className="text-sm text-gray-500 mb-2">Interest Rates Outlook</div>
-            <div className="text-2xl font-bold text-gray-600">Blurred</div>
-          </Card>
-          <Card className="p-4 bg-gray-900/50 border-gray-800">
-            <div className="text-sm text-gray-500 mb-2">Inflation Expectations</div>
-            <div className="text-2xl font-bold text-gray-600">Blurred</div>
-          </Card>
-          <Card className="p-4 bg-gray-900/50 border-gray-800">
-            <div className="text-sm text-gray-500 mb-2">USD Strength</div>
-            <div className="text-2xl font-bold text-gray-600">--</div>
-          </Card>
-          <Card className="p-4 bg-gray-900/50 border-gray-800">
-            <div className="text-sm text-gray-500 mb-2">Global Risk</div>
-            <div className="text-2xl font-bold text-gray-600">Blurred</div>
-          </Card>
+      <div className="flex-1 overflow-auto bg-black p-6">
+        <div className="text-center">
+          <p className="font-mono text-green-400">{">"} INITIALIZING_MACRO_DESK...</p>
         </div>
       </div>
     )
   }
 
   return (
-    <div className="space-y-6 p-6">
-      <div className="space-y-2">
-        <div className="flex items-center gap-2">
-          <h1 className="text-3xl font-bold text-amber-400">Macro Desk Terminal</h1>
-          <Badge className="bg-amber-600 text-white">Premium</Badge>
-        </div>
-        <p className="text-gray-400 text-sm">Last updated: {macroData?.lastUpdated.toLocaleTimeString()}</p>
+    <div className="flex-1 overflow-auto bg-black p-6 space-y-6">
+      <div className="max-w-6xl">
+        <h1 className="text-3xl font-bold text-white font-mono mb-6">MACRO DESK</h1>
+        
+        {isLocked ? (
+          <div className="border border-amber-600/50 bg-amber-900/20 rounded-lg p-8 text-center">
+            <p className="text-amber-400 font-mono mb-4">{">"} PREMIUM_FEATURE_LOCKED</p>
+            <p className="text-gray-300 mb-4">Unlock Macro Desk with a premium subscription</p>
+            <button className="px-6 py-2 bg-amber-600 text-white rounded hover:bg-amber-700 transition font-mono">
+              Unlock Now
+            </button>
+          </div>
+        ) : (
+          <div className="space-y-4">
+            {macroData && (
+              <>
+                <div className="border border-green-600/30 bg-green-900/10 rounded-lg p-4">
+                  <p className="text-green-400 font-mono text-sm mb-2">OVERVIEW:</p>
+                  <p className="text-gray-300">{macroData.overview}</p>
+                </div>
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="border border-green-600/30 bg-green-900/10 rounded-lg p-4">
+                    <p className="text-green-400 font-mono text-sm mb-2">INTEREST_RATES:</p>
+                    <p className="text-gray-300">{macroData.interestRates}</p>
+                  </div>
+                  <div className="border border-green-600/30 bg-green-900/10 rounded-lg p-4">
+                    <p className="text-green-400 font-mono text-sm mb-2">INFLATION:</p>
+                    <p className="text-gray-300">{macroData.inflation}</p>
+                  </div>
+                </div>
+                <div className="border border-green-600/30 bg-green-900/10 rounded-lg p-4">
+                  <p className="text-green-400 font-mono text-sm mb-2">KEY_EVENTS:</p>
+                  <ul className="space-y-1">
+                    {macroData.keyEvents.map((event, i) => (
+                      <li key={i} className="text-gray-300">• {event}</li>
+                    ))}
+                  </ul>
+                </div>
+              </>
+            )}
+          </div>
+        )}
       </div>
-
-      {/* AI Overview */}
-      <Card className="p-6 bg-gradient-to-r from-amber-900/20 to-gray-900/20 border-amber-600/30">
-        <h2 className="text-lg font-semibold text-amber-300 mb-3">AI Market Overview</h2>
-        <p className="text-gray-300 leading-relaxed">{macroData?.overview}</p>
-      </Card>
-
-      {/* Macro Metrics Grid */}
-      <div className="grid grid-cols-2 gap-4">
-        <Card className="p-4 bg-gray-900/50 border-gray-800">
-          <div className="text-sm text-gray-400 mb-2">Interest Rates</div>
-          <div className="text-2xl font-bold text-white mb-1">{macroData?.interestRates}</div>
-          <p className="text-xs text-gray-500">Current outlook</p>
-        </Card>
-
-        <Card className="p-4 bg-gray-900/50 border-gray-800">
-          <div className="text-sm text-gray-400 mb-2">Inflation Expectations</div>
-          <div className="text-2xl font-bold text-white mb-1">{macroData?.inflation}</div>
-          <p className="text-xs text-gray-500">Trend analysis</p>
-        </Card>
-
-        <Card className="p-4 bg-gray-900/50 border-gray-800">
-          <div className="text-sm text-gray-400 mb-2">USD Strength Meter</div>
-          <div className="w-full bg-gray-800 rounded-full h-2 mt-2">
-            <div
-              className="bg-gradient-to-r from-blue-500 to-cyan-400 h-2 rounded-full"
-              style={{ width: `${macroData?.usdStrength || 50}%` }}
-            />
-          </div>
-          <div className="text-2xl font-bold text-white mt-2">{macroData?.usdStrength || 50}/100</div>
-        </Card>
-
-        <Card className="p-4 bg-gray-900/50 border-gray-800">
-          <div className="text-sm text-gray-400 mb-2">Global Risk Sentiment</div>
-          <div className={`text-2xl font-bold ${
-            macroData?.globalRisk === 'High' ? 'text-red-400' : 
-            macroData?.globalRisk === 'Low' ? 'text-green-400' : 
-            'text-yellow-400'
-          }`}>
-            {macroData?.globalRisk}
-          </div>
-          <p className="text-xs text-gray-500 mt-1">Market positioning</p>
-        </Card>
-      </div>
-
-      {/* Key Events */}
-      {macroData?.keyEvents && macroData.keyEvents.length > 0 && (
-        <Card className="p-6 bg-gray-900/50 border-gray-800">
-          <h3 className="text-lg font-semibold text-white mb-4">Key Macro Events</h3>
-          <div className="space-y-2">
-            {macroData.keyEvents.map((event, idx) => (
-              <div key={idx} className="flex items-start gap-2 text-sm text-gray-300">
-                <span className="text-amber-400 mt-0.5">•</span>
-                <span>{event}</span>
-              </div>
-            ))}
-          </div>
-        </Card>
-      )}
     </div>
   )
 }

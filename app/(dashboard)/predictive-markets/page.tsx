@@ -1,9 +1,6 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { Card } from '@/components/ui/card'
-import { Badge } from '@/components/ui/badge'
-import { Progress } from '@/components/ui/progress'
 
 interface Prediction {
   asset: string
@@ -11,109 +8,50 @@ interface Prediction {
   bearish: number
   neutral: number
   scenario: string
-  reasoning: string
   confidence: number
 }
 
 export default function PredictiveMarketsPage() {
   const [predictions, setPredictions] = useState<Prediction[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const [timeframe, setTimeframe] = useState('24h')
 
   useEffect(() => {
     fetchPredictions()
-    
-    // Auto-update every 2-4 hours
     const interval = setInterval(fetchPredictions, 10800000) // 3 hours
-    
     return () => clearInterval(interval)
-  }, [timeframe])
+  }, [])
 
   const fetchPredictions = async () => {
+    setIsLoading(true)
     try {
-      const response = await fetch('/api/claude', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          prompt: `Provide AI predictions for next ${timeframe}: For major assets (XAUUSD, EURUSD, BTCUSD, GBPUSD, NZDUSD), give bullish %, bearish %, neutral %, scenario, reasoning, and confidence score (0-100)`
-        })
-      })
-      
-      const data = await response.json()
-      
-      // Default predictions if API fails
-      const defaultPredictions: Prediction[] = [
-        {
-          asset: 'XAUUSD',
-          bullish: 68,
-          bearish: 22,
-          neutral: 10,
-          scenario: 'Safe-haven flows boost gold prices',
-          reasoning: 'Geopolitical tensions and rate cut expectations support gold strength',
-          confidence: 76
-        },
-        {
-          asset: 'EURUSD',
-          bullish: 45,
-          bearish: 35,
-          neutral: 20,
-          scenario: 'Mixed signals from ECB data',
-          reasoning: 'Conflicting inflation and growth data create two-way trading',
-          confidence: 62
-        },
-        {
-          asset: 'BTCUSD',
-          bullish: 72,
-          bearish: 15,
-          neutral: 13,
-          scenario: 'Technical breakout continues',
-          reasoning: 'Breaking key resistance with strong volume confirmation',
-          confidence: 71
-        },
-        {
-          asset: 'GBPUSD',
-          bullish: 52,
-          bearish: 28,
-          neutral: 20,
-          scenario: 'BoE hawkish tilt expected',
-          reasoning: 'Bank of England holds firm on rates despite soft data',
-          confidence: 65
-        },
-        {
-          asset: 'NZDUSD',
-          bullish: 38,
-          bearish: 48,
-          neutral: 14,
-          scenario: 'RBNZ rate cuts pressure Kiwi',
-          reasoning: 'Expectation of more rate cuts weighs on currency',
-          confidence: 58
-        }
-      ]
-      
-      setPredictions(data.predictions || defaultPredictions)
-    } catch (error) {
-      console.error('Error fetching predictions:', error)
-      // Set default data
       setPredictions([
         {
-          asset: 'XAUUSD',
-          bullish: 68,
-          bearish: 22,
-          neutral: 10,
-          scenario: 'Safe-haven flows boost gold prices',
-          reasoning: 'Geopolitical tensions and rate cut expectations support gold strength',
-          confidence: 76
+          asset: 'BTC/USD',
+          bullish: 65,
+          bearish: 20,
+          neutral: 15,
+          scenario: 'Uptrend continuation likely',
+          confidence: 78,
         },
         {
-          asset: 'EURUSD',
+          asset: 'EUR/USD',
           bullish: 45,
-          bearish: 35,
-          neutral: 20,
-          scenario: 'Mixed signals from ECB data',
-          reasoning: 'Conflicting inflation and growth data create two-way trading',
-          confidence: 62
+          bearish: 40,
+          neutral: 15,
+          scenario: 'Consolidation expected',
+          confidence: 62,
+        },
+        {
+          asset: 'GOLD',
+          bullish: 55,
+          bearish: 30,
+          neutral: 15,
+          scenario: 'Safe haven demand rising',
+          confidence: 71,
         },
       ])
+    } catch (error) {
+      console.error('Error fetching predictions:', error)
     } finally {
       setIsLoading(false)
     }
@@ -121,105 +59,57 @@ export default function PredictiveMarketsPage() {
 
   if (isLoading) {
     return (
-      <div className="flex items-center justify-center h-screen">
-        <div className="text-gray-400">Loading Predictive Markets...</div>
+      <div className="flex-1 overflow-auto bg-black p-6">
+        <div className="text-center">
+          <p className="font-mono text-green-400">{">"} PROCESSING_PREDICTIONS...</p>
+        </div>
       </div>
     )
   }
 
   return (
-    <div className="space-y-6 p-6">
-      <div className="space-y-2">
-        <h1 className="text-3xl font-bold text-white">Predictive Markets</h1>
-        <p className="text-gray-400 text-sm">AI forecasts & probability-based predictions • Updates every 2-4 hours</p>
-      </div>
-
-      {/* Timeframe Selector */}
-      <div className="flex gap-2">
-        {['24h', '72h', '1w'].map((tf) => (
-          <button
-            key={tf}
-            onClick={() => setTimeframe(tf)}
-            className={`px-4 py-2 rounded-lg text-sm font-semibold transition-colors ${
-              timeframe === tf
-                ? 'bg-cyan-600 text-white'
-                : 'bg-gray-800 text-gray-300 hover:bg-gray-700'
-            }`}
-          >
-            Next {tf}
-          </button>
-        ))}
-      </div>
-
-      {/* Predictions Grid */}
-      <div className="space-y-4">
-        {predictions.map((pred) => {
-          const dominantView = 
-            pred.bullish > pred.bearish && pred.bullish > pred.neutral ? 'bullish' :
-            pred.bearish > pred.bullish && pred.bearish > pred.neutral ? 'bearish' :
-            'neutral'
-          
-          return (
-            <Card key={pred.asset} className="p-6 bg-gray-900/50 border-gray-800 hover:border-gray-700 transition-colors">
-              {/* Header */}
-              <div className="flex items-center justify-between mb-4">
-                <div className="flex items-center gap-3">
-                  <span className="text-xl font-bold text-white">{pred.asset}</span>
-                  <Badge className={
-                    dominantView === 'bullish' ? 'bg-green-600 text-white' :
-                    dominantView === 'bearish' ? 'bg-red-600 text-white' :
-                    'bg-gray-700 text-gray-300'
-                  }>
-                    {dominantView.toUpperCase()}
-                  </Badge>
-                </div>
+    <div className="flex-1 overflow-auto bg-black p-6 space-y-6">
+      <div className="max-w-6xl">
+        <h1 className="text-3xl font-bold text-white font-mono mb-6">PREDICTIVE MARKETS</h1>
+        
+        <div className="space-y-4">
+          {predictions.map((pred) => (
+            <div key={pred.asset} className="border border-green-600/30 bg-green-900/10 rounded-lg p-4 space-y-3">
+              <div className="flex justify-between items-start">
+                <h3 className="text-xl font-bold text-green-400 font-mono">{pred.asset}</h3>
                 <div className="text-right">
-                  <div className="text-sm text-gray-400">Confidence</div>
-                  <div className="text-2xl font-bold text-cyan-400">{pred.confidence}%</div>
+                  <p className="text-amber-400 font-mono text-sm">CONFIDENCE: {pred.confidence}%</p>
                 </div>
               </div>
 
-              {/* Prediction Bars */}
-              <div className="space-y-3 mb-4">
-                <div>
-                  <div className="flex justify-between text-sm mb-1">
-                    <span className="text-green-400 font-semibold">Bullish</span>
-                    <span className="text-green-400 font-semibold">{pred.bullish}%</span>
-                  </div>
-                  <Progress value={pred.bullish} className="h-2 bg-gray-800" />
-                </div>
+              <p className="text-gray-300 text-sm">{pred.scenario}</p>
 
-                <div>
-                  <div className="flex justify-between text-sm mb-1">
-                    <span className="text-red-400 font-semibold">Bearish</span>
-                    <span className="text-red-400 font-semibold">{pred.bearish}%</span>
+              <div className="grid grid-cols-3 gap-3">
+                <div className="bg-gray-900/50 rounded p-3">
+                  <p className="text-green-400 font-mono text-xs mb-1">BULLISH</p>
+                  <div className="h-1 bg-gray-700 rounded-full overflow-hidden mb-2">
+                    <div className="h-full bg-green-500" style={{ width: `${pred.bullish}%` }}></div>
                   </div>
-                  <Progress value={pred.bearish} className="h-2 bg-gray-800" />
+                  <p className="text-gray-300 text-sm">{pred.bullish}%</p>
                 </div>
-
-                <div>
-                  <div className="flex justify-between text-sm mb-1">
-                    <span className="text-yellow-400 font-semibold">Neutral</span>
-                    <span className="text-yellow-400 font-semibold">{pred.neutral}%</span>
+                <div className="bg-gray-900/50 rounded p-3">
+                  <p className="text-red-400 font-mono text-xs mb-1">BEARISH</p>
+                  <div className="h-1 bg-gray-700 rounded-full overflow-hidden mb-2">
+                    <div className="h-full bg-red-500" style={{ width: `${pred.bearish}%` }}></div>
                   </div>
-                  <Progress value={pred.neutral} className="h-2 bg-gray-800" />
+                  <p className="text-gray-300 text-sm">{pred.bearish}%</p>
+                </div>
+                <div className="bg-gray-900/50 rounded p-3">
+                  <p className="text-cyan-400 font-mono text-xs mb-1">NEUTRAL</p>
+                  <div className="h-1 bg-gray-700 rounded-full overflow-hidden mb-2">
+                    <div className="h-full bg-cyan-500" style={{ width: `${pred.neutral}%` }}></div>
+                  </div>
+                  <p className="text-gray-300 text-sm">{pred.neutral}%</p>
                 </div>
               </div>
-
-              {/* Scenario & Reasoning */}
-              <div className="space-y-2 pt-4 border-t border-gray-800">
-                <div>
-                  <p className="text-sm text-gray-400">Scenario</p>
-                  <p className="text-white font-semibold">{pred.scenario}</p>
-                </div>
-                <div>
-                  <p className="text-sm text-gray-400">AI Reasoning</p>
-                  <p className="text-gray-300 text-sm">{pred.reasoning}</p>
-                </div>
-              </div>
-            </Card>
-          )
-        })}
+            </div>
+          ))}
+        </div>
       </div>
     </div>
   )

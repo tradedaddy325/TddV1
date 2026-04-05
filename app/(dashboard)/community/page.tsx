@@ -1,186 +1,116 @@
 'use client'
 
 import { useState } from 'react'
-import { Card } from '@/components/ui/card'
-import { Button } from '@/components/ui/button'
-import { Badge } from '@/components/ui/badge'
-import { MessageSquare, Heart, Reply } from 'lucide-react'
 
 interface Post {
   id: string
   author: string
-  category: 'Questions' | 'Analysis' | 'Discussion' | 'Mindset'
+  category: string
   title: string
   content: string
-  timestamp: Date
   likes: number
   replies: number
-  liked: boolean
+  createdAt: Date
+  isLiked: boolean
 }
 
-const MOCK_POSTS: Post[] = [
-  {
-    id: '1',
-    author: 'trader_pro',
-    category: 'Questions',
-    title: 'What\'s the best way to manage drawdowns?',
-    content: 'I\'ve been experiencing larger than usual drawdowns. Any tips on managing them without losing confidence?',
-    timestamp: new Date(Date.now() - 3600000),
-    likes: 24,
-    replies: 8,
-    liked: false
-  },
-  {
-    id: '2',
-    author: 'market_analyst',
-    category: 'Analysis',
-    title: 'EUR/USD Technical Breakdown - April 2026',
-    content: 'Breaking down the EUR/USD chart with key support/resistance levels. Looking for a potential breakout this week...',
-    timestamp: new Date(Date.now() - 7200000),
-    likes: 156,
-    replies: 32,
-    liked: false
-  },
-  {
-    id: '3',
-    author: 'mindset_coach',
-    category: 'Mindset',
-    title: 'Overcoming Emotional Trading',
-    content: 'Trading is 90% psychology. Share your strategies for keeping emotions in check during volatile markets.',
-    timestamp: new Date(Date.now() - 86400000),
-    likes: 89,
-    replies: 24,
-    liked: false
-  }
-]
-
-const categoryColors = {
-  Questions: 'bg-blue-900/30 text-blue-300 border-blue-700',
-  Analysis: 'bg-purple-900/30 text-purple-300 border-purple-700',
-  Discussion: 'bg-green-900/30 text-green-300 border-green-700',
-  Mindset: 'bg-orange-900/30 text-orange-300 border-orange-700'
-}
+const CATEGORIES = ['All', 'Questions', 'Analysis', 'Discussion', 'Mindset']
 
 export default function CommunityPage() {
-  const [posts, setPosts] = useState<Post[]>(MOCK_POSTS)
-  const [selectedCategory, setSelectedCategory] = useState<string>('All')
-  const [isComposing, setIsComposing] = useState(false)
+  const [posts, setPosts] = useState<Post[]>([
+    {
+      id: '1',
+      author: 'TraderJack',
+      category: 'Analysis',
+      title: 'EUR/USD Technical Breakout Coming',
+      content: 'Looking at daily chart, EUR/USD showing consolidation before breakout. Targeting 1.10 resistance.',
+      likes: 24,
+      replies: 8,
+      createdAt: new Date(Date.now() - 3600000),
+      isLiked: false,
+    },
+    {
+      id: '2',
+      author: 'MindsetMaster',
+      category: 'Mindset',
+      title: 'How to Recover from Losing Streaks',
+      content: 'The psychological aspect of trading is often overlooked. Here are my top tips...',
+      likes: 42,
+      replies: 15,
+      createdAt: new Date(Date.now() - 7200000),
+      isLiked: false,
+    },
+  ])
 
-  const filteredPosts = selectedCategory === 'All' 
-    ? posts 
-    : posts.filter(p => p.category === selectedCategory)
+  const [filter, setFilter] = useState('All')
 
-  const toggleLike = (postId: string) => {
-    setPosts(posts.map(p => 
-      p.id === postId 
-        ? { ...p, liked: !p.liked, likes: p.liked ? p.likes - 1 : p.likes + 1 }
-        : p
+  const handleLike = (id: string) => {
+    setPosts(posts.map(post => 
+      post.id === id ? { ...post, isLiked: !post.isLiked, likes: post.isLiked ? post.likes - 1 : post.likes + 1 } : post
     ))
   }
 
+  const filteredPosts = filter === 'All' ? posts : posts.filter(p => p.category === filter)
+
   return (
-    <div className="space-y-6 p-6 max-w-2xl">
-      <div className="space-y-2">
-        <h1 className="text-3xl font-bold text-white">Community</h1>
-        <p className="text-gray-400">Share analysis, ask questions, and connect with other traders</p>
-      </div>
+    <div className="flex-1 overflow-auto bg-black p-6 space-y-6">
+      <div className="max-w-4xl">
+        <h1 className="text-3xl font-bold text-white font-mono mb-6">COMMUNITY</h1>
 
-      {/* Compose Button */}
-      <Button 
-        onClick={() => setIsComposing(!isComposing)}
-        className="w-full bg-cyan-600 hover:bg-cyan-700 text-white"
-      >
-        {isComposing ? 'Cancel' : '+ New Post'}
-      </Button>
+        <div className="flex gap-2 mb-6 overflow-x-auto pb-2">
+          {CATEGORIES.map((cat) => (
+            <button
+              key={cat}
+              onClick={() => setFilter(cat)}
+              className={`px-4 py-2 rounded-full font-mono text-sm transition-colors whitespace-nowrap ${
+                filter === cat
+                  ? 'bg-green-600 text-black'
+                  : 'border border-gray-700 text-gray-300 hover:border-gray-500'
+              }`}
+            >
+              {cat}
+            </button>
+          ))}
+        </div>
 
-      {/* Compose Box */}
-      {isComposing && (
-        <Card className="p-4 bg-gray-900/50 border-gray-800">
-          <textarea
-            placeholder="Share your analysis, ask a question, or start a discussion..."
-            className="w-full bg-gray-800 border border-gray-700 rounded text-white placeholder-gray-500 p-3 mb-3 focus:outline-none focus:border-cyan-600"
-            rows={4}
-          />
-          <div className="flex gap-2 mb-3">
-            {(['Questions', 'Analysis', 'Discussion', 'Mindset'] as const).map(cat => (
-              <Badge key={cat} variant="outline" className="cursor-pointer">{cat}</Badge>
-            ))}
-          </div>
-          <div className="flex justify-end gap-2">
-            <Button variant="outline" onClick={() => setIsComposing(false)}>Cancel</Button>
-            <Button className="bg-cyan-600 hover:bg-cyan-700">Post</Button>
-          </div>
-        </Card>
-      )}
-
-      {/* Category Filter */}
-      <div className="flex gap-2 overflow-x-auto pb-2">
-        {['All', 'Questions', 'Analysis', 'Discussion', 'Mindset'].map(cat => (
-          <button
-            key={cat}
-            onClick={() => setSelectedCategory(cat)}
-            className={`px-4 py-2 rounded-full text-sm font-semibold whitespace-nowrap transition-colors ${
-              selectedCategory === cat
-                ? 'bg-cyan-600 text-white'
-                : 'bg-gray-800 text-gray-300 hover:bg-gray-700'
-            }`}
-          >
-            {cat}
-          </button>
-        ))}
-      </div>
-
-      {/* Posts */}
-      <div className="space-y-4">
-        {filteredPosts.map(post => (
-          <Card key={post.id} className="p-4 bg-gray-900/50 border-gray-800 hover:border-gray-700 transition-colors">
-            {/* Header */}
-            <div className="flex items-start justify-between mb-3">
-              <div className="flex-1">
-                <div className="flex items-center gap-2 mb-1">
-                  <span className="text-sm font-semibold text-cyan-400">{post.author}</span>
-                  <Badge 
-                    className={`text-xs ${categoryColors[post.category]}`}
-                    variant="outline"
-                  >
-                    {post.category}
-                  </Badge>
+        <div className="space-y-4">
+          {filteredPosts.map((post) => (
+            <div key={post.id} className="border border-gray-700 bg-gray-900/50 rounded-lg p-4 hover:border-gray-600 transition">
+              <div className="flex justify-between items-start mb-3">
+                <div>
+                  <div className="flex items-center gap-2">
+                    <p className="font-mono text-green-400">{post.author}</p>
+                    <span className="px-2 py-1 bg-gray-800 text-xs text-gray-400 rounded">
+                      {post.category}
+                    </span>
+                  </div>
+                  <p className="text-xs text-gray-500 mt-1">
+                    {Math.round((Date.now() - post.createdAt.getTime()) / 60000)} minutes ago
+                  </p>
                 </div>
-                <p className="text-xs text-gray-500">
-                  {post.timestamp.toLocaleDateString()} at {post.timestamp.toLocaleTimeString()}
-                </p>
+              </div>
+
+              <h3 className="text-lg font-bold text-white mb-2">{post.title}</h3>
+              <p className="text-gray-300 text-sm mb-4">{post.content}</p>
+
+              <div className="flex gap-4 text-sm">
+                <button
+                  onClick={() => handleLike(post.id)}
+                  className={`flex items-center gap-1 px-3 py-1 rounded transition ${
+                    post.isLiked
+                      ? 'bg-green-900/50 text-green-400'
+                      : 'text-gray-400 hover:bg-gray-800'
+                  }`}
+                >
+                  ❤️ {post.likes}
+                </button>
+                <button className="flex items-center gap-1 px-3 py-1 rounded text-gray-400 hover:bg-gray-800 transition">
+                  💬 {post.replies}
+                </button>
               </div>
             </div>
-
-            {/* Title */}
-            <h3 className="text-lg font-semibold text-white mb-2">{post.title}</h3>
-
-            {/* Content */}
-            <p className="text-gray-300 text-sm mb-4 leading-relaxed">{post.content}</p>
-
-            {/* Interactions */}
-            <div className="flex items-center gap-4 pt-4 border-t border-gray-800">
-              <button
-                onClick={() => toggleLike(post.id)}
-                className="flex items-center gap-1 text-gray-400 hover:text-red-400 transition-colors"
-              >
-                <Heart 
-                  className="w-4 h-4" 
-                  fill={post.liked ? 'currentColor' : 'none'}
-                />
-                <span className="text-sm">{post.likes}</span>
-              </button>
-              <button className="flex items-center gap-1 text-gray-400 hover:text-cyan-400 transition-colors">
-                <MessageSquare className="w-4 h-4" />
-                <span className="text-sm">{post.replies}</span>
-              </button>
-              <button className="flex items-center gap-1 text-gray-400 hover:text-green-400 transition-colors">
-                <Reply className="w-4 h-4" />
-                <span className="text-sm">Reply</span>
-              </button>
-            </div>
-          </Card>
-        ))}
+          ))}
+        </div>
       </div>
     </div>
   )
