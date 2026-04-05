@@ -7,7 +7,6 @@ import { TerminalGreeting } from '@/components/dashboard/terminal-greeting'
 import { LiveStreamModal } from '@/components/dashboard/live-stream-modal'
 import { GrokTradingSignals } from '@/components/grok-trading-signals'
 import { PostLoginLegalModal } from '@/components/post-login-legal-modal'
-import { SessionStatusPills } from '@/components/session-status-pills'
 import { MacroDeskTerminal } from '@/components/macro-desk-terminal'
 import { MarketPsychologyTab } from '@/components/market-psychology-tab'
 import { AIPauseBanner } from '@/components/ai-pause-banner'
@@ -18,12 +17,10 @@ export default function DashboardPage() {
   const tabParam = searchParams.get('tab')
   
   const [profile, setProfile] = useState<Profile | null>(null)
-  const [loading, setLoading] = useState(true)
   const [showStream, setShowStream] = useState(false)
   const [activeTab, setActiveTab] = useState<'home' | 'macro' | 'psychology' | 'signals'>('home')
 
   useEffect(() => {
-    // Set active tab from URL parameter
     if (tabParam === 'macro' || tabParam === 'psychology' || tabParam === 'signals') {
       setActiveTab(tabParam)
     }
@@ -41,7 +38,6 @@ export default function DashboardPage() {
           .single()
         setProfile(data)
       }
-      setLoading(false)
     }
 
     fetchProfile()
@@ -49,23 +45,17 @@ export default function DashboardPage() {
 
   return (
     <main className="flex-1 overflow-auto bg-black">
-      {/* Post-Login Legal Modal */}
       {profile && <PostLoginLegalModal userId={profile.id} />}
-
-      {/* AI Pause Banner for Market Closure */}
       <AIPauseBanner />
 
       <div className="p-6 space-y-6 max-w-6xl">
-        {/* HOME PAGE - Default view */}
         {activeTab === 'home' && (
           <div className="space-y-6">
-            {/* Markets Closed Alert */}
             <div className="px-4 py-3 rounded-lg border border-yellow-600 bg-yellow-900/20 flex items-center gap-3">
               <span className="text-yellow-400 text-lg">🌙</span>
               <span className="text-yellow-400 font-mono text-sm uppercase tracking-wider">Markets Closed</span>
             </div>
 
-            {/* Market Status Pills */}
             <div className="flex flex-wrap gap-3">
               <div className="flex items-center gap-2 px-4 py-2 rounded-full border border-yellow-600 bg-yellow-900/20">
                 <span className="text-yellow-400 font-mono text-sm">⏰</span>
@@ -76,13 +66,10 @@ export default function DashboardPage() {
               </div>
               <div className="flex items-center gap-2 px-4 py-2 rounded-full border border-teal-600 bg-teal-900/20">
                 <span className="text-teal-400 text-xs font-mono font-bold">TRUMP SOCIAL MONITOR</span>
-                <div className="w-2 h-2 rounded-full bg-teal-400"></div>
-                <span className="text-teal-300 text-xs font-mono">Bullish USD</span>
-                <span className="text-teal-400 text-xs font-bold ml-1">80</span>
+                <span className="text-teal-300 text-xs font-mono">Bullish USD 80</span>
               </div>
             </div>
 
-            {/* Market Events */}
             <div className="flex flex-wrap gap-3">
               <div className="flex items-center gap-2 px-4 py-2 rounded-full border border-purple-600 bg-purple-900/20">
                 <span className="text-purple-300 font-mono text-sm">FOMC — 3d 10h</span>
@@ -100,10 +87,8 @@ export default function DashboardPage() {
               </button>
             </div>
 
-            {/* Welcome Message */}
             <p className="text-green-400 font-mono text-sm">Welcome, {profile?.display_name || 'Trader'}|</p>
 
-            {/* Active Signals & Setups Cards */}
             <div className="grid grid-cols-2 gap-4">
               <div className="p-4 rounded-lg border border-gray-800 bg-gray-900/30">
                 <div className="flex items-center gap-3">
@@ -126,11 +111,9 @@ export default function DashboardPage() {
               </div>
             </div>
 
-            {/* Market Intelligence Section */}
             <div className="space-y-4">
               <h2 className="text-lg font-bold text-white">Market Intelligence</h2>
 
-              {/* AI Daily Brief */}
               <div className="p-6 rounded-lg border border-gray-800 bg-gray-900/50 space-y-4">
                 <div className="flex items-center gap-3">
                   <span className="text-2xl">✨</span>
@@ -147,17 +130,11 @@ export default function DashboardPage() {
           </div>
         )}
 
-        {/* MACRO DESK TERMINAL TAB */}
         {activeTab === 'macro' && <MacroDeskTerminal />}
-
-        {/* MARKET PSYCHOLOGY TAB */}
         {activeTab === 'psychology' && <MarketPsychologyTab />}
-
-        {/* TRADING SIGNALS TAB */}
         {activeTab === 'signals' && <GrokTradingSignals />}
       </div>
 
-      {/* Live Stream Modal */}
       <LiveStreamModal isOpen={showStream} onClose={() => setShowStream(false)} />
     </main>
   )
