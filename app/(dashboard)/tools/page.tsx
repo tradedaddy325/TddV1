@@ -1,3 +1,4 @@
+import { Metadata } from 'next'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import Link from 'next/link'
 import {
@@ -15,7 +16,7 @@ import {
   PieChart,
 } from 'lucide-react'
 
-export const metadata = {
+export const metadata: Metadata = {
   title: 'Tools | TRADEDADDY',
   description: 'Trading calculators and tools',
 }

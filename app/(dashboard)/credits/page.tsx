@@ -1,8 +1,9 @@
+import { Metadata } from 'next'
 import { CreditsContent } from '@/components/credits-content'
 import { createClient } from '@/lib/supabase/server'
 import { redirect } from 'next/navigation'
 
-export const metadata = {
+export const metadata: Metadata = {
   title: 'Credits | TRADEDADDY',
   description: 'Purchase credits for premium features',
 }
