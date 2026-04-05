@@ -59,8 +59,8 @@ const mobileMenuItems = [
   { title: 'Macro Desk', href: '/macro', icon: Globe },
   { title: 'Predictive Markets', href: '/markets', icon: BarChart3 },
   { title: 'Market Psychology', href: '/psychology', icon: Brain },
-  { 
-    title: 'Signals', 
+  {
+    title: 'Signals',
     icon: TrendingUp,
     expandable: true,
     children: [
@@ -68,8 +68,8 @@ const mobileMenuItems = [
       { title: 'Market Alerts', href: '/signals/alerts' },
     ]
   },
-  { 
-    title: 'Trading Tools', 
+  {
+    title: 'Trading Tools',
     icon: Wrench,
     expandable: true,
     children: [
@@ -77,8 +77,8 @@ const mobileMenuItems = [
       { title: 'Journal', href: '/journal' },
     ]
   },
-  { 
-    title: 'Learn', 
+  {
+    title: 'Learn',
     icon: BookOpen,
     expandable: true,
     children: [
@@ -86,8 +86,8 @@ const mobileMenuItems = [
       { title: 'Resources', href: '/learn/resources' },
     ]
   },
-  { 
-    title: 'Community', 
+  {
+    title: 'Community',
     icon: Users,
     expandable: true,
     children: [
@@ -248,7 +248,7 @@ export function DashboardShell({ children, profile }: DashboardShellProps) {
             <div className="fixed inset-0 z-50 flex flex-col bg-background lg:hidden" style={{ top: '40px' }}>
               {/* Header with close button */}
               <div className="flex items-center justify-between px-4 py-4 border-b border-border">
-                <span className="text-sm text-muted-foreground">traders for traders by traders</span>
+                <span className="text-sm text-muted-foreground">BUILT BY TRADERS FOR TRADERS</span>
                 <Button
                   variant="ghost"
                   size="icon"
