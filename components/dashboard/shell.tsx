@@ -24,7 +24,6 @@ import {
   ChevronRight,
   BarChart3,
   Brain,
-  Lightbulb,
   Users,
   MessageCircle,
   ChevronDown,
