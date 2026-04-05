@@ -461,7 +461,7 @@ export default function JournalPage() {
                   <div className="space-y-4">
                     <div className="bg-card/50 border border-terminal-green/20 rounded p-4 space-y-2">
                       <p className="text-sm text-gray-300"><span className="text-terminal-green font-mono">→</span> Win Rate: <span className="text-terminal-green font-mono">{((stats.winRate / stats.totalTrades) * 100).toFixed(1)}%</span></p>
-                      <p className="text-sm text-gray-300"><span className="text-terminal-green font-mono">→</span> Total P&L: <span className={stats.totalPnL >= 0 ? "text-terminal-green" : "text-terminal-red"} + " font-mono">${stats.totalPnL.toFixed(2)}</span></p>
+                      <p className="text-sm text-gray-300"><span className="text-terminal-green font-mono">→</span> Total P&L: <span className={stats.totalPnL >= 0 ? "text-terminal-green font-mono" : "text-terminal-red font-mono"}>${stats.totalPnL.toFixed(2)}</span></p>
                       <p className="text-sm text-gray-300"><span className="text-terminal-green font-mono">→</span> Average Trade: <span className="text-terminal-cyan font-mono">${(stats.totalPnL / stats.totalTrades).toFixed(2)}</span></p>
                     </div>
                     <div className="bg-card/50 border border-terminal-cyan/20 rounded p-4">
