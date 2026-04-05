@@ -18,6 +18,7 @@ export default function DashboardPage() {
   const [loading, setLoading] = useState(true)
   const [showStream, setShowStream] = useState(false)
   const [activeTab, setActiveTab] = useState<'macro' | 'psychology' | 'signals'>('macro')
+  const [dropdownOpen, setDropdownOpen] = useState(false)
 
   useEffect(() => {
     const fetchProfile = async () => {
@@ -58,41 +59,67 @@ export default function DashboardPage() {
       </div>
 
       <div className="p-6 space-y-6 max-w-7xl">
-        {/* Terminal Greeting */}
-        <TerminalGreeting profile={profile} />
+        {/* Terminal Greeting with Right-Side Dropdown Menu */}
+        <div className="flex items-center justify-between">
+          <TerminalGreeting profile={profile} />
+          
+          {/* Dropdown Menu on Right */}
+          <div className="relative">
+            <button
+              onClick={() => setDropdownOpen(!dropdownOpen)}
+              className="px-4 py-2 rounded-lg border border-gray-700 bg-gray-900 text-gray-300 hover:text-green-400 font-mono text-sm transition-colors flex items-center gap-2"
+            >
+              {activeTab === 'macro' && 'Macro Desk Terminal'}
+              {activeTab === 'psychology' && 'Market Psychology'}
+              {activeTab === 'signals' && 'Trading Signals'}
+              <span className={`transition-transform ${dropdownOpen ? 'rotate-180' : ''}`}>▼</span>
+            </button>
 
-        {/* Tab Navigation */}
-        <div className="flex gap-2 border-b border-gray-800">
-          <button
-            onClick={() => setActiveTab('macro')}
-            className={`px-4 py-2 font-mono text-sm transition-colors ${
-              activeTab === 'macro'
-                ? 'text-green-400 border-b-2 border-green-400'
-                : 'text-gray-400 hover:text-gray-300'
-            }`}
-          >
-            Macro Desk Terminal
-          </button>
-          <button
-            onClick={() => setActiveTab('psychology')}
-            className={`px-4 py-2 font-mono text-sm transition-colors ${
-              activeTab === 'psychology'
-                ? 'text-green-400 border-b-2 border-green-400'
-                : 'text-gray-400 hover:text-gray-300'
-            }`}
-          >
-            Market Psychology
-          </button>
-          <button
-            onClick={() => setActiveTab('signals')}
-            className={`px-4 py-2 font-mono text-sm transition-colors ${
-              activeTab === 'signals'
-                ? 'text-green-400 border-b-2 border-green-400'
-                : 'text-gray-400 hover:text-gray-300'
-            }`}
-          >
-            Trading Signals
-          </button>
+            {/* Dropdown Items */}
+            {dropdownOpen && (
+              <div className="absolute right-0 mt-2 w-56 rounded-lg border border-gray-700 bg-gray-900 shadow-xl z-50">
+                <button
+                  onClick={() => {
+                    setActiveTab('macro')
+                    setDropdownOpen(false)
+                  }}
+                  className={`w-full text-left px-4 py-3 text-sm font-mono transition-colors border-b border-gray-800 last:border-b-0 ${
+                    activeTab === 'macro'
+                      ? 'bg-green-900/30 text-green-400'
+                      : 'text-gray-300 hover:bg-gray-800 hover:text-green-400'
+                  }`}
+                >
+                  Macro Desk Terminal
+                </button>
+                <button
+                  onClick={() => {
+                    setActiveTab('psychology')
+                    setDropdownOpen(false)
+                  }}
+                  className={`w-full text-left px-4 py-3 text-sm font-mono transition-colors border-b border-gray-800 last:border-b-0 ${
+                    activeTab === 'psychology'
+                      ? 'bg-green-900/30 text-green-400'
+                      : 'text-gray-300 hover:bg-gray-800 hover:text-green-400'
+                  }`}
+                >
+                  Market Psychology
+                </button>
+                <button
+                  onClick={() => {
+                    setActiveTab('signals')
+                    setDropdownOpen(false)
+                  }}
+                  className={`w-full text-left px-4 py-3 text-sm font-mono transition-colors border-b border-gray-800 last:border-b-0 ${
+                    activeTab === 'signals'
+                      ? 'bg-green-900/30 text-green-400'
+                      : 'text-gray-300 hover:bg-gray-800 hover:text-green-400'
+                  }`}
+                >
+                  Trading Signals
+                </button>
+              </div>
+            )}
+          </div>
         </div>
 
         {/* Tab Content */}
