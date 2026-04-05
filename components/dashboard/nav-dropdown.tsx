@@ -14,15 +14,10 @@ import {
 } from '@/components/ui/dropdown-menu'
 import {
   LayoutDashboard,
-  Gauge,
-  Brain,
-  Eye,
-  TrendingUp,
+  Globe,
   Wrench,
-  BarChart3,
   BookOpen,
   FileText,
-  Users,
   MessageSquare,
   CreditCard,
   Settings,
@@ -31,20 +26,16 @@ import {
 } from 'lucide-react'
 
 const mainNavItems = [
-  { title: 'Dashboard', href: '/dashboard', icon: LayoutDashboard, badge: 'Free' },
-  { title: 'Macro Desk', href: '/macro-desk', icon: Gauge, badge: 'PAID' },
-  { title: 'Market Psychology', href: '/market-psychology', icon: Brain },
-  { title: 'Predictive Markets', href: '/predictive-markets', icon: Eye },
-  { title: 'Signals', href: '/signals', icon: TrendingUp },
-  { title: 'Trading Tools', href: '/tools', icon: Wrench },
-  { title: 'Charting', href: '/charting', icon: BarChart3 },
-  { title: 'Trade Journal', href: '/journal', icon: FileText },
-  { title: 'Education Suite', href: '/academy', icon: BookOpen },
-  { title: 'Community', href: '/community', icon: Users },
-  { title: 'Profile', href: '/profile', icon: User },
+  { title: 'Dashboard', href: '/dashboard', icon: LayoutDashboard },
+  { title: 'Macro Hub', href: '/macro', icon: Globe },
+  { title: 'Tools', href: '/tools', icon: Wrench },
+  { title: 'Academy', href: '/academy', icon: BookOpen },
+  { title: 'Journal', href: '/journal', icon: FileText },
+  { title: 'AI Chat', href: '/chat', icon: MessageSquare },
 ]
 
 const profileNavItems = [
+  { title: 'Profile', href: '/profile', icon: User },
   { title: 'Credits', href: '/credits', icon: CreditCard },
   { title: 'Settings', href: '/settings', icon: Settings },
 ]
@@ -73,35 +64,22 @@ export function DashboardNav() {
           </Button>
         </DropdownMenuTrigger>
         <DropdownMenuContent align="start" className="w-56">
-          {mainNavItems.map((item, index) => {
+          {mainNavItems.map((item) => {
             const isActive = pathname === item.href || pathname.startsWith(`${item.href}/`)
             const Icon = item.icon
             return (
-              <div key={item.href}>
-                <DropdownMenuItem asChild>
-                  <Link
-                    href={item.href}
-                    className={cn(
-                      'flex items-center gap-2 cursor-pointer justify-between',
-                      isActive && 'bg-accent text-accent-foreground'
-                    )}
-                  >
-                    <span className="flex items-center gap-2">
-                      <Icon className="w-4 h-4" />
-                      {item.title}
-                    </span>
-                    {item.badge && (
-                      <span className={cn(
-                        'text-xs px-2 py-0.5 rounded font-semibold',
-                        item.badge === 'PAID' ? 'bg-amber-900/50 text-amber-300' : 'bg-green-900/50 text-green-300'
-                      )}>
-                        {item.badge}
-                      </span>
-                    )}
-                  </Link>
-                </DropdownMenuItem>
-                {index === 0 || index === 4 || index === 10 ? <DropdownMenuSeparator /> : null}
-              </div>
+              <DropdownMenuItem key={item.href} asChild>
+                <Link
+                  href={item.href}
+                  className={cn(
+                    'flex items-center gap-2 cursor-pointer',
+                    isActive && 'bg-accent text-accent-foreground'
+                  )}
+                >
+                  <Icon className="w-4 h-4" />
+                  {item.title}
+                </Link>
+              </DropdownMenuItem>
             )
           })}
         </DropdownMenuContent>
