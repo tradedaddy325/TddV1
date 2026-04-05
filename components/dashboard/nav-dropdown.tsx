@@ -26,7 +26,11 @@ import {
 } from 'lucide-react'
 
 const mainNavItems = [
-  { title: 'Dashboard', href: '/dashboard', icon: LayoutDashboard },
+  { title: 'Dashboard', href: '/dashboard', icon: LayoutDashboard, submenu: [
+    { title: 'Macro Desk Terminal', href: '/dashboard?tab=macro' },
+    { title: 'Market Psychology', href: '/dashboard?tab=psychology' },
+    { title: 'Trading Signals', href: '/dashboard?tab=signals' },
+  ]},
   { title: 'Macro Hub', href: '/macro', icon: Globe },
   { title: 'Tools', href: '/tools', icon: Wrench },
   { title: 'Academy', href: '/academy', icon: BookOpen },
@@ -68,18 +72,36 @@ export function DashboardNav() {
             const isActive = pathname === item.href || pathname.startsWith(`${item.href}/`)
             const Icon = item.icon
             return (
-              <DropdownMenuItem key={item.href} asChild>
-                <Link
-                  href={item.href}
-                  className={cn(
-                    'flex items-center gap-2 cursor-pointer',
-                    isActive && 'bg-accent text-accent-foreground'
-                  )}
-                >
-                  <Icon className="w-4 h-4" />
-                  {item.title}
-                </Link>
-              </DropdownMenuItem>
+              <div key={item.href}>
+                <DropdownMenuItem asChild>
+                  <Link
+                    href={item.href}
+                    className={cn(
+                      'flex items-center gap-2 cursor-pointer',
+                      isActive && 'bg-accent text-accent-foreground'
+                    )}
+                  >
+                    <Icon className="w-4 h-4" />
+                    {item.title}
+                  </Link>
+                </DropdownMenuItem>
+                {item.submenu && (
+                  <>
+                    <DropdownMenuSeparator />
+                    {item.submenu.map((subitem) => (
+                      <DropdownMenuItem key={subitem.href} asChild>
+                        <Link
+                          href={subitem.href}
+                          className="flex items-center gap-2 cursor-pointer pl-8 text-xs"
+                        >
+                          {subitem.title}
+                        </Link>
+                      </DropdownMenuItem>
+                    ))}
+                    <DropdownMenuSeparator />
+                  </>
+                )}
+              </div>
             )
           })}
         </DropdownMenuContent>

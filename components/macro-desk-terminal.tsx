@@ -33,28 +33,42 @@ export function MacroDeskTerminal() {
   const fetchMacroData = async () => {
     setIsLoading(true)
     try {
-      const response = await fetch('/api/macro/data', {
-        cache: 'no-store',
-      })
+      // Mock data for development
+      const mockMacroData = [
+        { indicator: 'DXY', value: '103.42', change: 0.18, timeFrame: 'Current' },
+        { indicator: 'USD/JPY', value: '155.32', change: -0.25, timeFrame: 'Current' },
+        { indicator: 'EUR/USD', value: '1.0842', change: 0.15, timeFrame: 'Current' },
+        { indicator: 'Gold', value: '$2,045', change: -0.52, timeFrame: 'Current' },
+        { indicator: 'Oil WTI', value: '$82.15', change: 11.15, timeFrame: 'Current' },
+        { indicator: 'BTC', value: '$68,420', change: 2.34, timeFrame: 'Current' },
+      ]
 
-      if (!response.ok) throw new Error('Failed to fetch macro data')
+      setMacroData(mockMacroData)
 
-      const data = await response.json()
-      setMacroData(data.indicators || [])
-
-      // Fetch AI analysis
-      const analysisResponse = await fetch('/api/ai/analysis', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ macroData: data.indicators }),
-      })
-
-      if (analysisResponse.ok) {
-        const analysis = await analysisResponse.json()
-        setAiAnalysis(analysis)
+      // Mock AI analysis
+      const mockAnalysis: AIAnalysis = {
+        summary: 'Market is in a Risk-Off environment. Dollar strength persists while precious metals remain under pressure.',
+        sentiment: 'bearish',
+        confidence: 85,
+        recommendations: [
+          'Monitor USD strength for downside exhaustion',
+          'Watch for safe-haven flows into gold',
+          'Track energy prices for inflation signals',
+        ],
       }
+
+      setAiAnalysis(mockAnalysis)
     } catch (err) {
       console.error('[v0] Macro data error:', err)
+      // Use default mock data on error
+      setMacroData([
+        { indicator: 'DXY', value: '103.42', change: 0.18, timeFrame: 'Current' },
+        { indicator: 'USD/JPY', value: '155.32', change: -0.25, timeFrame: 'Current' },
+        { indicator: 'EUR/USD', value: '1.0842', change: 0.15, timeFrame: 'Current' },
+        { indicator: 'Gold', value: '$2,045', change: -0.52, timeFrame: 'Current' },
+        { indicator: 'Oil WTI', value: '$82.15', change: 11.15, timeFrame: 'Current' },
+        { indicator: 'BTC', value: '$68,420', change: 2.34, timeFrame: 'Current' },
+      ])
     } finally {
       setIsLoading(false)
     }
