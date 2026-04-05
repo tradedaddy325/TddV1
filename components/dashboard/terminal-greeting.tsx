@@ -4,7 +4,7 @@ import { useEffect, useState } from 'react'
 import type { Profile } from '@/lib/types'
 
 interface TerminalGreetingProps {
-  profile: Profile
+  profile: Profile | null
 }
 
 function getGreeting(hourOverride?: number): string {
