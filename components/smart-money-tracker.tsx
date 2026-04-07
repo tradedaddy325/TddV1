@@ -24,15 +24,18 @@ export function SmartMoneyTracker() {
       try {
         const response = await fetch('/api/market/live')
         if (!response.ok) throw new Error('Failed to fetch data')
-        
         const marketData = await response.json()
-        
-        // Calculate smart money indicators (mock calculation)
+
         const btc = marketData.BTC
         if (btc) {
           const flowScore = Math.random() * 100
-          const trend = flowScore > 60 ? 'bullish' : flowScore < 40 ? 'bearish' : 'neutral'
-          
+          const trend =
+            flowScore > 60
+              ? 'bullish'
+              : flowScore < 40
+              ? 'bearish'
+              : 'neutral'
+
           setData({
             symbol: 'BTC',
             price: btc.price,
@@ -52,7 +55,7 @@ export function SmartMoneyTracker() {
     }
 
     fetchData()
-    const interval = setInterval(fetchData, 120000) // Update every 2 minutes
+    const interval = setInterval(fetchData, 120000) // 2 minutes
     return () => clearInterval(interval)
   }, [])
 
@@ -72,63 +75,61 @@ export function SmartMoneyTracker() {
       <CardHeader className="pb-3">
         <CardTitle className="text-lg">Smart Money Tracker</CardTitle>
       </CardHeader>
-      <CardContent className="space-y-4">
-        {loading ? (
-          <div className="space-y-3">
-            <Skeleton className="h-4 w-full bg-muted" />
-            <Skeleton className="h-4 w-3/4 bg-muted" />
-          </div>
-<div>
-  {error ? (
-    <p className="text-sm text-red-400">{error}</p>
-  ) : data ? (
-    <div className="space-y-4">
-      <div className="flex items-center justify-between py-3 border-b border-border/50">
-        <p className="text-sm text-muted-foreground">Asset</p>
-        <Badge variant="outline" className="text-sm">{data.symbol}</Badge>
-      </div>
+      <CardContent>
+        {/* Single wrapper ensures one parent element */}
+        <div className="space-y-4">
+          {/* Loading */}
+          {loading && (
+            <div className="space-y-3">
+              <Skeleton className="h-4 w-full bg-muted" />
+              <Skeleton className="h-4 w-3/4 bg-muted" />
+            </div>
+          )}
 
-      <div className="flex items-center justify-between py-3 border-b border-border/50">
-        <p className="text-sm text-muted-foreground">Price</p>
-        <p className="text-sm">{data.price}</p>
-      </div>
+          {/* Error */}
+          {!loading && error && (
+            <p className="text-sm text-red-400">{error}</p>
+          )}
 
-      {/* Add more items as needed */}
-    </div>
-  ) : null}
-</div>
-      
-            <div className="py-3 border-b border-border/50 flex items-center justify-between">
-              <p className="text-sm text-muted-foreground">Price</p>
-              <p className="text-lg font-semibold text-foreground">${data.price.toLocaleString()}</p>
-            </div>
-            
-            <div className="py-3 border-b border-border/50 flex items-center justify-between">
-              <p className="text-sm text-muted-foreground">Flow Score</p>
-              <p className="text-lg font-semibold text-accent">{data.flowScore.toFixed(1)}%</p>
-            </div>
-            
-            <div className="py-3 flex items-center justify-between">
-              <p className="text-sm text-muted-foreground">Trend</p>
-              <Badge className={`${getTrendColor(data.trend)}`}>
-                {data.trend.toUpperCase()}
-              </Badge>
-            </div>
-          </div>
+          {/* Data */}
+          {!loading && data && (
+            <>
+              <div className="flex items-center justify-between py-3 border-b border-border/50">
+                <p className="text-sm text-muted-foreground">Asset</p>
+                <Badge variant="outline" className="text-sm">
+                  {data.symbol}
+                </Badge>
+              </div>
 
-            <div>
-              <p className="text-xs text-muted-foreground mb-1">Market Trend</p>
-              <Badge className={`${getTrendColor(data.trend)} border text-xs`}>
-                {data.trend.toUpperCase()}
-              </Badge>
-            </div>
+              <div className="flex items-center justify-between py-3 border-b border-border/50">
+                <p className="text-sm text-muted-foreground">Price</p>
+                <p className="text-sm">${data.price.toLocaleString()}</p>
+              </div>
 
-            <div className="text-xs text-muted-foreground space-y-1 pt-2 border-t border-accent/20">
-              <p>Volume: ${(data.volume / 1000000).toFixed(1)}M</p>
-              <p>Open Interest: ${(data.openInterest / 1000000).toFixed(1)}M</p>
-            </div>
-          </div>
-        ) : null}
+              <div className="flex items-center justify-between py-3 border-b border-border/50">
+                <p className="text-sm text-muted-foreground">Flow Score</p>
+                <p className="text-sm">{data.flowScore.toFixed(1)}%</p>
+              </div>
+
+              <div className="flex items-center justify-between">
+                <p className="text-sm text-muted-foreground">Trend</p>
+                <Badge className={`${getTrendColor(data.trend)}`}>
+                  {data.trend.toUpperCase()}
+                </Badge>
+              </div>
+
+              <div className="text-xs text-muted-foreground space-y-1 pt-2 border-t border-accent/20">
+                <p>Volume: ${(data.volume / 1_000_000).toFixed(1)}M</p>
+                <p>Open Interest: ${(data.openInterest / 1_000_000).toFixed(1)}M</p>
+              </div>
+            </>
+          )}
+
+          {/* Fallback if no data */}
+          {!loading && !error && !data && (
+            <p className="text-sm text-muted-foreground">No data available</p>
+          )}
+        </div>
       </CardContent>
     </Card>
   )
