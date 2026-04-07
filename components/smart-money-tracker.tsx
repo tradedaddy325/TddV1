@@ -78,15 +78,24 @@ export function SmartMoneyTracker() {
             <Skeleton className="h-4 w-full bg-muted" />
             <Skeleton className="h-4 w-3/4 bg-muted" />
           </div>
-        ) : error ? (
-          <p className="text-sm text-red-400">{error}</p>
-        ) : data ? (
-          <div className="space-y-4">
-            <div className="flex items-center justify-between py-3 border-b border-border/50">
-              <p className="text-sm text-muted-foreground">Asset</p>
-              <Badge variant="outline" className="text-sm">{data.symbol}</Badge>
-            </div>
-            
+       
+    {error ? (
+  <p className="text-sm text-red-400">{error}</p>
+) : data ? (
+  <>
+    <div className="space-y-4">
+      <div className="flex items-center justify-between py-3 border-b border-border/50">
+        <p className="text-sm text-muted-foreground">Asset</p>
+        <Badge variant="outline" className="text-sm">{data.symbol}</Badge>
+      </div>
+      <div className="flex items-center justify-between py-3 border-b border-border/50">
+        <p className="text-sm text-muted-foreground">Price</p>
+        <p className="text-sm">{data.price}</p>
+      </div>
+      {/* Add other items here */}
+    </div>
+  </>
+) : null}        
             <div className="py-3 border-b border-border/50 flex items-center justify-between">
               <p className="text-sm text-muted-foreground">Price</p>
               <p className="text-lg font-semibold text-foreground">${data.price.toLocaleString()}</p>
