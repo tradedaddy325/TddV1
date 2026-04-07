@@ -78,7 +78,7 @@ export function SmartMoneyTracker() {
             <Skeleton className="h-4 w-full bg-muted" />
             <Skeleton className="h-4 w-3/4 bg-muted" />
           </div>
-<>
+<div>
   {error ? (
     <p className="text-sm text-red-400">{error}</p>
   ) : data ? (
@@ -87,14 +87,16 @@ export function SmartMoneyTracker() {
         <p className="text-sm text-muted-foreground">Asset</p>
         <Badge variant="outline" className="text-sm">{data.symbol}</Badge>
       </div>
+
       <div className="flex items-center justify-between py-3 border-b border-border/50">
         <p className="text-sm text-muted-foreground">Price</p>
         <p className="text-sm">{data.price}</p>
       </div>
-      {/* add any other items here */}
+
+      {/* Add more items as needed */}
     </div>
   ) : null}
-</>
+</div>
       
             <div className="py-3 border-b border-border/50 flex items-center justify-between">
               <p className="text-sm text-muted-foreground">Price</p>
