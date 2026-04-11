@@ -76,6 +76,7 @@ export function SmartMoneyTracker() {
         <CardTitle className="text-lg">Smart Money Tracker</CardTitle>
       </CardHeader>
       <CardContent>
+        {/* This outer div ensures everything has one parent */}
         <div className="space-y-4">
           {/* Loading State */}
           {loading && (
@@ -90,9 +91,9 @@ export function SmartMoneyTracker() {
             <p className="text-sm text-red-400">{error}</p>
           )}
 
-          {/* Data Display */}
+          {/* Data State - Fixed with proper wrapping */}
           {!loading && data && (
-            <>
+            <div className="space-y-4">   {/* ← Single parent wrapper added here */}
               <div className="flex items-center justify-between py-3 border-b border-border/50">
                 <p className="text-sm text-muted-foreground">Asset</p>
                 <Badge variant="outline" className="text-sm">
@@ -112,7 +113,7 @@ export function SmartMoneyTracker() {
 
               <div className="flex items-center justify-between py-3 border-b border-border/50">
                 <p className="text-sm text-muted-foreground">Trend</p>
-                <Badge className={`${getTrendColor(data.trend)}`}>
+                <Badge className={getTrendColor(data.trend)}>
                   {data.trend.toUpperCase()}
                 </Badge>
               </div>
@@ -121,7 +122,7 @@ export function SmartMoneyTracker() {
                 <p>Volume: ${(data.volume / 1_000_000).toFixed(1)}M</p>
                 <p>Open Interest: ${(data.openInterest / 1_000_000).toFixed(1)}M</p>
               </div>
-            </>
+            </div>
           )}
 
           {/* No Data Fallback */}
