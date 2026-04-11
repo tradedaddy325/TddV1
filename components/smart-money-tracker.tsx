@@ -1,5 +1,4 @@
 'use client'
-
 import { useEffect, useState } from 'react'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
@@ -24,9 +23,10 @@ export function SmartMoneyTracker() {
       try {
         const response = await fetch('/api/market/live')
         if (!response.ok) throw new Error('Failed to fetch data')
-        const marketData = await response.json()
 
+        const marketData = await response.json()
         const btc = marketData.BTC
+
         if (btc) {
           const flowScore = Math.random() * 100
           const trend =
@@ -55,7 +55,7 @@ export function SmartMoneyTracker() {
     }
 
     fetchData()
-    const interval = setInterval(fetchData, 120000) // 2 minutes
+    const interval = setInterval(fetchData, 120000) // Update every 2 minutes
     return () => clearInterval(interval)
   }, [])
 
@@ -76,9 +76,8 @@ export function SmartMoneyTracker() {
         <CardTitle className="text-lg">Smart Money Tracker</CardTitle>
       </CardHeader>
       <CardContent>
-        {/* Single wrapper ensures one parent element */}
         <div className="space-y-4">
-          {/* Loading */}
+          {/* Loading State */}
           {loading && (
             <div className="space-y-3">
               <Skeleton className="h-4 w-full bg-muted" />
@@ -86,12 +85,12 @@ export function SmartMoneyTracker() {
             </div>
           )}
 
-          {/* Error */}
+          {/* Error State */}
           {!loading && error && (
             <p className="text-sm text-red-400">{error}</p>
           )}
 
-          {/* Data */}
+          {/* Data Display */}
           {!loading && data && (
             <>
               <div className="flex items-center justify-between py-3 border-b border-border/50">
@@ -103,15 +102,15 @@ export function SmartMoneyTracker() {
 
               <div className="flex items-center justify-between py-3 border-b border-border/50">
                 <p className="text-sm text-muted-foreground">Price</p>
-                <p className="text-sm">${data.price.toLocaleString()}</p>
+                <p className="text-sm font-medium">${data.price.toLocaleString()}</p>
               </div>
 
               <div className="flex items-center justify-between py-3 border-b border-border/50">
                 <p className="text-sm text-muted-foreground">Flow Score</p>
-                <p className="text-sm">{data.flowScore.toFixed(1)}%</p>
+                <p className="text-sm font-medium">{data.flowScore.toFixed(1)}%</p>
               </div>
 
-              <div className="flex items-center justify-between">
+              <div className="flex items-center justify-between py-3 border-b border-border/50">
                 <p className="text-sm text-muted-foreground">Trend</p>
                 <Badge className={`${getTrendColor(data.trend)}`}>
                   {data.trend.toUpperCase()}
@@ -125,7 +124,7 @@ export function SmartMoneyTracker() {
             </>
           )}
 
-          {/* Fallback if no data */}
+          {/* No Data Fallback */}
           {!loading && !error && !data && (
             <p className="text-sm text-muted-foreground">No data available</p>
           )}
