@@ -100,7 +100,12 @@ export default function DashboardPage() {
             <h3 className="text-lg font-bold text-white">Market Sentiment</h3>
 
             <div className="p-4 mt-4 rounded-lg bg-gray-800/50 border border-gray-700 flex items-center gap-4">
-              <CircularMetricLarge value="34" label="COT" sublabel="Risk-Off" color="green" />
+              <CircularMetricLarge
+                value="34"
+                label="COT"
+                sublabel="Risk-Off"
+                color="green"
+              />
 
               <div>
                 <div className="text-lg font-bold text-white">Risk-Off</div>
@@ -162,7 +167,7 @@ function CircularMetric({
     orange: { color: '#f59e0b' },
   }
 
-  const c = map[color] || map.blue
+  const c = map[color] ?? map.blue
 
   return (
     <div className="p-4 rounded-lg border border-gray-700 bg-gray-900/30 flex flex-col items-center">
@@ -182,19 +187,36 @@ function CircularMetric({
 
 function CircularMetricLarge({
   value,
+  label,
+  sublabel,
+  color,
 }: {
   value: string
   label: string
   sublabel: string
   color: string
 }) {
+  const map: Record<string, { color: string }> = {
+    blue: { color: '#3b82f6' },
+    green: { color: '#10b981' },
+    purple: { color: '#a855f7' },
+    pink: { color: '#ec4899' },
+  }
+
+  const c = map[color] ?? map.green
+
   return (
-    <svg className="w-28 h-28" viewBox="0 0 100 100">
-      <circle cx="50" cy="50" r="45" fill="none" stroke="#374151" strokeWidth="2" />
-      <circle cx="50" cy="50" r="45" fill="none" stroke="#10b981" strokeWidth="4" />
-      <text x="50" y="55" textAnchor="middle" fill="white" fontSize="20">
-        {value}
-      </text>
-    </svg>
+    <div className="flex flex-col items-center">
+      <svg className="w-28 h-28" viewBox="0 0 100 100">
+        <circle cx="50" cy="50" r="45" fill="none" stroke="#374151" strokeWidth="2" />
+        <circle cx="50" cy="50" r="45" fill="none" stroke={c.color} strokeWidth="4" />
+        <text x="50" y="55" textAnchor="middle" fill="white" fontSize="20">
+          {value}
+        </text>
+      </svg>
+
+      <div className="text-xs text-gray-400 mt-2">{label}</div>
+      <div className="text-xs text-gray-500">{sublabel}</div>
+    </div>
   )
 }
