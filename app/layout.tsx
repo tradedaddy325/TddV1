@@ -1,6 +1,7 @@
 import type { Metadata } from 'next'
 import { Geist, Geist_Mono } from 'next/font/google'
 import { Analytics } from '@vercel/analytics/next'
+import { SpeedInsights } from '@vercel/speed-insights/next'
 import { BootScreen } from '@/components/boot-screen'
 import { TermsAcceptanceModal } from '@/components/terms-acceptance-modal'
 import './globals.css'
@@ -42,6 +43,7 @@ export default function RootLayout({
         <TermsAcceptanceModal />
         {children}
         {process.env.NODE_ENV === 'production' && <Analytics />}
+        <SpeedInsights />
       </body>
     </html>
   )
