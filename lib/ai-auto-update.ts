@@ -3,18 +3,23 @@
  * Manages automatic data fetching from AI APIs with configurable intervals
  */
 
+import { useState, useEffect } from 'react'
+
 interface UpdateConfig {
   interval: number // milliseconds
   key: string
   fetcher: () => Promise<any>
 }
 
-const updateIntervals = new Map<string, NodeJS.Timeout>()
+const updateIntervals = new Map<string, ReturnType<typeof setInterval>>()
 
 /**
  * Start auto-updating a data source
  */
-export function startAutoUpdate(config: UpdateConfig, onData: (data: any) => void): () => void {
+export function startAutoUpdate(
+  config: UpdateConfig,
+  onData: (data: any) => void
+): () => void {
   // Initial fetch
   config.fetcher().then(onData).catch(console.error)
 
@@ -45,23 +50,23 @@ export function stopAutoUpdate(key: string): void {
  */
 export const autoUpdateConfigs = {
   dashboard: {
-    interval: 30 * 60 * 1000, // 30 minutes
+    interval: 30 * 60 * 1000,
     key: 'dashboard-summary'
   },
   macrodesk: {
-    interval: 60 * 60 * 1000, // 1 hour
+    interval: 60 * 60 * 1000,
     key: 'macro-desk-data'
   },
   psychology: {
-    interval: 45 * 60 * 1000, // 45 minutes (30-60 range)
+    interval: 45 * 60 * 1000,
     key: 'market-psychology-data'
   },
   predictive: {
-    interval: 3 * 60 * 60 * 1000, // 3 hours (2-4 range)
+    interval: 3 * 60 * 60 * 1000,
     key: 'predictive-markets-data'
   },
   signals: {
-    interval: 4 * 60 * 60 * 1000, // 4 hours
+    interval: 4 * 60 * 60 * 1000,
     key: 'trading-signals-data'
   }
 }
@@ -76,7 +81,7 @@ export async function fetchFromClaudeAPI(prompt: string): Promise<any> {
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ prompt })
     })
-    
+
     if (!response.ok) throw new Error('API call failed')
     return await response.json()
   } catch (error) {
@@ -95,7 +100,7 @@ export async function fetchFromGeminiAPI(prompt: string): Promise<any> {
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ prompt })
     })
-    
+
     if (!response.ok) throw new Error('API call failed')
     return await response.json()
   } catch (error) {
@@ -112,9 +117,9 @@ export function useAutoUpdate(
   onData: (data: any) => void,
   shouldStart: boolean = true
 ) {
-  const [stopFunction, setStopFunction] = React.useState<(() => void) | null>(null)
+  const [stopFunction, setStopFunction] = useState<(() => void) | null>(null)
 
-  React.useEffect(() => {
+  useEffect(() => {
     if (!shouldStart) return
 
     const stop = startAutoUpdate(config, onData)
