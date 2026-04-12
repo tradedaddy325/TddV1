@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useEffect } from 'react';
 import type {
   TechnicalAnalysisData,
   PsychologyData,
@@ -11,7 +11,7 @@ import type {
   MacroDeskData,
 } from '../../types/neural-engine';
 
-// Placeholder hook for fetching neural engine data from Supabase
+// Hook for fetching neural engine data from Supabase
 export function useNeuralEngineData() {
   const [macroDeskData, setMacroDeskData] = useState<MacroDeskData | null>(null);
   const [psychologyData, setPsychologyData] = useState<PsychologyData | null>(null);
@@ -25,22 +25,42 @@ export function useNeuralEngineData() {
   const refresh = useCallback(async () => {
     setLoading(true);
     try {
-      // TODO: Integrate with Supabase to fetch:
-      // - Macro Desk Data
-      // - Psychology Data
-      // - AI Signals
-      // - News Signals
-      // - Earnings Signals
-      // - Technical Analysis
-      // - Predictive Markets
+      // Fetch from API routes that connect to Supabase
+      const [
+        macroDeskRes,
+        psychologyRes,
+        signalsRes,
+        newsRes,
+        earningsRes,
+        technicalRes,
+        predictiveRes,
+      ] = await Promise.all([
+        fetch('/api/neural-engine/macro-desk'),
+        fetch('/api/neural-engine/psychology'),
+        fetch('/api/neural-engine/signals'),
+        fetch('/api/neural-engine/news-signals'),
+        fetch('/api/neural-engine/earnings-signals'),
+        fetch('/api/neural-engine/technical-analysis'),
+        fetch('/api/neural-engine/predictive-markets'),
+      ]);
 
-      // Example Supabase calls:
-      // const { data: macroDeskData } = await supabase
-      //   .from('macro_desk')
-      //   .select('*')
-      //   .single();
+      if (macroDeskRes.ok) setMacroDeskData(await macroDeskRes.json());
+      if (psychologyRes.ok) setPsychologyData(await psychologyRes.json());
+      if (signalsRes.ok) setAiSignals(await signalsRes.json());
+      if (newsRes.ok) setNewsSignals(await newsRes.json());
+      if (earningsRes.ok) setEarningsSignals(await earningsRes.json());
+      if (technicalRes.ok) setTechnicalAnalysis(await technicalRes.json());
+      if (predictiveRes.ok) setPredictiveMarkets(await predictiveRes.json());
+    } catch (error) {
+      console.error('Error fetching neural engine data:', error);
+      // Fallback to placeholder data
+      loadPlaceholderData();
+    } finally {
+      setLoading(false);
+    }
+  }, []);
 
-      // Placeholder data for demonstration
+  const loadPlaceholderData = () => {
       setMacroDeskData({
         deskNote:
           'Market sentiment is cautiously optimistic. US indices showing consolidation. Gold continues its bull run.',
@@ -196,12 +216,13 @@ export function useNeuralEngineData() {
           },
         ],
       });
-    } catch (error) {
-      console.error('Error fetching neural engine data:', error);
-    } finally {
-      setLoading(false);
     }
-  }, []);
+  };
+
+  // Auto-refresh data on component mount
+  useEffect(() => {
+    refresh();
+  }, [refresh]);
 
   return {
     macroDeskData,
