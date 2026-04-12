@@ -144,7 +144,7 @@ export function SignalsTab({
                 <div className="flex justify-between items-start mb-3">
                   <div>
                     <h4 className="text-lg font-bold text-white mb-1">{earning.company}</h4>
-                    <p className="text-gray-400 text-sm">{earning.ticker}</p>
+                    <p className="text-gray-400 text-sm">Earnings Report</p>
                   </div>
                   <div className="text-right">
                     <div className="text-purple-400 font-mono text-sm">{earning.reportTime}</div>
