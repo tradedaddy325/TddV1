@@ -267,7 +267,7 @@ export default function NeuralEngineCompletePage() {
       case 'signals':
         return (
           <SignalsTab
-            aiSignals={aiSignals}
+            signals={aiSignals}
             newsSignals={newsSignals}
             earningsSignals={earningsSignals}
             loading={loading}
