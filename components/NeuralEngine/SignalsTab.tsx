@@ -58,8 +58,8 @@ export function SignalsTab({
               <div key={idx} className="p-6 bg-gray-800 rounded border border-gray-700">
                 <div className="flex justify-between items-start mb-3">
                   <div>
-                    <h4 className="text-lg font-bold text-white mb-1">{signal.symbol}</h4>
-                    <p className="text-gray-400 text-sm">{signal.description}</p>
+                    <h4 className="text-lg font-bold text-white mb-1">{signal.asset}</h4>
+                    <p className="text-gray-400 text-sm">{signal.timeframe} timeframe</p>
                   </div>
                   <div className="text-right">
                     <div className={`text-2xl font-bold font-mono ${
@@ -72,6 +72,20 @@ export function SignalsTab({
                 </div>
                 <div className="py-3 border-t border-gray-700 text-sm text-gray-300">
                   {signal.reasoning}
+                </div>
+                <div className="grid grid-cols-3 gap-4 mt-3 text-xs">
+                  <div>
+                    <div className="text-gray-500 font-mono mb-1">ENTRY</div>
+                    <div className="text-white font-mono">{signal.entry}</div>
+                  </div>
+                  <div>
+                    <div className="text-gray-500 font-mono mb-1">STOP LOSS</div>
+                    <div className="text-white font-mono">{signal.stopLoss}</div>
+                  </div>
+                  <div>
+                    <div className="text-gray-500 font-mono mb-1">TAKE PROFIT</div>
+                    <div className="text-white font-mono">{signal.takeProfit}</div>
+                  </div>
                 </div>
               </div>
             ))
@@ -89,15 +103,30 @@ export function SignalsTab({
               <div key={idx} className="p-6 bg-gray-800 rounded border border-yellow-700">
                 <div className="flex justify-between items-start mb-3">
                   <div>
-                    <h4 className="text-lg font-bold text-white mb-1">{news.headline}</h4>
-                    <p className="text-gray-400 text-sm">{news.source}</p>
+                    <h4 className="text-lg font-bold text-white mb-1">{news.event}</h4>
+                    <p className="text-gray-400 text-sm">{news.time}</p>
                   </div>
                   <div className="text-right">
-                    <div className="text-yellow-500 font-mono text-xs">{news.time}</div>
+                    <div className={`font-mono text-xs font-bold ${
+                      news.impact === 'HIGH' ? 'text-red-400' : news.impact === 'MEDIUM' ? 'text-yellow-400' : 'text-gray-400'
+                    }`}>
+                      {news.impact} IMPACT
+                    </div>
+                    {news.locked && (
+                      <div className="text-yellow-500 text-xs mt-1">Locked {news.unlocksIn}h</div>
+                    )}
                   </div>
                 </div>
-                <p className="text-gray-300 text-sm mb-3">{news.summary}</p>
-                <div className="text-sm text-gray-400">Impact: {news.impact}</div>
+                <div className="grid grid-cols-2 gap-4 py-3 border-t border-gray-700 text-sm">
+                  <div>
+                    <div className="text-gray-500 text-xs font-mono mb-1">FORECAST</div>
+                    <div className="text-white font-mono">{news.forecast}</div>
+                  </div>
+                  <div>
+                    <div className="text-gray-500 text-xs font-mono mb-1">PREVIOUS</div>
+                    <div className="text-white font-mono">{news.previous}</div>
+                  </div>
+                </div>
               </div>
             ))
           ) : (
@@ -119,16 +148,32 @@ export function SignalsTab({
                   </div>
                   <div className="text-right">
                     <div className="text-purple-400 font-mono text-sm">{earning.reportTime}</div>
+                    {earning.locked && (
+                      <div className="text-purple-500 text-xs mt-1">Unlocks in {earning.hoursUntil}h</div>
+                    )}
                   </div>
                 </div>
-                <div className="grid grid-cols-2 gap-4 py-3 border-t border-gray-700">
+                <div className="grid grid-cols-3 gap-4 py-3 border-t border-gray-700">
                   <div>
-                    <div className="text-gray-500 text-xs font-mono mb-1">EXPECTED EPS</div>
-                    <div className="text-white font-mono">{earning.expectedEps}</div>
+                    <div className="text-gray-500 text-xs font-mono mb-1">EST. EPS</div>
+                    <div className="text-white font-mono">${earning.estimateEPS.toFixed(2)}</div>
                   </div>
                   <div>
-                    <div className="text-gray-500 text-xs font-mono mb-1">PREVIOUS EPS</div>
-                    <div className="text-white font-mono">{earning.previousEps}</div>
+                    <div className="text-gray-500 text-xs font-mono mb-1">PREV. EPS</div>
+                    <div className="text-white font-mono">${earning.previousEPS.toFixed(2)}</div>
+                  </div>
+                  <div>
+                    <div className="text-gray-500 text-xs font-mono mb-1">REVENUE EST.</div>
+                    <div className="text-white font-mono">{earning.revenueEst}</div>
+                  </div>
+                </div>
+                <div className="mt-3 pt-3 border-t border-gray-700">
+                  <div className={`text-sm font-mono font-bold ${
+                    earning.prediction.direction === 'BEAT' ? 'text-green-400' :
+                    earning.prediction.direction === 'MISS' ? 'text-red-400' :
+                    'text-gray-400'
+                  }`}>
+                    {earning.prediction.direction} ({earning.prediction.confidence}% confidence)
                   </div>
                 </div>
               </div>
