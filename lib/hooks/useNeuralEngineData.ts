@@ -216,7 +216,6 @@ export function useNeuralEngineData() {
           },
         ],
       });
-    }
   };
 
   // Auto-refresh data on component mount
