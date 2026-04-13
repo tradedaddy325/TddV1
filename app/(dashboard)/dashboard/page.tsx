@@ -186,8 +186,6 @@ function CircularMetric({
 }
 
 function CircularMetricLarge({
-
-function CircularMetricLarge({
   value,
   label,
   sublabel,

@@ -1,5 +1,3 @@
-mport type { NextApiRequest, NextApiResponse } from "next";
-
 async function getMarketPrices() {
   const key = process.env.TWELVE_DATA_API_KEY;
 
@@ -18,7 +16,7 @@ async function getMarketPrices() {
   };
 }
 
-export default async function handler(req: NextApiRequest, res: NextApiResponse) {
+export async function GET() {
   try {
     const prices = await getMarketPrices();
 
@@ -60,10 +58,10 @@ macro, psychology, signals, technical, predictive
       parsed = {};
     }
 
-    res.status(200).json(parsed);
+    return Response.json(parsed);
 
   } catch (e) {
     console.error(e);
-    res.status(500).json({ error: "fail" });
+    return Response.json({ error: "fail" }, { status: 500 });
   }
 }
