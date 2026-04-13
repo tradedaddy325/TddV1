@@ -1,6 +1,6 @@
 'use client'
 
-import { useRouter } from 'next/navigation'
+import { useRouter, useSearchParams } from 'next/navigation'
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { Activity, Zap, Newspaper, TrendingUp, DollarSign } from 'lucide-react'
 
@@ -14,13 +14,12 @@ const signalTabs = [
 
 export default function SignalsLayout({
   children,
-  params,
 }: {
   children: React.ReactNode
-  params: { tab?: string }
 }) {
   const router = useRouter()
-  const currentTab = params.tab || 'setups'
+  const searchParams = useSearchParams()
+  const currentTab = searchParams.get('tab') || 'setups'
 
   return (
     <div className="space-y-6">
@@ -35,7 +34,7 @@ export default function SignalsLayout({
         </div>
       </div>
 
-      <Tabs value={currentTab} onValueChange={(v) => router.push(`/signals/${v}`)} className="w-full">
+      <Tabs value={currentTab} onValueChange={(v) => router.push(`/signals/setups?tab=${v}`)} className="w-full">
         <TabsList className="bg-muted/50 grid w-full grid-cols-5">
           {signalTabs.map((tab) => {
             const Icon = tab.icon
