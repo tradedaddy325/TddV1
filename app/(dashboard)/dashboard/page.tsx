@@ -272,7 +272,6 @@ function CircularMetricLarge({ value, label, sublabel, color }: { value: string;
     </div>
   )
 }
-
 function CircularMetric({ label, sublabel, value, color }: { label: string; sublabel: string; value: string; color: string }) {
   const colorMap: Record<string, { circle: string; dot: string; bg: string }> = {
     blue: { circle: '#3b82f6', dot: '● ', bg: 'bg-blue-900/30' },
