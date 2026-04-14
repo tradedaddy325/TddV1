@@ -49,10 +49,7 @@ export default function DashboardPage() {
       </div>
 
       <div className="p-6 space-y-6 max-w-7xl">
-        <AIDailyBrief />
         <MetricPills />
-
-        <TerminalGreeting profile={profile} onOpenStream={() => setShowStream(true)} />
 
         {/* Stats */}
         <div className="grid grid-cols-2 gap-4">
@@ -66,6 +63,10 @@ export default function DashboardPage() {
             <div className="text-xs text-gray-400">Active Setups</div>
           </div>
         </div>
+
+        <TerminalGreeting profile={profile} onOpenStream={() => setShowStream(true)} />
+
+        <AIDailyBrief />
 
         {/* Market Intelligence */}
         <div className="space-y-4">
