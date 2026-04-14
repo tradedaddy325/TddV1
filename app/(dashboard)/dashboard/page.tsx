@@ -4,7 +4,6 @@ import { useEffect, useState } from 'react'
 import { createClient } from '@/lib/supabase/client'
 import { TerminalGreeting } from '@/components/dashboard/terminal-greeting'
 import { LiveStreamModal } from '@/components/dashboard/live-stream-modal'
-import { GrokTradingSignals } from '@/components/grok-trading-signals'
 import { AIDailyBrief } from '@/components/dashboard/ai-daily-brief'
 import { MetricPills } from '@/components/dashboard/metric-pills'
 import type { Profile } from '@/lib/types'
@@ -49,10 +48,7 @@ export default function DashboardPage() {
       </div>
 
       <div className="p-6 space-y-6 max-w-7xl">
-        <AIDailyBrief />
         <MetricPills />
-
-        <TerminalGreeting profile={profile} />
 
         {/* Stats */}
         <div className="grid grid-cols-2 gap-4">
@@ -66,6 +62,10 @@ export default function DashboardPage() {
             <div className="text-xs text-gray-400">Active Setups</div>
           </div>
         </div>
+
+        <TerminalGreeting profile={profile} onOpenStream={() => setShowStream(true)} />
+
+        <AIDailyBrief />
 
         {/* Market Intelligence */}
         <div className="space-y-4">
@@ -137,8 +137,6 @@ export default function DashboardPage() {
             <div className="text-purple-400 text-xl font-bold">103.42</div>
           </div>
         </div>
-
-        <GrokTradingSignals />
       </div>
 
       <LiveStreamModal isOpen={showStream} onClose={() => setShowStream(false)} />

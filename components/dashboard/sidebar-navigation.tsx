@@ -40,11 +40,10 @@ const navigationItems: NavItem[] = [
     icon: TrendingUp,
     expandable: true,
     children: [
-      { title: 'Signals & Setups', href: '/signals/setups' },
       { title: 'AI Signals', href: '/signals/ai' },
-      { title: 'News Signals', href: '/signals/news' },
-      { title: 'Gap Signals', href: '/signals/gaps' },
+      { title: 'Gap Signals', href: '/signals/gap' },
       { title: 'Earnings Signals', href: '/signals/earnings' },
+      { title: 'Economic Events', href: '/signals/economic-events' },
     ]
   },
   {
