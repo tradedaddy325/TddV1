@@ -8,6 +8,25 @@ import { EventSignalCard } from '@/components/signals/event-signal-card';
 import { GapSignalsSection } from '@/components/signals/gap-signals-section';
 import { DisclaimerBox } from '@/components/signals/disclaimer-box';
 
+interface UnlockedSignal {
+  symbol: string;
+  direction: 'BUY' | 'SELL';
+  confidence: number;
+  analysis: string;
+  entryLevel: number;
+  riskReward: string;
+}
+
+interface EconomicEvent {
+  id: string;
+  type: string;
+  description: string;
+  lockTime: string;
+  eventTime: string;
+  locked: boolean;
+  unlockedSignals: UnlockedSignal[];
+}
+
 export default function EconomicEventSignalsPage() {
   const [selectedEventType, setSelectedEventType] = useState('FED_RATE');
   const [disclaimerAccepted, setDisclaimerAccepted] = useState(false);
@@ -20,7 +39,7 @@ export default function EconomicEventSignalsPage() {
     { id: 'FED_RATE', title: 'FED_RATE', description: 'Fed Rate Decision', date: '29 Apr' },
   ];
 
-  const upcomingEvents = [
+  const upcomingEvents: EconomicEvent[] = [
     {
       id: 'fed_rate_001',
       type: 'FED_RATE',
