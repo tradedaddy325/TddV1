@@ -5,6 +5,7 @@ import type { Profile } from '@/lib/types'
 
 interface TerminalGreetingProps {
   profile: Profile | null
+  onOpenStream?: () => void
 }
 
 function getGreeting(hourOverride?: number): string {
@@ -14,7 +15,7 @@ function getGreeting(hourOverride?: number): string {
   return 'Good evening'
 }
 
-export function TerminalGreeting({ profile }: TerminalGreetingProps) {
+export function TerminalGreeting({ profile, onOpenStream }: TerminalGreetingProps) {
   const [displayText, setDisplayText] = useState('')
   const [showCursor, setShowCursor] = useState(true)
   const [currentTime, setCurrentTime] = useState<string | null>(null)
@@ -71,10 +72,20 @@ export function TerminalGreeting({ profile }: TerminalGreetingProps) {
         {displayText}
         <span className={showCursor ? 'opacity-100' : 'opacity-0'}>_</span>
       </p>
-      <div className="mt-2 text-xs text-muted-foreground">
-        {currentTime && <span className="text-accent">[{currentTime}]</span>}{' '}
-        Session active | Tier: <span className="text-primary uppercase">{profile?.subscription_tier || 'free'}</span> |{' '}
-        Credits: <span className="text-warning">{profile?.credits || 0}</span>
+      <div className="mt-4 flex items-center justify-between">
+        <div className="text-xs text-muted-foreground">
+          {currentTime && <span className="text-accent">[{currentTime}]</span>}{' '}
+          Session active | Tier: <span className="text-primary uppercase">{profile?.subscription_tier || 'free'}</span> |{' '}
+          Credits: <span className="text-warning">{profile?.credits || 0}</span>
+        </div>
+        {onOpenStream && (
+          <button
+            onClick={onOpenStream}
+            className="px-3 py-1 text-xs bg-primary text-primary-foreground rounded hover:bg-primary/90 transition-colors font-mono"
+          >
+            📺 Live Stream
+          </button>
+        )}
       </div>
     </div>
   )

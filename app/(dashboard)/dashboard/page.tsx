@@ -52,7 +52,7 @@ export default function DashboardPage() {
         <AIDailyBrief />
         <MetricPills />
 
-        <TerminalGreeting profile={profile} />
+        <TerminalGreeting profile={profile} onOpenStream={() => setShowStream(true)} />
 
         {/* Stats */}
         <div className="grid grid-cols-2 gap-4">
