@@ -6,13 +6,29 @@ import { SignalCard } from '@/components/signals/signal-card';
 import { SignalStats } from '@/components/signals/signal-stats';
 import { SignalFilters } from '@/components/signals/signal-filters';
 
+interface Signal {
+  id: string;
+  asset: string;
+  direction: 'BUY' | 'SELL';
+  confidence: number;
+  entryPrice: number;
+  takeProfit: number;
+  stopLoss: number;
+  technicalScore: number;
+  fundamentalScore: number;
+  sentimentScore: number;
+  reasoning: string;
+  timeframeRecommended: string;
+  activeSignals: number;
+}
+
 export default function AiSignalsPage() {
   const [selectedAssets, setSelectedAssets] = useState<string[]>([]);
   const [selectedConfidence, setSelectedConfidence] = useState<string>('all');
   const [searchQuery, setSearchQuery] = useState('');
   const [archivedSignals, setArchivedSignals] = useState<string[]>([]);
 
-  const allSignals = [
+  const allSignals: Signal[] = [
     {
       id: 'gbpusd-001',
       asset: 'GBPUSD',
