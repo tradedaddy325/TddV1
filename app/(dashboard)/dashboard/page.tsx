@@ -5,9 +5,11 @@ import { createClient } from '@/lib/supabase/client'
 import { QuickStats } from '@/components/dashboard/quick-stats'
 import { QuickActions } from '@/components/dashboard/quick-actions'
 import { MarketOverview } from '@/components/dashboard/market-overview'
-import { AIIntelligence } from '@/components/dashboard/ai-intelligence'
 import { AIDailyBrief } from '@/components/dashboard/ai-daily-brief'
 import { RecentTrades } from '@/components/dashboard/recent-trades'
+import { MarketStatusPills } from '@/components/dashboard/market-status-pills'
+import { SystemsOperational } from '@/components/dashboard/systems-operational'
+import { WelcomeMessage } from '@/components/dashboard/welcome-message'
 import type { Profile, JournalEntry } from '@/lib/types'
 
 export default function DashboardPage() {
@@ -60,6 +62,15 @@ export default function DashboardPage() {
   return (
     <main className="flex-1 overflow-auto bg-background">
       <div className="p-6 space-y-6 max-w-7xl">
+        {/* Market Status Pills */}
+        <MarketStatusPills />
+
+        {/* Systems Operational */}
+        <SystemsOperational />
+
+        {/* Welcome Message */}
+        {profile && <WelcomeMessage displayName={profile.display_name} />}
+
         {/* Quick Stats */}
         {profile && <QuickStats stats={stats} profile={profile} />}
 
@@ -68,9 +79,6 @@ export default function DashboardPage() {
 
         {/* Market Overview */}
         <MarketOverview />
-
-        {/* AI Intelligence */}
-        <AIIntelligence />
 
         {/* AI Daily Brief */}
         <AIDailyBrief />
