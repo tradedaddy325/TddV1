@@ -8,14 +8,15 @@ import { MarketOverview } from '@/components/dashboard/market-overview'
 import { AIIntelligence } from '@/components/dashboard/ai-intelligence'
 import { AIDailyBrief } from '@/components/dashboard/ai-daily-brief'
 import { RecentTrades } from '@/components/dashboard/recent-trades'
-import type { Profile } from '@/lib/types'
+import type { Profile, JournalEntry } from '@/lib/types'
 
 export default function DashboardPage() {
   const [profile, setProfile] = useState<Profile | null>(null)
+  const [trades, setTrades] = useState<JournalEntry[]>([])
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
-    const fetchProfile = async () => {
+    const fetchData = async () => {
       const supabase = createClient()
 
       const {
@@ -23,19 +24,30 @@ export default function DashboardPage() {
       } = await supabase.auth.getUser()
 
       if (user) {
-        const { data } = await supabase
+        // Fetch profile
+        const { data: profileData } = await supabase
           .from('profiles')
           .select('*')
           .eq('id', user.id)
           .single()
 
-        setProfile(data)
+        setProfile(profileData)
+
+        // Fetch recent trades
+        const { data: tradesData } = await supabase
+          .from('journal_entries')
+          .select('*')
+          .eq('user_id', user.id)
+          .order('created_at', { ascending: false })
+          .limit(10)
+
+        setTrades(tradesData || [])
       }
 
       setLoading(false)
     }
 
-    fetchProfile()
+    fetchData()
   }, [])
 
   const stats = {
@@ -64,7 +76,7 @@ export default function DashboardPage() {
         <AIDailyBrief />
 
         {/* Recent Trades */}
-        <RecentTrades />
+        <RecentTrades trades={trades} />
       </div>
     </main>
   )
