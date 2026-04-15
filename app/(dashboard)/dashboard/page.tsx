@@ -2,17 +2,13 @@
 
 import { useEffect, useState } from 'react'
 import { createClient } from '@/lib/supabase/client'
-import { TerminalGreeting } from '@/components/dashboard/terminal-greeting'
-import { LiveStreamModal } from '@/components/dashboard/live-stream-modal'
-import { GrokTradingSignals } from '@/components/grok-trading-signals'
-import { AIDailyBrief } from '@/components/dashboard/ai-daily-brief'
-import { MetricPills } from '@/components/dashboard/metric-pills'
+import { Menu } from 'lucide-react'
+import { Clock, TrendingUp, Eye, Zap } from 'lucide-react'
 import type { Profile } from '@/lib/types'
 
 export default function DashboardPage() {
   const [profile, setProfile] = useState<Profile | null>(null)
   const [loading, setLoading] = useState(true)
-  const [showStream, setShowStream] = useState(false)
 
   useEffect(() => {
     const fetchProfile = async () => {
@@ -39,109 +35,113 @@ export default function DashboardPage() {
   }, [])
 
   return (
-    <main className="flex-1 overflow-auto bg-black">
-      {/* Header */}
-      <div className="sticky top-0 z-40 bg-black border-b border-gray-800 px-6 py-4">
-        <div className="flex items-center justify-between">
-          <div className="text-sm text-white font-mono">Market Status</div>
-          <div className="w-3 h-3 rounded-full bg-green-400 animate-pulse" />
+    <main className="flex-1 overflow-auto bg-black min-h-screen">
+      {/* Terminal Header */}
+      <div className="sticky top-0 z-40 bg-black border-b border-gray-800 px-6 py-6">
+        <div className="flex items-center justify-between mb-6">
+          {/* Logo and Title */}
+          <div className="flex items-center gap-4">
+            <div className="w-12 h-12 rounded-full bg-gradient-to-br from-pink-400 to-orange-400 flex items-center justify-center flex-shrink-0">
+              <TrendingUp className="w-6 h-6 text-white" />
+            </div>
+            <div>
+              <h1 className="text-2xl font-bold text-white">Trade Daddy <span className="text-purple-400">Terminal</span></h1>
+              <p className="text-xs text-gray-400">Powered by Claude & Gemini</p>
+            </div>
+          </div>
+
+          {/* Menu Button */}
+          <button className="p-3 bg-green-400 rounded-2xl hover:bg-green-500 transition-colors">
+            <Menu className="w-6 h-6 text-black" />
+          </button>
         </div>
       </div>
 
-      <div className="p-6 space-y-6 max-w-7xl">
-        <AIDailyBrief />
-        <MetricPills />
-
-        <TerminalGreeting profile={profile} />
-
-        {/* Stats */}
-        <div className="grid grid-cols-2 gap-4">
-          <div className="p-4 rounded-xl border border-gray-800 bg-gray-900/30">
-            <div className="text-2xl font-bold text-white">0</div>
-            <div className="text-xs text-gray-400">Active Signals</div>
+      <div className="p-6 space-y-6 max-w-5xl">
+        {/* Metric Pills - Terminal Style */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+          <div className="flex items-center gap-2 px-4 py-3 rounded-full border border-red-600 bg-red-900/20 w-fit">
+            <Clock className="w-4 h-4 text-red-400" />
+            <span className="text-sm font-mono text-red-400">New York Open</span>
           </div>
 
-          <div className="p-4 rounded-xl border border-gray-800 bg-gray-900/30">
-            <div className="text-2xl font-bold text-white">0</div>
-            <div className="text-xs text-gray-400">Active Setups</div>
+          <div className="flex items-center gap-2 px-4 py-3 rounded-full border border-yellow-600 bg-yellow-900/20 w-fit">
+            <div className="w-3 h-3 rounded-full bg-yellow-400" />
+            <span className="text-sm font-mono text-yellow-400">Neutral</span>
+            <span className="text-sm font-mono text-yellow-400">50</span>
+          </div>
+
+          <div className="flex items-center gap-2 px-4 py-3 rounded-full border border-purple-600 bg-purple-900/20 w-fit">
+            <span className="text-sm font-mono text-purple-400">TRUMP SOCIAL MONITOR</span>
+            <div className="w-3 h-3 rounded-full bg-purple-400 ml-1" />
+            <span className="text-sm font-mono text-purple-400">Neutral USD</span>
+            <span className="text-sm font-mono text-purple-400">60</span>
+          </div>
+
+          <div className="flex items-center gap-2 px-4 py-3 rounded-full border border-cyan-600 bg-cyan-900/20 w-fit">
+            <span className="text-sm font-mono text-cyan-400">FED_RATE — 14d 1h</span>
+          </div>
+
+          <div className="flex items-center gap-2 px-4 py-3 rounded-full border border-purple-600 bg-purple-900/20 w-fit">
+            <span className="text-sm font-mono text-purple-400">Global</span>
+          </div>
+
+          <div className="flex items-center gap-2 px-4 py-3 rounded-full border border-green-600 bg-green-900/20 w-fit">
+            <span className="text-sm font-mono text-green-400">📺 Start News Live Stream</span>
+            <span className="text-sm font-mono text-green-400 ml-1">▶</span>
           </div>
         </div>
 
-        {/* Market Intelligence */}
-        <div className="space-y-4">
-          <h2 className="text-xl font-bold text-white">Market Intelligence</h2>
+        {/* Welcome Message */}
+        <div className="text-green-400 font-mono text-sm">
+          Welcome, {profile?.display_name || 'trader'}|
+        </div>
 
-          <div className="p-6 rounded-xl border border-gray-800 bg-gray-900/50">
-            <h3 className="text-lg font-bold text-white">DXY - Dollar Index</h3>
-
-            <div className="flex items-center gap-3 mt-3">
-              <span className="text-4xl font-bold text-white">103.42</span>
-              <span className="text-green-400 font-mono">+0.47%</span>
-            </div>
-
-            <div className="grid grid-cols-2 gap-4 pt-4">
-              <CircularMetric label="Dollar pressure" sublabel="Momentum" value="64" color="blue" />
-              <CircularMetric label="10Y-2Y spread" sublabel="Curve" value="0.52%" color="orange" />
-            </div>
-          </div>
-
-          <div className="p-6 rounded-xl border border-gray-800 bg-gray-900/50">
-            <h3 className="text-lg font-bold text-white">Smart Money Tracker</h3>
-
-            <div className="grid grid-cols-2 gap-4 mt-4">
-              <CircularMetric label="Volume pressure" sublabel="Flow" value="45" color="blue" />
-              <CircularMetric label="Open interest" sublabel="Futures" value="36" color="purple" />
-              <CircularMetric label="Institutional flow" sublabel="Capital" value="48" color="green" />
-              <CircularMetric label="Sentiment divergence" sublabel="Retail vs Smart" value="12" color="pink" />
-            </div>
-          </div>
-
-          <div className="p-6 rounded-xl border border-gray-800 bg-gray-900/50">
-            <h3 className="text-lg font-bold text-white">Market Sentiment</h3>
-
-            <div className="p-4 mt-4 rounded-lg bg-gray-800/50 border border-gray-700 flex items-center gap-4">
-              <CircularMetricLarge
-                value="34"
-                label="COT"
-                sublabel="Risk-Off"
-                color="green"
-              />
-
+        {/* Stats Cards */}
+        <div className="grid grid-cols-2 gap-4">
+          <div className="p-6 rounded-xl border border-gray-800 bg-gray-900/30">
+            <div className="flex items-start gap-4">
+              <div className="w-12 h-12 rounded-lg bg-gray-800 flex items-center justify-center flex-shrink-0">
+                <TrendingUp className="w-6 h-6 text-green-400" />
+              </div>
               <div>
-                <div className="text-lg font-bold text-white">Risk-Off</div>
-                <div className="text-xs text-gray-400">Bearish positioning bias</div>
+                <div className="text-3xl font-bold text-white">1</div>
+                <div className="text-xs text-gray-400">Active Signals</div>
+              </div>
+            </div>
+          </div>
+
+          <div className="p-6 rounded-xl border border-gray-800 bg-gray-900/30">
+            <div className="flex items-start gap-4">
+              <div className="w-12 h-12 rounded-lg bg-gray-800 flex items-center justify-center flex-shrink-0">
+                <Eye className="w-6 h-6 text-cyan-400" />
+              </div>
+              <div>
+                <div className="text-3xl font-bold text-white">0</div>
+                <div className="text-xs text-gray-400">Active Setups</div>
               </div>
             </div>
           </div>
         </div>
 
-        {/* Live Data */}
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-          <div className="p-4 border border-green-800 bg-green-900/10 rounded-lg">
-            <div className="text-green-400 text-xs">Bitcoin</div>
-            <div className="text-green-400 text-xl font-bold">$68,420</div>
-          </div>
+        {/* Market Intelligence */}
+        <div className="space-y-4">
+          <h2 className="text-2xl font-bold text-white">Market Intelligence</h2>
 
-          <div className="p-4 border border-blue-800 bg-blue-900/10 rounded-lg">
-            <div className="text-blue-400 text-xs">Ethereum</div>
-            <div className="text-blue-400 text-xl font-bold">$3,842</div>
-          </div>
-
-          <div className="p-4 border border-yellow-800 bg-yellow-900/10 rounded-lg">
-            <div className="text-yellow-400 text-xs">Gold</div>
-            <div className="text-yellow-400 text-xl font-bold">$2,045</div>
-          </div>
-
-          <div className="p-4 border border-purple-800 bg-purple-900/10 rounded-lg">
-            <div className="text-purple-400 text-xs">DXY</div>
-            <div className="text-purple-400 text-xl font-bold">103.42</div>
+          <div className="p-6 rounded-xl border border-green-800 bg-green-900/20 space-y-3">
+            <div className="flex items-center gap-3">
+              <span className="text-2xl">⚡</span>
+              <h3 className="text-lg font-bold text-white">AI Daily Brief</h3>
+              <div className="flex items-center gap-2 px-3 py-1 rounded-full border border-green-600 bg-green-900/20 ml-auto">
+                <span className="text-green-400 text-xs font-mono font-bold">Risk-Off</span>
+              </div>
+            </div>
+            <p className="text-sm text-gray-300 leading-relaxed">
+              On April 14, 2026, with no major economic events and a risk-off sentiment prevailing in institutional positioning, key movers include WTI Oil gaining 2.92%, while Silver shows a bearish trend with a decline of 1.16%. The...
+            </p>
           </div>
         </div>
-
-        <GrokTradingSignals />
       </div>
-
-      <LiveStreamModal isOpen={showStream} onClose={() => setShowStream(false)} />
     </main>
   )
 }
