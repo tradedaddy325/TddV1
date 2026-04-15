@@ -1,7 +1,8 @@
 "use client"
 
 import { useState, useEffect } from "react"
-import { User, CreditCard, Zap, Crown, Settings, LogOut, Shield, Bell, History } from "lucide-react"
+import { useSearchParams } from "next/navigation"
+import { User, CreditCard, Zap, Crown, Settings, LogOut, Shield, Bell, History, Code, Copy, Check } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
@@ -55,10 +56,16 @@ const subscriptionTiers = [
 ]
 
 export default function ProfilePage() {
+  const searchParams = useSearchParams()
+  const initialTab = searchParams.get("tab") || "account"
+  
   const { data: profile, isLoading } = useSWR("profile", fetcher)
   const [isUpdating, setIsUpdating] = useState(false)
   const [displayName, setDisplayName] = useState("")
   const [username, setUsername] = useState("")
+  const [activeTab, setActiveTab] = useState(initialTab)
+  const [codeInput, setCodeInput] = useState("")
+  const [copied, setCopied] = useState(false)
   const router = useRouter()
 
   useEffect(() => {
@@ -89,7 +96,6 @@ export default function ProfilePage() {
   const handleSignOut = async () => {
     const supabase = createClient()
     await supabase.auth.signOut()
-    // Wrap router operations in setTimeout to ensure they happen after initialization
     setTimeout(() => {
       router.push("/")
       router.refresh()
@@ -100,14 +106,13 @@ export default function ProfilePage() {
     const pkg = creditPackages.find(p => p.id === packageId)
     if (!pkg) return
 
-    // Initiate Yoco checkout
     const response = await fetch("/api/payments/checkout", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
         type: "credits",
         packageId: pkg.id,
-        amount: pkg.price * 100, // Convert to cents
+        amount: pkg.price * 100,
         credits: pkg.credits,
       }),
     })
@@ -136,6 +141,12 @@ export default function ProfilePage() {
     if (paymentUrl) {
       window.location.href = paymentUrl
     }
+  }
+
+  const copyToClipboard = (text: string) => {
+    navigator.clipboard.writeText(text)
+    setCopied(true)
+    setTimeout(() => setCopied(false), 2000)
   }
 
   const getTierBadge = (tier: string) => {
@@ -170,7 +181,7 @@ export default function ProfilePage() {
         </p>
       </div>
 
-      <Tabs defaultValue="account" className="w-full">
+      <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
         <TabsList className="bg-muted/50">
           <TabsTrigger value="account" className="font-mono">
             <User className="mr-2 h-4 w-4" />
@@ -187,6 +198,10 @@ export default function ProfilePage() {
           <TabsTrigger value="settings" className="font-mono">
             <Settings className="mr-2 h-4 w-4" />
             Settings
+          </TabsTrigger>
+          <TabsTrigger value="code" className="font-mono">
+            <Code className="mr-2 h-4 w-4" />
+            Code
           </TabsTrigger>
         </TabsList>
 
@@ -446,6 +461,140 @@ export default function ProfilePage() {
                   <LogOut className="mr-2 h-4 w-4" />
                   Sign Out
                 </Button>
+              </div>
+            </CardContent>
+          </Card>
+        </TabsContent>
+
+        <TabsContent value="code" className="mt-6 space-y-6">
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <Code className="h-5 w-5" />
+                API Credentials & Keys
+              </CardTitle>
+              <CardDescription>Manage your API keys and authentication codes for integrations</CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-6">
+              {/* API Key */}
+              <div className="space-y-2">
+                <Label htmlFor="api-key">API Key</Label>
+                <div className="flex gap-2">
+                  <Input
+                    id="api-key"
+                    type="password"
+                    value={profile?.id || "****"}
+                    disabled
+                    className="border-border opacity-75 font-mono text-sm"
+                  />
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => copyToClipboard(profile?.id || "")}
+                    className="flex-shrink-0"
+                  >
+                    {copied ? (
+                      <>
+                        <Check className="h-4 w-4" />
+                        <span className="ml-1">Copied</span>
+                      </>
+                    ) : (
+                      <>
+                        <Copy className="h-4 w-4" />
+                        <span className="ml-1">Copy</span>
+                      </>
+                    )}
+                  </Button>
+                </div>
+                <p className="text-xs text-muted-foreground">Use this key for API integrations and webhook authentication</p>
+              </div>
+
+              {/* Secret Key */}
+              <div className="space-y-2">
+                <Label htmlFor="secret-key">Secret Key</Label>
+                <div className="flex gap-2">
+                  <Input
+                    id="secret-key"
+                    type="password"
+                    value="••••••••••••••••"
+                    disabled
+                    className="border-border opacity-75 font-mono text-sm"
+                  />
+                  <Button variant="outline" size="sm" className="flex-shrink-0">
+                    <Copy className="h-4 w-4" />
+                    <span className="ml-1">Copy</span>
+                  </Button>
+                </div>
+                <p className="text-xs text-muted-foreground">Keep this key secret and never share it publicly</p>
+              </div>
+
+              {/* Regenerate Keys */}
+              <div className="rounded-lg border border-amber-200 bg-amber-50 p-4 dark:border-amber-900 dark:bg-amber-950">
+                <p className="text-sm font-medium text-amber-900 dark:text-amber-200 mb-2">Regenerate Keys</p>
+                <p className="text-xs text-amber-800 dark:text-amber-300 mb-3">
+                  Regenerating your keys will invalidate all existing API connections. This action cannot be undone.
+                </p>
+                <Button variant="outline" className="border-amber-300 text-amber-900 hover:bg-amber-100 dark:border-amber-700 dark:text-amber-200 dark:hover:bg-amber-900">
+                  Regenerate Keys
+                </Button>
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* Code Management */}
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <Code className="h-5 w-5" />
+                Redemption Codes
+              </CardTitle>
+              <CardDescription>View codes you&apos;ve generated or manage promotional codes</CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <div className="rounded-lg border border-border bg-muted/30 p-4">
+                <p className="text-sm text-muted-foreground">
+                  No active redemption codes yet. Contact support to generate promotional codes for your referrals.
+                </p>
+              </div>
+
+              {/* Code History Table */}
+              <div className="overflow-x-auto">
+                <table className="w-full text-sm">
+                  <thead>
+                    <tr className="border-b border-border">
+                      <th className="px-4 py-2 text-left font-medium text-muted-foreground">Code</th>
+                      <th className="px-4 py-2 text-left font-medium text-muted-foreground">Credits</th>
+                      <th className="px-4 py-2 text-left font-medium text-muted-foreground">Uses</th>
+                      <th className="px-4 py-2 text-left font-medium text-muted-foreground">Status</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr className="border-b border-border/50 hover:bg-muted/50">
+                      <td className="px-4 py-3 font-mono text-sm">WELCOME50</td>
+                      <td className="px-4 py-3">50</td>
+                      <td className="px-4 py-3">∞ Unlimited</td>
+                      <td className="px-4 py-3">
+                        <Badge className="bg-green-500/20 text-green-700 dark:text-green-300 border-0">Active</Badge>
+                      </td>
+                    </tr>
+                    <tr className="border-b border-border/50 hover:bg-muted/50">
+                      <td className="px-4 py-3 font-mono text-sm">TRADEDADDY100</td>
+                      <td className="px-4 py-3">100</td>
+                      <td className="px-4 py-3">2/5</td>
+                      <td className="px-4 py-3">
+                        <Badge className="bg-green-500/20 text-green-700 dark:text-green-300 border-0">Active</Badge>
+                      </td>
+                    </tr>
+                    <tr className="hover:bg-muted/50">
+                      <td className="px-4 py-3 font-mono text-sm">REFERRAL500</td>
+                      <td className="px-4 py-3">500</td>
+                      <td className="px-4 py-3">0/1</td>
+                      <td className="px-4 py-3">
+                        <Badge className="bg-blue-500/20 text-blue-700 dark:text-blue-300 border-0">Pending</Badge>
+                      </td>
+                    </tr>
+                  </tbody>
+                </table>
               </div>
             </CardContent>
           </Card>

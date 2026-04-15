@@ -66,7 +66,16 @@ const navigationItems: NavItem[] = [
   },
   { title: 'Learn', href: '/academy', icon: BookOpen },
   { title: 'Community', href: '/community', icon: Users },
-  { title: 'Profile', href: '/profile', icon: User },
+  {
+    title: 'Profile',
+    icon: User,
+    expandable: true,
+    children: [
+      { title: 'Account', href: '/profile' },
+      { title: 'Settings', href: '/profile?tab=settings' },
+      { title: 'Code', href: '/profile?tab=code' },
+    ]
+  },
   { title: 'Traders Talk Room', href: '/traders-talk', icon: MessageCircle },
 ]
 
