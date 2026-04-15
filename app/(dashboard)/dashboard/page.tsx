@@ -69,7 +69,7 @@ export default function DashboardPage() {
         <SystemsOperational />
 
         {/* Welcome Message */}
-        {profile && <WelcomeMessage displayName={profile.display_name} />}
+        {profile && <WelcomeMessage displayName={profile.display_name || undefined} />}
 
         {/* Quick Stats */}
         {profile && <QuickStats stats={stats} profile={profile} />}
