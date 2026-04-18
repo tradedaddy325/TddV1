@@ -2,14 +2,14 @@
 
 /**
  * Test Claude API Key
- * Verifies the CLAUDE_API_KEY environment variable works
+ * Verifies the ANTHROPIC_API_KEY environment variable works
  */
 
 async function testClaudeAPI() {
-  const apiKey = process.env.CLAUDE_API_KEY;
+  const apiKey = process.env.ANTHROPIC_API_KEY || process.env.CLAUDE_API_KEY;
 
   if (!apiKey) {
-    console.error('[ERROR] CLAUDE_API_KEY environment variable not set');
+    console.error('[ERROR] ANTHROPIC_API_KEY or CLAUDE_API_KEY environment variable not set');
     process.exit(1);
   }
 
