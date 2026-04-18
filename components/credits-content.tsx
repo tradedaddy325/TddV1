@@ -4,7 +4,7 @@ import { useState } from 'react'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
-import { Zap, ShoppingCart, History, Info } from 'lucide-react'
+import { Zap, ShoppingCart, History, Info, Gift, Copy, Check } from 'lucide-react'
 
 interface CreditPackage {
   credits: number
@@ -24,35 +24,58 @@ const creditPackages: CreditPackage[] = [
 export function CreditsContent() {
   const [selectedPackage, setSelectedPackage] = useState<CreditPackage | null>(null)
   const [isProcessing, setIsProcessing] = useState(false)
+  const [codeInput, setCodeInput] = useState('')
+  const [redeeming, setRedeeming] = useState(false)
+  const [codeMessage, setCodeMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(null)
+  const [copied, setCopied] = useState(false)
 
-  const handleCheckout = async (pkg: CreditPackage) => {
-    setSelectedPackage(pkg)
-    setIsProcessing(true)
-    
+  const handleRedeemCode = async () => {
+    if (!codeInput.trim()) {
+      setCodeMessage({ type: 'error', text: 'Please enter a code' })
+      return
+    }
+
+    setRedeeming(true)
+    setCodeMessage(null)
     try {
-      const response = await fetch('/api/payments/checkout', {
+      const response = await fetch('/api/credits/redeem-code', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          credits: pkg.credits,
-          amount: pkg.price * 100, // Convert to cents
-          description: `${pkg.credits} TRADEDADDY Credits`,
-          returnUrl: window.location.origin + '/credits?success=true',
-          cancelUrl: window.location.origin + '/credits?canceled=true',
+          code: codeInput.trim().toUpperCase(),
         }),
       })
 
-      if (!response.ok) throw new Error('Checkout failed')
-      
-      const { paymentUrl } = await response.json()
-      if (paymentUrl) {
-        window.location.href = paymentUrl
+      const data = await response.json()
+
+      if (!response.ok) {
+        setCodeMessage({ type: 'error', text: data.error || 'Failed to redeem code' })
+        return
       }
+
+      setCodeMessage({ 
+        type: 'success', 
+        text: `✓ Successfully redeemed! You received ${data.creditsAdded} credits.` 
+      })
+      setCodeInput('')
+      
+      // Refresh page to show new balance
+      setTimeout(() => {
+        window.location.reload()
+      }, 1500)
     } catch (error) {
-      console.error('Error processing checkout:', error)
-      alert('Payment processing failed. Please try again.')
-      setIsProcessing(false)
+      console.error('[v0] Error redeeming code:', error)
+      setCodeMessage({ type: 'error', text: 'An error occurred while redeeming the code' })
+    } finally {
+      setRedeeming(false)
     }
+  }
+
+  const copyReferralLink = () => {
+    const link = `${window.location.origin}?ref=tradedaddy`
+    navigator.clipboard.writeText(link)
+    setCopied(true)
+    setTimeout(() => setCopied(false), 2000)
   }
 
   return (
@@ -62,6 +85,47 @@ export function CreditsContent() {
         <h1 className="text-3xl font-bold">Buy Credits</h1>
         <p className="text-muted-foreground">Use credits to access premium features and AI analysis</p>
       </div>
+
+      {/* Redeem Code Section */}
+      <Card className="border-purple-600 bg-purple-900/10">
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <Gift className="w-5 h-5 text-purple-400" />
+            Redeem Credit Code
+          </CardTitle>
+          <CardDescription>Enter a promotional code to receive credits</CardDescription>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          {codeMessage && (
+            <div className={`p-3 rounded-lg text-sm flex items-center gap-2 ${
+              codeMessage.type === 'success' 
+                ? 'bg-green-900/30 border border-green-800 text-green-300'
+                : 'bg-red-900/30 border border-red-800 text-red-300'
+            }`}>
+              {codeMessage.text}
+            </div>
+          )}
+
+          <div className="flex gap-2">
+            <input
+              type="text"
+              value={codeInput}
+              onChange={(e) => setCodeInput(e.target.value)}
+              onKeyDown={(e) => e.key === 'Enter' && handleRedeemCode()}
+              placeholder="Enter code (e.g., WELCOME50)"
+              disabled={redeeming}
+              className="flex-1 px-4 py-2 bg-background border border-input rounded-md text-sm focus:outline-none focus:border-purple-600 disabled:opacity-50 font-mono uppercase"
+            />
+            <Button
+              onClick={handleRedeemCode}
+              disabled={redeeming || !codeInput.trim()}
+              className="px-6"
+            >
+              {redeeming ? 'Redeeming...' : 'Redeem'}
+            </Button>
+          </div>
+        </CardContent>
+      </Card>
 
       {/* Credit Packages */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
@@ -95,7 +159,33 @@ export function CreditsContent() {
               </div>
 
               <Button
-                onClick={() => handleCheckout(pkg)}
+                onClick={() => {
+                  setSelectedPackage(pkg)
+                  setIsProcessing(true)
+                  
+                  fetch('/api/payments/checkout', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                      credits: pkg.credits,
+                      amount: pkg.price * 100,
+                      description: `${pkg.credits} TRADEDADDY Credits`,
+                      returnUrl: window.location.origin + '/credits?success=true',
+                      cancelUrl: window.location.origin + '/credits?canceled=true',
+                    }),
+                  })
+                  .then(res => res.json())
+                  .then(data => {
+                    if (data.paymentUrl) {
+                      window.location.href = data.paymentUrl
+                    }
+                  })
+                  .catch(err => {
+                    console.error('Checkout error:', err)
+                    alert('Payment processing failed. Please try again.')
+                    setIsProcessing(false)
+                  })
+                }}
                 disabled={isProcessing && selectedPackage === pkg}
                 className="w-full"
                 variant={pkg.popular ? 'default' : 'outline'}
