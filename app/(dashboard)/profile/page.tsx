@@ -1,456 +1,425 @@
 "use client"
 
 import { useState, useEffect } from "react"
-import { User, CreditCard, Zap, Crown, Settings, LogOut, Shield, Bell, History } from "lucide-react"
-import { Button } from "@/components/ui/button"
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { Badge } from "@/components/ui/badge"
-import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
-import { Switch } from "@/components/ui/switch"
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
-import { createClient } from "@/lib/supabase/client"
+import { useSession, signOut } from "next-auth/react"
 import { useRouter } from "next/navigation"
-import useSWR, { mutate } from "swr"
-import type { Profile } from "@/lib/types"
+import {
+  User,
+  Mail,
+  Wallet,
+  RefreshCw,
+  Gift,
+  HelpCircle,
+  LogOut,
+  Crown,
+  Calendar,
+  CheckCircle,
+  ChevronDown,
+  ArrowRight,
+  Zap,
+  Shield,
+  TrendingUp,
+} from "lucide-react"
 
-const fetcher = async () => {
-  const supabase = createClient()
-  const { data: { user } } = await supabase.auth.getUser()
-  if (!user) return null
-
-  const { data, error } = await supabase
-    .from("profiles")
-    .select("*")
-    .eq("id", user.id)
-    .single()
-
-  if (error) throw error
-  return { ...data, email: user.email } as Profile & { email: string }
+interface ProfileData {
+  username?: string
+  email?: string
+  credits?: number
+  tier?: string
+  subscriptions?: Subscription[]
+  coupons?: CouponHistory[]
+  referral_code?: string
 }
 
-const creditPackages = [
-  { id: "starter", name: "Starter Pack", credits: 50, price: 49, popular: false },
-  { id: "trader", name: "Trader Pack", credits: 150, price: 129, popular: true },
-  { id: "pro", name: "Pro Pack", credits: 300, price: 249, popular: false },
-  { id: "elite", name: "Elite Pack", credits: 500, price: 399, popular: false },
-]
+interface Subscription {
+  name: string
+  credits_per_period: number
+  status: "active" | "auto-renew" | "expired"
+  next_renewal?: string
+  access_ends?: string
+}
 
-const subscriptionTiers = [
-  {
-    id: "pro",
-    name: "Pro",
-    price: 249,
-    features: ["500 credits/month", "All calculators", "Unlimited journal", "Full academy access", "Priority support"],
-    popular: true,
-  },
-  {
-    id: "elite",
-    name: "Elite",
-    price: 499,
-    features: ["Unlimited credits", "All Pro features", "AI trade analysis", "Advanced analytics", "Dedicated support"],
-    popular: false,
-  },
-]
+interface CouponHistory {
+  code: string
+  credits: number
+  date: string
+}
 
 export default function ProfilePage() {
-  const { data: profile, isLoading } = useSWR("profile", fetcher)
-  const [isUpdating, setIsUpdating] = useState(false)
-  const [displayName, setDisplayName] = useState("")
-  const [username, setUsername] = useState("")
+  const { data: session } = useSession()
   const router = useRouter()
+  const [profile, setProfile] = useState<ProfileData | null>(null)
+  const [loading, setLoading] = useState(true)
+  const [topUpAmount, setTopUpAmount] = useState("100")
+  const [couponCode, setCouponCode] = useState("")
+  const [couponLoading, setCouponLoading] = useState(false)
+  const [couponMsg, setCouponMsg] = useState("")
+  const [selectedInfluencer, setSelectedInfluencer] = useState("")
+  const [logoutLoading, setLogoutLoading] = useState(false)
 
   useEffect(() => {
-    if (profile) {
-      setDisplayName(profile.display_name || "")
-      setUsername(profile.username || "")
+    async function fetchProfile() {
+      try {
+        const res = await fetch("/api/profile")
+        if (res.ok) {
+          const data = await res.json()
+          setProfile(data)
+        }
+      } catch (e) {
+        console.error(e)
+      } finally {
+        setLoading(false)
+      }
     }
-  }, [profile])
+    fetchProfile()
+  }, [])
 
-  const handleUpdateProfile = async () => {
-    if (!profile) return
-    setIsUpdating(true)
+  const handleTopUp = (amount: string) => {
+    router.push(`/credits?amount=${amount}`)
+  }
 
-    const supabase = createClient()
-    await supabase
-      .from("profiles")
-      .update({
-        display_name: displayName,
-        username: username,
-        updated_at: new Date().toISOString(),
+  const handleRedeemCoupon = async () => {
+    if (!couponCode.trim()) return
+    setCouponLoading(true)
+    setCouponMsg("")
+    try {
+      const res = await fetch("/api/credits/redeem-code", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ code: couponCode }),
       })
-      .eq("id", profile.id)
-
-    mutate("profile")
-    setIsUpdating(false)
-  }
-
-  const handleSignOut = async () => {
-    const supabase = createClient()
-    await supabase.auth.signOut()
-    // Wrap router operations in setTimeout to ensure they happen after initialization
-    setTimeout(() => {
-      router.push("/")
-      router.refresh()
-    }, 0)
-  }
-
-  const handleBuyCredits = async (packageId: string) => {
-    const pkg = creditPackages.find(p => p.id === packageId)
-    if (!pkg) return
-
-    // Initiate Yoco checkout
-    const response = await fetch("/api/payments/checkout", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        type: "credits",
-        packageId: pkg.id,
-        amount: pkg.price * 100, // Convert to cents
-        credits: pkg.credits,
-      }),
-    })
-
-    const { paymentUrl } = await response.json()
-    if (paymentUrl) {
-      window.location.href = paymentUrl
+      const data = await res.json()
+      if (res.ok) {
+        setCouponMsg(`✓ ${data.message || "Coupon redeemed successfully!"}`)
+        setCouponCode("")
+        // refresh profile
+        const profileRes = await fetch("/api/profile")
+        if (profileRes.ok) setProfile(await profileRes.json())
+      } else {
+        setCouponMsg(`✗ ${data.error || "Invalid coupon code"}`)
+      }
+    } catch {
+      setCouponMsg("✗ Something went wrong")
+    } finally {
+      setCouponLoading(false)
     }
   }
 
-  const handleSubscribe = async (tierId: string) => {
-    const tier = subscriptionTiers.find(t => t.id === tierId)
-    if (!tier) return
-
-    const response = await fetch("/api/payments/checkout", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        type: "subscription",
-        tierId: tier.id,
-        amount: tier.price * 100,
-      }),
-    })
-
-    const { paymentUrl } = await response.json()
-    if (paymentUrl) {
-      window.location.href = paymentUrl
-    }
+  const handleLogout = async () => {
+    setLogoutLoading(true)
+    await signOut({ callbackUrl: "/auth/login" })
   }
 
-  const getTierBadge = (tier: string) => {
-    switch (tier) {
-      case "free":
-        return <Badge variant="outline" className="border-muted-foreground/30 text-muted-foreground">FREE</Badge>
-      case "pro":
-        return <Badge variant="outline" className="border-terminal-yellow/30 text-terminal-yellow">PRO</Badge>
-      case "elite":
-        return <Badge className="border-0 bg-gradient-to-r from-terminal-yellow to-amber-500 text-background">ELITE</Badge>
-      default:
-        return null
-    }
+  const userEmail = session?.user?.email || profile?.email || ""
+  const username = session?.user?.name || profile?.username || userEmail.split("@")[0] || "Trader"
+  const credits = profile?.credits ?? 0
+  const tier = profile?.tier || "free"
+  const isPremium = tier === "premium" || tier === "pro"
+
+  const subscriptions: Subscription[] = profile?.subscriptions || []
+  const coupons: CouponHistory[] = profile?.coupons || []
+
+  const PRESET_AMOUNTS = ["100", "250", "500", "699", "1000"]
+
+  const getStatusColor = (status: string) => {
+    if (status === "auto-renew") return "bg-green-500/20 text-green-400 border border-green-500/40"
+    if (status === "active") return "bg-yellow-500/20 text-yellow-400 border border-yellow-500/40"
+    return "bg-gray-700/50 text-gray-400 border border-gray-600/40"
   }
 
-  if (isLoading) {
+  if (loading) {
     return (
-      <div className="flex h-[50vh] items-center justify-center">
-        <p className="animate-pulse font-mono text-terminal-green">Loading profile...</p>
+      <div className="flex items-center justify-center min-h-screen bg-[#0a0a0a]">
+        <div className="flex flex-col items-center gap-3">
+          <div className="w-8 h-8 border-2 border-green-500 border-t-transparent rounded-full animate-spin" />
+          <p className="text-gray-500 text-sm font-mono">Loading profile...</p>
+        </div>
       </div>
     )
   }
 
   return (
-    <div className="space-y-6">
-      <div>
-        <h1 className="text-3xl font-bold tracking-tight">
-          User Profile
-        </h1>
-        <p className="text-muted-foreground mt-2">
-          Manage your account, credits, and subscription
-        </p>
+    <div className="min-h-screen bg-[#0a0a0a] text-white">
+      {/* Header */}
+      <div className="sticky top-0 z-10 bg-[#0a0a0a]/90 backdrop-blur-md border-b border-white/5 px-4 py-4">
+        <div className="flex items-center justify-between max-w-lg mx-auto">
+          <h1 className="text-2xl font-bold tracking-tight">Profile</h1>
+          <button
+            onClick={() => router.push("/chat")}
+            className="flex items-center gap-2 px-4 py-2 rounded-xl bg-white/5 border border-white/10 text-sm font-medium hover:bg-white/10 transition-colors"
+          >
+            <HelpCircle className="w-4 h-4" />
+            Support
+          </button>
+        </div>
       </div>
 
-      <Tabs defaultValue="account" className="w-full">
-        <TabsList className="bg-muted/50">
-          <TabsTrigger value="account" className="font-mono">
-            <User className="mr-2 h-4 w-4" />
-            Account
-          </TabsTrigger>
-          <TabsTrigger value="credits" className="font-mono">
-            <Zap className="mr-2 h-4 w-4" />
-            Credits
-          </TabsTrigger>
-          <TabsTrigger value="subscription" className="font-mono">
-            <Crown className="mr-2 h-4 w-4" />
-            Subscription
-          </TabsTrigger>
-          <TabsTrigger value="settings" className="font-mono">
-            <Settings className="mr-2 h-4 w-4" />
-            Settings
-          </TabsTrigger>
-        </TabsList>
+      <div className="max-w-lg mx-auto px-4 py-6 space-y-4 pb-24">
 
-        <TabsContent value="account" className="mt-6 space-y-6">
-          <Card>
-            <CardHeader>
-              <CardTitle>Profile Information</CardTitle>
-              <CardDescription>Update your account details</CardDescription>
-            </CardHeader>
-            <CardContent className="space-y-6">
-              <div className="flex items-center gap-6">
-                <Avatar className="h-20 w-20 border-2 border-accent">
-                  <AvatarImage src={profile?.avatar_url || ""} />
-                  <AvatarFallback className="bg-accent text-background">
-                    {profile?.display_name?.charAt(0) || profile?.email?.charAt(0) || "U"}
-                  </AvatarFallback>
-                </Avatar>
-                <div>
-                  <Button variant="outline" size="sm">
-                    Change Avatar
-                  </Button>
-                </div>
+        {/* User Card */}
+        <div className="bg-[#141414] rounded-2xl border border-white/8 p-4">
+          <div className="flex items-center gap-4">
+            <div className="w-14 h-14 rounded-full bg-green-500/20 border border-green-500/30 flex items-center justify-center flex-shrink-0">
+              <User className="w-7 h-7 text-green-400" />
+            </div>
+            <div className="min-w-0">
+              <p className="font-bold text-lg leading-tight truncate">{username}</p>
+              <div className="flex items-center gap-1.5 mt-0.5">
+                <Mail className="w-3.5 h-3.5 text-gray-500 flex-shrink-0" />
+                <p className="text-gray-400 text-sm truncate">{userEmail}</p>
               </div>
+              {isPremium && (
+                <span className="inline-flex items-center gap-1 mt-1.5 px-2 py-0.5 rounded-full bg-yellow-500/15 border border-yellow-500/30 text-yellow-400 text-xs font-semibold">
+                  <Crown className="w-3 h-3" />
+                  PREMIUM
+                </span>
+              )}
+            </div>
+          </div>
+        </div>
 
-              <div className="grid gap-4 md:grid-cols-2">
-                <div className="space-y-2">
-                  <Label>Display Name</Label>
-                  <Input
-                    value={displayName}
-                    onChange={(e) => setDisplayName(e.target.value)}
-                    className="border-border"
-                  />
+        {/* Upgrade to Premium (if not premium) */}
+        {!isPremium && (
+          <div className="bg-[#141414] rounded-2xl border border-yellow-500/20 p-5">
+            <div className="flex items-center gap-2 mb-3">
+              <Crown className="w-5 h-5 text-yellow-400" />
+              <h2 className="text-lg font-bold">Upgrade to Premium</h2>
+            </div>
+            <p className="text-gray-400 text-sm mb-4">699 credits/month — unlock everything except the trade copier.</p>
+            <div className="space-y-2 mb-5">
+              {[
+                "Unlimited Signals & Setups",
+                "Unlimited AI Signals (all pairs)",
+                "Unlimited Economic News Signals",
+                "Unlimited Weekend Gap Signals",
+                "Full Trading Journal with AI coaching",
+                "Macro Desk — macro market intelligence",
+                "Sentiment Intelligence — market psychology",
+                "Polymarket Pulse — prediction market data",
+                "Full Trading Academy access",
+                "Psychology Coaching & Tilt Monitor",
+              ].map((feature) => (
+                <div key={feature} className="flex items-start gap-2.5">
+                  <div className="w-1.5 h-1.5 rounded-full bg-yellow-400 mt-1.5 flex-shrink-0" />
+                  <span className="text-gray-300 text-sm">{feature}</span>
                 </div>
-                <div className="space-y-2">
-                  <Label>Username</Label>
-                  <Input
-                    value={username}
-                    onChange={(e) => setUsername(e.target.value)}
-                    className="border-border"
-                  />
-                </div>
-                <div className="space-y-2">
-                  <Label>Email</Label>
-                  <Input
-                    value={profile?.email || ""}
-                    disabled
-                    className="border-border opacity-50"
-                  />
-                </div>
-                <div className="space-y-2">
-                  <Label>Member Since</Label>
-                  <Input
-                    value={profile?.created_at ? new Date(profile.created_at).toLocaleDateString() : ""}
-                    disabled
-                    className="border-border opacity-50"
-                  />
-                </div>
+              ))}
+            </div>
+            <button
+              onClick={() => handleTopUp("699")}
+              className="w-full flex items-center justify-center gap-2 py-3.5 rounded-xl bg-yellow-500/80 hover:bg-yellow-500 text-black font-bold text-sm transition-colors"
+            >
+              <Crown className="w-4 h-4" />
+              Use 699 credits
+            </button>
+            <button
+              onClick={() => router.push("/credits")}
+              className="w-full flex items-center justify-center gap-2 py-3.5 rounded-xl bg-white/5 border border-white/10 text-white font-medium text-sm mt-2 hover:bg-white/10 transition-colors"
+            >
+              <Crown className="w-4 h-4" />
+              Pay with Yoco
+            </button>
+          </div>
+        )}
+
+        {/* Credits Wallet */}
+        <div className="bg-[#141414] rounded-2xl border border-white/8 p-5">
+          <div className="flex items-center justify-between mb-4">
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 rounded-xl bg-green-500/15 border border-green-500/20 flex items-center justify-center">
+                <Wallet className="w-5 h-5 text-green-400" />
               </div>
+              <div>
+                <h2 className="font-bold text-base">Credits Wallet</h2>
+                <p className="text-gray-500 text-xs">1 credit = R1</p>
+              </div>
+            </div>
+            <span className="px-3 py-1.5 rounded-full bg-green-500/20 border border-green-500/30 text-green-400 font-bold text-sm">
+              {credits} credits
+            </span>
+          </div>
 
-              <div className="flex items-center justify-between rounded-lg border border-accent/30 bg-accent/5 p-4">
-                <div className="flex items-center gap-3">
-                  <Zap className="h-5 w-5 text-accent" />
-                  <div>
-                    <p className="font-medium">Available Credits</p>
-                    <p className="text-sm text-muted-foreground">Use credits for AI analysis</p>
+          {/* Preset amounts */}
+          <div className="grid grid-cols-3 gap-2 mb-3">
+            {PRESET_AMOUNTS.slice(0, 3).map((amt) => (
+              <button
+                key={amt}
+                onClick={() => setTopUpAmount(amt)}
+                className={`py-2.5 rounded-xl text-sm font-semibold border transition-all ${
+                  topUpAmount === amt
+                    ? "bg-green-500/20 border-green-500/50 text-green-400"
+                    : "bg-white/5 border-white/8 text-gray-300 hover:bg-white/10"
+                }`}
+              >
+                Load {amt}
+              </button>
+            ))}
+          </div>
+          <div className="grid grid-cols-2 gap-2 mb-3">
+            {PRESET_AMOUNTS.slice(3).map((amt) => (
+              <button
+                key={amt}
+                onClick={() => setTopUpAmount(amt)}
+                className={`py-2.5 rounded-xl text-sm font-semibold border transition-all ${
+                  topUpAmount === amt
+                    ? "bg-green-500/20 border-green-500/50 text-green-400"
+                    : "bg-white/5 border-white/8 text-gray-300 hover:bg-white/10"
+                }`}
+              >
+                Load {amt}
+              </button>
+            ))}
+          </div>
+
+          {/* Custom amount + top up */}
+          <div className="flex gap-2">
+            <input
+              type="number"
+              value={topUpAmount}
+              onChange={(e) => setTopUpAmount(e.target.value)}
+              className="flex-1 bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white text-sm font-mono focus:outline-none focus:border-green-500/50 focus:bg-white/8"
+              placeholder="Custom amount"
+              min="10"
+            />
+            <button
+              onClick={() => handleTopUp(topUpAmount)}
+              className="px-5 py-3 rounded-xl bg-green-500 hover:bg-green-400 text-black font-bold text-sm transition-colors flex-shrink-0"
+            >
+              Top up
+            </button>
+          </div>
+        </div>
+
+        {/* Subscriptions */}
+        {subscriptions.length > 0 && (
+          <div className="bg-[#141414] rounded-2xl border border-white/8 p-5">
+            <div className="flex items-center gap-2 mb-4">
+              <RefreshCw className="w-5 h-5 text-green-400" />
+              <h2 className="font-bold text-base">Subscriptions</h2>
+            </div>
+            <div className="space-y-3">
+              {subscriptions.map((sub, i) => (
+                <div key={i} className="bg-white/3 rounded-xl border border-white/6 p-4">
+                  <p className="font-semibold text-sm mb-0.5 font-mono">{sub.name}</p>
+                  <p className="text-gray-500 text-xs mb-3">{sub.credits_per_period} credits per 30 days</p>
+                  <span className={`inline-block px-3 py-1 rounded-full text-xs font-bold uppercase mb-3 ${getStatusColor(sub.status)}`}>
+                    {sub.status === "auto-renew" ? "AUTO-RENEW" : sub.status.toUpperCase()}
+                  </span>
+                  <div className="flex items-center gap-2 text-gray-400 text-xs">
+                    <Calendar className="w-3.5 h-3.5" />
+                    <span>{sub.next_renewal ? `Next renewal` : `Access ends`}</span>
+                    <span className="text-white font-medium">{sub.next_renewal || sub.access_ends}</span>
                   </div>
                 </div>
-                <span className="text-2xl font-bold text-accent">{profile?.credits || 0}</span>
-              </div>
+              ))}
+            </div>
+          </div>
+        )}
 
-              <div className="flex items-center justify-between rounded-lg border border-accent/30 bg-accent/5 p-4">
-                <div className="flex items-center gap-3">
-                  <Crown className="h-5 w-5 text-accent" />
-                  <div>
-                    <p className="font-medium">Subscription Tier</p>
-                    <p className="text-sm text-muted-foreground">Your current plan</p>
+        {/* Add Coupon */}
+        <div className="bg-[#141414] rounded-2xl border border-white/8 p-5">
+          <div className="flex items-center gap-2 mb-1">
+            <Gift className="w-5 h-5 text-green-400" />
+            <h2 className="font-bold text-base">Add Coupon</h2>
+          </div>
+          <p className="text-gray-500 text-sm mb-4">Got a promo code? Redeem it here to receive free wallet credits.</p>
+          <input
+            type="text"
+            value={couponCode}
+            onChange={(e) => setCouponCode(e.target.value.toUpperCase())}
+            placeholder="Enter coupon code"
+            className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white text-sm font-mono focus:outline-none focus:border-green-500/50 placeholder:text-gray-600 mb-3"
+            onKeyDown={(e) => e.key === "Enter" && handleRedeemCoupon()}
+          />
+          <button
+            onClick={handleRedeemCoupon}
+            disabled={couponLoading || !couponCode.trim()}
+            className="w-full flex items-center justify-center gap-2 py-3.5 rounded-xl bg-green-500 hover:bg-green-400 disabled:opacity-40 disabled:cursor-not-allowed text-black font-bold text-sm transition-colors"
+          >
+            <Gift className="w-4 h-4" />
+            {couponLoading ? "Redeeming..." : "Redeem"}
+          </button>
+          {couponMsg && (
+            <p className={`mt-2.5 text-sm text-center font-mono ${couponMsg.startsWith("✓") ? "text-green-400" : "text-red-400"}`}>
+              {couponMsg}
+            </p>
+          )}
+
+          {coupons.length > 0 && (
+            <div className="mt-4">
+              <p className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2">Recent Coupon Credits</p>
+              <div className="space-y-2">
+                {coupons.slice(0, 5).map((c, i) => (
+                  <div key={i} className="flex items-center justify-between bg-white/3 rounded-xl px-4 py-3 border border-white/6">
+                    <div>
+                      <p className="text-sm font-mono font-bold text-white">{c.code}</p>
+                      <p className="text-xs text-gray-500">{c.date}</p>
+                    </div>
+                    <span className="px-3 py-1 rounded-full bg-green-500/20 border border-green-500/30 text-green-400 text-xs font-bold">
+                      +{c.credits} credits
+                    </span>
                   </div>
-                </div>
-                {getTierBadge(profile?.subscription_tier || "free")}
-              </div>
-
-              <div className="flex justify-end gap-3">
-                <Button
-                  onClick={handleUpdateProfile}
-                  disabled={isUpdating}
-                  className="bg-accent text-background hover:bg-accent/90"
-                >
-                  {isUpdating ? "Saving..." : "Save Changes"}
-                </Button>
-              </div>
-            </CardContent>
-          </Card>
-        </TabsContent>
-
-        <TabsContent value="credits" className="mt-6 space-y-6">
-          <Card>
-            <CardHeader>
-              <CardTitle>
-                <Zap className="mr-2 inline h-5 w-5 text-accent" />
-                Buy Credits
-              </CardTitle>
-              <CardDescription>
-                Credits are used for AI trade analysis. Choose a package that suits your trading volume.
-              </CardDescription>
-            </CardHeader>
-            <CardContent>
-              <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-                {creditPackages.map((pkg) => (
-                  <Card 
-                    key={pkg.id} 
-                    className={`relative border-border transition-all hover:border-accent/50 ${
-                      pkg.popular ? "ring-2 ring-accent" : ""
-                    }`}
-                  >
-                    {pkg.popular && (
-                      <Badge className="absolute -top-2 left-1/2 -translate-x-1/2 bg-accent text-background">
-                        POPULAR
-                      </Badge>
-                    )}
-                    <CardContent className="pt-6 text-center">
-                      <h3 className="text-lg font-bold">{pkg.name}</h3>
-                      <div className="my-4">
-                        <span className="text-3xl font-bold text-accent">{pkg.credits}</span>
-                        <span className="text-muted-foreground"> credits</span>
-                      </div>
-                      <p className="mb-4 text-2xl font-bold">R{pkg.price}</p>
-                      <Button 
-                        onClick={() => handleBuyCredits(pkg.id)}
-                        className="w-full bg-white text-black hover:bg-white/90 font-semibold"
-                      >
-                        Buy Now
-                      </Button>
-                    </CardContent>
-                  </Card>
                 ))}
               </div>
-            </CardContent>
-          </Card>
+            </div>
+          )}
+        </div>
 
-          <Card>
-            <CardHeader>
-              <CardTitle>
-                <History className="mr-2 inline h-5 w-5" />
-                Credit History
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <p className="text-center text-muted-foreground">No credit transactions yet</p>
-            </CardContent>
-          </Card>
-        </TabsContent>
+        {/* Change Influencer */}
+        <div className="bg-[#141414] rounded-2xl border border-white/8 p-5">
+          <div className="flex items-center gap-2 mb-1">
+            <RefreshCw className="w-4 h-4 text-green-400" />
+            <h2 className="font-bold text-base">Change Influencer</h2>
+          </div>
+          <p className="text-sm text-gray-400 mb-1">Current influencer: <span className="text-white font-semibold">Main TradeDaddy site</span></p>
+          <p className="text-xs text-gray-500 mb-4">Choose the influencer you want to move to and send your request for approval.</p>
+          <div className="relative mb-3">
+            <select
+              value={selectedInfluencer}
+              onChange={(e) => setSelectedInfluencer(e.target.value)}
+              className="w-full appearance-none bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-sm text-gray-300 focus:outline-none focus:border-green-500/50 pr-10"
+            >
+              <option value="" className="bg-[#1a1a1a]">Select an influencer</option>
+              <option value="main" className="bg-[#1a1a1a]">Main TradeDaddy site</option>
+            </select>
+            <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-500 pointer-events-none" />
+          </div>
+          <button className="flex items-center gap-2 px-4 py-3 rounded-xl bg-green-500/15 border border-green-500/30 text-green-400 font-semibold text-sm hover:bg-green-500/25 transition-colors">
+            <RefreshCw className="w-4 h-4" />
+            Request Influencer Change
+          </button>
+        </div>
 
-        <TabsContent value="subscription" className="mt-6 space-y-6">
-          <Card>
-            <CardHeader>
-              <CardTitle>
-                <Crown className="mr-2 inline h-5 w-5" />
-                Subscription Plans
-              </CardTitle>
-              <CardDescription>
-                Unlock premium features and take your trading to the next level
-              </CardDescription>
-            </CardHeader>
-            <CardContent>
-              <div className="grid gap-6 md:grid-cols-2">
-                {subscriptionTiers.map((tier) => (
-                  <Card 
-                    key={tier.id} 
-                    className={`relative border-border transition-all hover:border-accent/50 ${
-                      tier.popular ? "ring-2 ring-accent" : ""
-                    }`}
-                  >
-                    {tier.popular && (
-                      <Badge className="absolute -top-2 left-1/2 -translate-x-1/2 bg-accent text-background">
-                        MOST POPULAR
-                      </Badge>
-                    )}
-                    <CardContent className="pt-6">
-                      <div className="text-center">
-                        <h3 className="text-xl font-bold">{tier.name}</h3>
-                        <div className="my-4">
-                          <span className="text-4xl font-bold text-accent">R{tier.price}</span>
-                          <span className="text-muted-foreground">/month</span>
-                        </div>
-                      </div>
-                      <ul className="mb-6 space-y-3">
-                        {tier.features.map((feature, i) => (
-                          <li key={i} className="flex items-center gap-2 text-sm">
-                            <div className="h-1.5 w-1.5 rounded-full bg-accent" />
-                            {feature}
-                          </li>
-                        ))}
-                      </ul>
-                      <Button 
-                        onClick={() => handleSubscribe(tier.id)}
-                        className={`w-full font-semibold ${
-                          profile?.subscription_tier === tier.id
-                            ? "bg-muted text-muted-foreground cursor-not-allowed"
-                            : "bg-white text-black hover:bg-white/90"
-                        }`}
-                        disabled={profile?.subscription_tier === tier.id}
-                      >
-                        {profile?.subscription_tier === tier.id ? "Current Plan" : "Subscribe"}
-                      </Button>
-                    </CardContent>
-                  </Card>
-                ))}
-              </div>
-            </CardContent>
-          </Card>
-        </TabsContent>
+        {/* Need Help */}
+        <div className="bg-[#141414] rounded-2xl border border-white/8 p-5">
+          <div className="flex items-center gap-2 mb-1">
+            <HelpCircle className="w-5 h-5 text-green-400" />
+            <h2 className="font-bold text-base">Need help?</h2>
+          </div>
+          <p className="text-gray-400 text-sm mb-4">Open the support desk to chat with the AI assistant or get escalated to the team.</p>
+          <button
+            onClick={() => router.push("/chat")}
+            className="w-full flex items-center justify-center gap-2 py-3.5 rounded-xl bg-green-500 hover:bg-green-400 text-black font-bold text-sm transition-colors"
+          >
+            Open Support
+          </button>
+        </div>
 
-        <TabsContent value="settings" className="mt-6 space-y-6">
-          <Card>
-            <CardHeader>
-              <CardTitle>Preferences</CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-6">
-              <div className="flex items-center justify-between">
-                <div className="flex items-center gap-3">
-                  <Bell className="h-5 w-5 text-muted-foreground" />
-                  <div>
-                    <p className="font-medium">Price Alerts</p>
-                    <p className="text-sm text-muted-foreground">Get notified when prices hit your targets</p>
-                  </div>
-                </div>
-                <Switch />
-              </div>
-              <div className="flex items-center justify-between">
-                <div className="flex items-center gap-3">
-                  <Shield className="h-5 w-5 text-muted-foreground" />
-                  <div>
-                    <p className="font-medium">Two-Factor Authentication</p>
-                    <p className="text-sm text-muted-foreground">Add an extra layer of security</p>
-                  </div>
-                </div>
-                <Switch />
-              </div>
-            </CardContent>
-          </Card>
+        {/* Log Out */}
+        <div className="bg-[#141414] rounded-2xl border border-white/8 p-5">
+          <h2 className="font-bold text-base mb-0.5">Log out</h2>
+          <p className="text-gray-500 text-sm mb-4">Sign out of TradeDaddy on this device.</p>
+          <button
+            onClick={handleLogout}
+            disabled={logoutLoading}
+            className="w-full flex items-center justify-center gap-2 py-3.5 rounded-xl bg-white/5 border border-white/10 text-white font-semibold text-sm hover:bg-red-500/10 hover:border-red-500/30 hover:text-red-400 transition-colors disabled:opacity-50"
+          >
+            <LogOut className="w-4 h-4" />
+            {logoutLoading ? "Signing out..." : "Log Out"}
+          </button>
+        </div>
 
-          <Card>
-            <CardHeader>
-              <CardTitle>Danger Zone</CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="font-medium">Sign Out</p>
-                  <p className="text-sm text-muted-foreground">Log out of your account</p>
-                </div>
-                <Button 
-                  variant="outline" 
-                  onClick={handleSignOut}
-                  className="text-red-500 hover:bg-red-500/10 hover:text-red-500"
-                >
-                  <LogOut className="mr-2 h-4 w-4" />
-                  Sign Out
-                </Button>
-              </div>
-            </CardContent>
-          </Card>
-        </TabsContent>
-      </Tabs>
+      </div>
     </div>
   )
 }

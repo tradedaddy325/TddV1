@@ -6,6 +6,7 @@ import { TerminalGreeting } from '@/components/dashboard/terminal-greeting'
 import { LiveStreamModal } from '@/components/dashboard/live-stream-modal'
 import { AIDailyBrief } from '@/components/dashboard/ai-daily-brief'
 import { MetricPills } from '@/components/dashboard/metric-pills'
+import DailyIntelligenceWidget from '@/components/dashboard/daily-intelligence-widget'
 import type { Profile } from '@/lib/types'
 
 export default function DashboardPage() {
@@ -50,6 +51,7 @@ export default function DashboardPage() {
       <div className="p-6 space-y-6 max-w-7xl">
         <AIDailyBrief />
         <MetricPills />
+        <DailyIntelligenceWidget />
 
         <TerminalGreeting profile={profile} />
 
