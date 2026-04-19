@@ -14,14 +14,14 @@ const actions = [
   {
     title: 'New Trade',
     description: 'Log a trade in your journal',
-    href: '/journal/new',
+    href: '/journal',
     icon: Plus,
     variant: 'default' as const,
   },
   {
-    title: 'Calculators',
+    title: 'Risk Calculator',
     description: 'Pip, lot size, risk tools',
-    href: '/tools',
+    href: '/tools/risk-calculator',
     icon: Calculator,
     variant: 'secondary' as const,
   },
@@ -33,7 +33,7 @@ const actions = [
     variant: 'secondary' as const,
   },
   {
-    title: 'AI Analysis',
+    title: 'Chat',
     description: 'Get AI trade insights',
     href: '/chat',
     icon: MessageSquare,
@@ -42,12 +42,12 @@ const actions = [
   {
     title: 'Buy Credits',
     description: 'Top up your account',
-    href: '/profile/credits',
+    href: '/credits',
     icon: CreditCard,
     variant: 'secondary' as const,
   },
   {
-    title: 'View Macro',
+    title: 'Macro Desk',
     description: 'Economic calendar & news',
     href: '/macro',
     icon: TrendingUp,

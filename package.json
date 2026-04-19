@@ -11,7 +11,6 @@
   "dependencies": {
     "@ai-sdk/react": "^3.0.0",
     "@ai-sdk/xai": "^3.0.77",
-    "@anthropic-ai/sdk": "^0.90.0",
     "@hookform/resolvers": "^3.9.1",
     "@microsoft/signalr": "^8.0.0",
     "@radix-ui/react-accordion": "1.2.12",
@@ -55,7 +54,6 @@
     "input-otp": "1.4.2",
     "lucide-react": "^0.564.0",
     "next": "16.2.0",
-    "next-auth": "^4.24.14",
     "next-themes": "^0.4.6",
     "react": "^19",
     "react-day-picker": "9.13.2",

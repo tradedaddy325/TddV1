@@ -33,8 +33,9 @@ interface NavItem {
 const navigationItems: NavItem[] = [
   { title: 'Dashboard', href: '/dashboard', icon: LayoutDashboard },
   { title: 'Macro Desk', href: '/macro', icon: Globe, locked: true },
-  { title: 'Predictive Markets', href: '/markets', icon: TrendingUp },
-  { title: 'Market Psychology', href: '/psychology', icon: Brain, locked: true },
+  { title: 'Predictive Markets', href: '/predictive-markets', icon: TrendingUp },
+  { title: 'Market Psychology', href: '/market-psychology', icon: Brain },
+  { title: 'Strings', href: '/strings', icon: MessageCircle },
   {
     title: 'Signals',
     icon: TrendingUp,
@@ -65,7 +66,16 @@ const navigationItems: NavItem[] = [
   },
   { title: 'Learn', href: '/academy', icon: BookOpen },
   { title: 'Community', href: '/community', icon: Users },
-  { title: 'Profile', href: '/profile', icon: User },
+  {
+    title: 'Profile',
+    icon: User,
+    expandable: true,
+    children: [
+      { title: 'Account', href: '/profile' },
+      { title: 'Settings', href: '/profile?tab=settings' },
+      { title: 'Code', href: '/profile?tab=code' },
+    ]
+  },
   { title: 'Traders Talk Room', href: '/traders-talk', icon: MessageCircle },
 ]
 
