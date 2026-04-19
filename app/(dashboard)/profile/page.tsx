@@ -119,7 +119,7 @@ export default function ProfilePage() {
   const subscriptions: Subscription[] = profile?.subscriptions || []
   const coupons: CouponHistory[] = profile?.coupons || []
 
-  const PRESET_AMOUNTS = ["100", "250", "500", "699", "1000"]
+  const PRESET_AMOUNTS = ["100", "250", "499", "899", "1499"]
 
   const getStatusColor = (status: string) => {
     if (status === "auto-renew") return "bg-green-500/20 text-green-400 border border-green-500/40"
@@ -185,19 +185,21 @@ export default function ProfilePage() {
               <Crown className="w-5 h-5 text-yellow-400" />
               <h2 className="text-lg font-bold">Upgrade to Premium</h2>
             </div>
-            <p className="text-gray-400 text-sm mb-4">699 credits/month — unlock everything except the trade copier.</p>
+            <p className="text-gray-400 text-sm mb-4">499 credits/month — unlock everything except the trade copier.</p>
             <div className="space-y-2 mb-5">
               {[
-                "Unlimited Signals & Setups",
-                "Unlimited AI Signals (all pairs)",
-                "Unlimited Economic News Signals",
-                "Unlimited Weekend Gap Signals",
-                "Full Trading Journal with AI coaching",
-                "Macro Desk — macro market intelligence",
-                "Sentiment Intelligence — market psychology",
-                "Polymarket Pulse — prediction market data",
-                "Full Trading Academy access",
-                "Psychology Coaching & Tilt Monitor",
+                
+  "Endless Trade Ideas & Setups",
+  "AI-Driven Signals for Every Pair (No Limits)",
+  "Continuous Economic News Signal Coverage",
+  "Weekend Gap Opportunity Alerts",
+  "Smart Trading Journal with Built-In AI Guidance",
+  "Macro Desk — Big Picture Market Analysis",
+  "Sentiment Intelligence — Crowd Behavior Insights",
+  "Polymarket Pulse — Forecast Market Trends",
+  "All-Access Trading Academy",
+  "Performance Psychology Coaching & Tilt Tracking"
+
               ].map((feature) => (
                 <div key={feature} className="flex items-start gap-2.5">
                   <div className="w-1.5 h-1.5 rounded-full bg-yellow-400 mt-1.5 flex-shrink-0" />
@@ -210,7 +212,7 @@ export default function ProfilePage() {
               className="w-full flex items-center justify-center gap-2 py-3.5 rounded-xl bg-yellow-500/80 hover:bg-yellow-500 text-black font-bold text-sm transition-colors"
             >
               <Crown className="w-4 h-4" />
-              Use 699 credits
+              Use 499 credits
             </button>
             <button
               onClick={() => router.push("/credits")}
@@ -364,32 +366,7 @@ export default function ProfilePage() {
             </div>
           )}
         </div>
-
-        {/* Change Influencer */}
-        <div className="bg-[#141414] rounded-2xl border border-white/8 p-5">
-          <div className="flex items-center gap-2 mb-1">
-            <RefreshCw className="w-4 h-4 text-green-400" />
-            <h2 className="font-bold text-base">Change Influencer</h2>
-          </div>
-          <p className="text-sm text-gray-400 mb-1">Current influencer: <span className="text-white font-semibold">Main TradeDaddy site</span></p>
-          <p className="text-xs text-gray-500 mb-4">Choose the influencer you want to move to and send your request for approval.</p>
-          <div className="relative mb-3">
-            <select
-              value={selectedInfluencer}
-              onChange={(e) => setSelectedInfluencer(e.target.value)}
-              className="w-full appearance-none bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-sm text-gray-300 focus:outline-none focus:border-green-500/50 pr-10"
-            >
-              <option value="" className="bg-[#1a1a1a]">Select an influencer</option>
-              <option value="main" className="bg-[#1a1a1a]">Main TradeDaddy site</option>
-            </select>
-            <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-500 pointer-events-none" />
-          </div>
-          <button className="flex items-center gap-2 px-4 py-3 rounded-xl bg-green-500/15 border border-green-500/30 text-green-400 font-semibold text-sm hover:bg-green-500/25 transition-colors">
-            <RefreshCw className="w-4 h-4" />
-            Request Influencer Change
-          </button>
-        </div>
-
+        
         {/* Need Help */}
         <div className="bg-[#141414] rounded-2xl border border-white/8 p-5">
           <div className="flex items-center gap-2 mb-1">
