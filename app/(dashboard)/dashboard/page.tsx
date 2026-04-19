@@ -6,6 +6,7 @@ import { QuickStats } from '@/components/dashboard/quick-stats'
 import { QuickActions } from '@/components/dashboard/quick-actions'
 import { MarketOverview } from '@/components/dashboard/market-overview'
 import { AIDailyBrief } from '@/components/dashboard/ai-daily-brief'
+import { DailyIntelligenceWidget } from '@/components/dashboard/daily-intelligence-widget'
 import { RecentTrades } from '@/components/dashboard/recent-trades'
 import { MarketStatusPills } from '@/components/dashboard/market-status-pills'
 import { SystemsOperational } from '@/components/dashboard/systems-operational'
@@ -79,6 +80,9 @@ export default function DashboardPage() {
 
         {/* Market Overview */}
         <MarketOverview />
+
+        {/* Daily Intelligence Widget */}
+        <DailyIntelligenceWidget />
 
         {/* AI Daily Brief */}
         <AIDailyBrief />

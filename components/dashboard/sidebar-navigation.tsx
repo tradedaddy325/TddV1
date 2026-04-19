@@ -64,7 +64,7 @@ const navigationItems: NavItem[] = [
       { title: 'Trade Copier Setup', href: '/tools/trade-copier' },
     ]
   },
-  { title: 'Learn', href: '/academy', icon: BookOpen },
+  { title: 'Learn', href: '/learn', icon: BookOpen },
   { title: 'Community', href: '/community', icon: Users },
   {
     title: 'Profile',
