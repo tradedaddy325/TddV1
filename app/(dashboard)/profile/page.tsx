@@ -1,8 +1,8 @@
 "use client"
 
 import { useState, useEffect } from "react"
-import { useSession, signOut } from "next-auth/react"
 import { useRouter } from "next/navigation"
+import { createClient } from "@/lib/supabase/client"
 import {
   User,
   Mail,
@@ -46,7 +46,6 @@ interface CouponHistory {
 }
 
 export default function ProfilePage() {
-  const { data: session } = useSession()
   const router = useRouter()
   const [profile, setProfile] = useState<ProfileData | null>(null)
   const [loading, setLoading] = useState(true)
@@ -60,6 +59,14 @@ export default function ProfilePage() {
   useEffect(() => {
     async function fetchProfile() {
       try {
+        const supabase = createClient()
+        const { data: { user } } = await supabase.auth.getUser()
+        
+        if (!user) {
+          router.push("/auth/login")
+          return
+        }
+
         const res = await fetch("/api/profile")
         if (res.ok) {
           const data = await res.json()
@@ -107,11 +114,18 @@ export default function ProfilePage() {
 
   const handleLogout = async () => {
     setLogoutLoading(true)
-    await signOut({ callbackUrl: "/auth/login" })
+    try {
+      const supabase = createClient()
+      await supabase.auth.signOut()
+      router.push("/auth/login")
+    } catch (e) {
+      console.error(e)
+      setLogoutLoading(false)
+    }
   }
 
-  const userEmail = session?.user?.email || profile?.email || ""
-  const username = session?.user?.name || profile?.username || userEmail.split("@")[0] || "Trader"
+  const userEmail = profile?.email || ""
+  const username = profile?.username || userEmail.split("@")[0] || "Trader"
   const credits = profile?.credits ?? 0
   const tier = profile?.tier || "free"
   const isPremium = tier === "premium" || tier === "pro"
