@@ -37,8 +37,8 @@ export default function RootLayout({
   children: React.ReactNode
 }>) {
   return (
-    <html lang="en">
-      <body className="font-sans antialiased">
+    <html lang="en" className="bg-[#0A0A0A]">
+      <body className="font-mono bg-[#0A0A0A] text-white antialiased">
         <BootScreen />
         <TermsAcceptanceModal />
         {children}
