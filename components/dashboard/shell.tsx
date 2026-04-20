@@ -18,15 +18,19 @@ export function DashboardShell({ children, profile }: DashboardShellProps) {
       <div className="flex relative">
         {/* Desktop Sidebar */}
         <div className="hidden lg:block fixed left-0 top-0 h-screen w-64 bg-[#0A0A0A] border-r border-[#1A1A1A]">
-          <Sidebar isOpen={true} onClose={() => {}} isMobile={false} />
+          <Sidebar />
         </div>
 
         {/* Mobile Sidebar */}
         {sidebarOpen && (
           <div className="lg:hidden fixed inset-0 z-40 bg-black/50">
-            <div className="w-64 h-screen bg-[#0A0A0A] border-r border-[#1A1A1A]">
-              <Sidebar isOpen={sidebarOpen} onClose={() => setSidebarOpen(false)} isMobile={true} />
+            <div className="w-64 h-screen bg-[#0A0A0A] border-r border-[#1A1A1A] overflow-y-auto">
+              <Sidebar />
             </div>
+            <div 
+              className="flex-1"
+              onClick={() => setSidebarOpen(false)}
+            />
           </div>
         )}
 
