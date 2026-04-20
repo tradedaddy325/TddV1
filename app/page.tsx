@@ -1,272 +1,342 @@
-import Link from 'next/link'
-import { Button } from '@/components/ui/button'
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import { Badge } from '@/components/ui/badge'
-import { LegalFooter } from '@/components/legal-footer'
-import {
-  TrendingUp,
-  Calculator,
-  BookOpen,
-  FileText,
-  MessageSquare,
-  Globe,
-  Zap,
-  Shield,
-  BarChart3,
-  ChevronRight,
-} from 'lucide-react'
+"use client"
 
-const features = [
-  {
-    icon: BarChart3,
-    title: 'Live Market Data',
-    description: 'Real-time prices for Gold, Forex, Crypto, and Indices with 15-30s refresh rates.',
-  },
-  {
-    icon: Calculator,
-    title: '12 Trading Calculators',
-    description: 'Pip value, lot size, risk/reward, position sizing, and more essential tools.',
-  },
-  {
-    icon: FileText,
-    title: 'Trade Journal',
-    description: 'Log trades, track performance, analyze patterns, and improve your strategy.',
-  },
-  {
-    icon: BookOpen,
-    title: 'Trading Academy',
-    description: 'Learn from beginner to advanced with structured lessons and quizzes.',
-  },
-  {
-    icon: MessageSquare,
-    title: 'AI Analysis',
-    description: 'Get AI-powered trade analysis, market insights, and setup recommendations.',
-  },
-  {
-    icon: Globe,
-    title: 'Macro Hub',
-    description: 'Economic calendar, news feed, and global market analysis tools.',
-  },
-]
+import { useState, useEffect } from "react"
 
-const pricingTiers = [
-  {
-    name: 'SNIPER',
-    price: 'R199',
-    period: '/mo',
-    features: [
-      '✔ 300 Credits',
-      '✔ Basic Signals',
-      '✔ Limited Data',
-      '✔ Basic AI',
-    ],
-    cta: 'Get Started',
-    popular: false,
-  },
-  {
-    name: 'EXECUTION',
-    price: 'R399',
-    period: '/mo',
-    features: [
-      '✔ 1200 Credits',
-      '✔ Advanced Signals',
-      '✔ Full Market Data',
-      '✔ Advanced AI',
-    ],
-    cta: 'Start Winning',
-    popular: true,
-  },
-  {
-    name: 'DOMINANCE',
-    price: 'R999',
-    period: '/mo',
-    features: [
-      '✔ 4000 Credits',
-      '✔ Premium Signals',
-      '✔ Full + Priority Data',
-      '✔ Priority AI',
-    ],
-    cta: 'Go Dominant',
-    popular: false,
-  },
+const TICKER_DATA = [
+  { symbol: "XAUUSD", price: "3341.20", change: "+0.82%" },
+  { symbol: "EURUSD", price: "1.1342", change: "+0.21%" },
+  { symbol: "GBPUSD", price: "1.3218", change: "-0.11%" },
+  { symbol: "NAS100", price: "19842.5", change: "+1.04%" },
+  { symbol: "US500", price: "5521.3", change: "+0.67%" },
+  { symbol: "BTCUSD", price: "93,412", change: "+2.31%" },
+  { symbol: "USDJPY", price: "142.31", change: "-0.33%" },
+  { symbol: "WTI", price: "79.42", change: "+0.54%" },
 ]
 
 export default function LandingPage() {
+  const [time, setTime] = useState("")
+  const [activeNav, setActiveNav] = useState("Features")
+
+  useEffect(() => {
+    const tick = () => {
+      const now = new Date()
+      const t = now.toLocaleTimeString("en-US", {
+        hour: "2-digit",
+        minute: "2-digit",
+        second: "2-digit",
+        hour12: false,
+        timeZone: "America/New_York",
+      })
+      setTime(t + " EST")
+    }
+    tick()
+    const id = setInterval(tick, 1000)
+    return () => clearInterval(id)
+  }, [])
+
   return (
-    <div className="min-h-screen bg-background flex flex-col">
-      {/* Header */}
-      <header className="border-b border-border/50 sticky top-0 z-40 bg-background/95 backdrop-blur">
-        <div className="container mx-auto px-4 py-3 flex items-center justify-between">
-          <div className="flex items-center gap-2">
-            <div className="flex items-center justify-center w-8 h-8 bg-primary rounded">
-              <TrendingUp className="w-5 h-5 text-primary-foreground" />
+    <div className="min-h-screen bg-[#0A0A0A] text-white font-mono overflow-x-hidden">
+      {/* Ticker Bar */}
+      <div className="bg-[#111] border-b border-[#222] overflow-hidden h-8 flex items-center">
+        <div className="flex gap-0 shrink-0 animate-[scroll_30s_linear_infinite]">
+          {[...TICKER_DATA, ...TICKER_DATA].map((t, i) => (
+            <span key={i} className="flex items-center gap-2 px-4 text-xs border-r border-[#222] h-8 whitespace-nowrap">
+              <span className="text-[#888]">{t.symbol}</span>
+              <span className="text-white">{t.price}</span>
+              <span className={t.change.startsWith("+") ? "text-[#00D084]" : "text-[#FF4444]"}>{t.change}</span>
+            </span>
+          ))}
+        </div>
+        <style>{`@keyframes scroll { from { transform: translateX(0); } to { transform: translateX(-50%); } }`}</style>
+      </div>
+
+      {/* Top Bar */}
+      <header className="border-b border-[#222] bg-[#0D0D0D]">
+        <div className="max-w-7xl mx-auto px-4">
+          {/* Top row */}
+          <div className="flex items-center justify-between py-3 border-b border-[#1A1A1A]">
+            <div className="flex items-center gap-3">
+              <div className="w-7 h-7 bg-[#FF6600] flex items-center justify-center">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2.5">
+                  <path d="M16 7h6v6"/><path d="m22 7-8.5 8.5-5-5L2 17"/>
+                </svg>
+              </div>
+              <span className="text-sm font-bold tracking-[0.2em] text-white">TRADEDADDY</span>
+              <span className="text-[10px] text-[#FF6600] border border-[#FF6600]/40 px-1.5 py-0.5 tracking-wider">TERMINAL</span>
             </div>
-            <span className="text-lg font-bold text-primary">TRADEDADDY</span>
+            <div className="flex items-center gap-6 text-[11px] text-[#555]">
+              <span className="text-[#00D084]">● MARKETS OPEN</span>
+              <span>{time}</span>
+            </div>
+            <div className="flex items-center gap-2">
+              <a href="/auth/login" className="text-xs text-[#888] hover:text-white px-3 py-1.5 border border-[#333] hover:border-[#555] transition-colors">
+                LOGIN
+              </a>
+              <a href="/auth/sign-up" className="text-xs bg-[#FF6600] hover:bg-[#FF7722] px-4 py-1.5 text-white transition-colors font-bold tracking-wide">
+                GET ACCESS
+              </a>
+            </div>
           </div>
-          <nav className="hidden md:flex items-center gap-8">
-            <Link href="#features" className="text-sm text-muted-foreground hover:text-foreground transition-colors">
-              Features
-            </Link>
-            <Link href="#pricing" className="text-sm text-muted-foreground hover:text-foreground transition-colors">
-              Pricing
-            </Link>
-            <Link href="/auth/login" className="text-sm text-muted-foreground hover:text-foreground transition-colors">
-              Login
-            </Link>
-            <Link href="/auth/sign-up">
-              <Button size="sm">Get Started</Button>
-            </Link>
+          {/* Nav row */}
+          <nav className="flex items-center gap-0 text-[11px]">
+            {["Features", "Pricing", "Signals", "Academy", "About"].map((item) => (
+              <button
+                key={item}
+                onClick={() => setActiveNav(item)}
+                className={`px-4 py-2.5 border-b-2 transition-colors tracking-wider ${
+                  activeNav === item
+                    ? "border-[#FF6600] text-white"
+                    : "border-transparent text-[#555] hover:text-[#888]"
+                }`}
+              >
+                {item}
+              </button>
+            ))}
           </nav>
-          <Link href="/auth/sign-up" className="md:hidden">
-            <Button size="sm">Start</Button>
-          </Link>
         </div>
       </header>
 
-      <main className="flex-1">
-        {/* Hero */}
-        <section className="py-20 md:py-28">
-          <div className="container mx-auto px-4">
-            <div className="max-w-3xl mx-auto text-center">
-              <div className="inline-flex items-center gap-2 px-3 py-1 mb-6 text-xs border border-border rounded-full bg-card">
-                <span className="relative flex h-2 w-2">
-                  <span className="pulse-live absolute inline-flex h-full w-full rounded-full bg-primary opacity-75"></span>
-                  <span className="relative inline-flex rounded-full h-2 w-2 bg-primary"></span>
-                </span>
-                <span className="text-muted-foreground">Live Market Data</span>
+      {/* Hero Section */}
+      <main className="max-w-7xl mx-auto px-4 py-12">
+        <div className="grid grid-cols-12 gap-6">
+          {/* Main Hero */}
+          <div className="col-span-12 lg:col-span-7 space-y-6">
+            <div className="space-y-1">
+              <div className="flex items-center gap-2 text-[11px] text-[#555] mb-4">
+                <span className="text-[#FF6600]">▶</span>
+                <span>PROFESSIONAL GRADE TRADING INTELLIGENCE</span>
               </div>
-
-              <h1 className="text-5xl md:text-6xl font-bold text-foreground mb-6 text-balance leading-tight">
-                Professional <span className="text-primary">Trading Terminal</span>
+              <h1 className="text-5xl lg:text-6xl font-bold leading-none tracking-tight">
+                <span className="text-white">TRADE</span>
+                <span className="text-[#FF6600]">DADDY</span>
               </h1>
+              <p className="text-2xl text-[#555] font-light mt-2 tracking-wide">PROFESSIONAL TRADING TERMINAL</p>
+            </div>
 
-              <p className="text-lg text-muted-foreground mb-8 text-balance max-w-2xl mx-auto">
-                All-in-one platform with live market prices, 12 trading calculators, AI analysis, trade journal, and academy. Everything a trader needs.
+            <div className="border-l-2 border-[#FF6600] pl-4">
+              <p className="text-sm text-[#999] leading-relaxed max-w-lg">
+                All-in-one platform with live market prices, 12 trading calculators, AI-powered analysis via Claude's Neural Network, trade journal, signals, and trading academy. Everything a serious trader needs in one terminal.
               </p>
+            </div>
 
-              <div className="flex flex-col sm:flex-row items-center justify-center gap-3">
-                <Link href="/auth/sign-up">
-                  <Button size="lg">
-                    Start for Free
-                    <ChevronRight className="w-4 h-4 ml-2" />
-                  </Button>
-                </Link>
-                <Link href="/auth/login">
-                  <Button variant="outline" size="lg">
-                    Sign In
-                  </Button>
-                </Link>
-              </div>
+            <div className="flex items-center gap-3 pt-2">
+              <a href="/auth/sign-up" className="bg-[#FF6600] hover:bg-[#FF7722] text-white text-sm font-bold px-6 py-3 tracking-wider transition-colors">
+                LAUNCH TERMINAL →
+              </a>
+              <a href="/auth/login" className="border border-[#333] hover:border-[#555] text-[#888] hover:text-white text-sm px-6 py-3 tracking-wider transition-colors">
+                SIGN IN
+              </a>
+            </div>
 
-              {/* Stats */}
-              <div className="grid grid-cols-3 gap-4 mt-16">
-                <div className="p-4 border border-border/50 rounded-lg bg-card/50">
-                  <div className="text-2xl font-bold text-primary mb-1">6</div>
-                  <div className="text-xs text-muted-foreground">Live Market Feeds</div>
+            {/* Stats Row */}
+            <div className="grid grid-cols-4 gap-0 border border-[#1A1A1A] mt-8">
+              {[
+                { val: "6", label: "LIVE FEEDS" },
+                { val: "12+", label: "CALCULATORS" },
+                { val: "AI", label: "NEURAL NET" },
+                { val: "24/7", label: "MARKET DATA" },
+              ].map((s, i) => (
+                <div key={i} className={`p-4 text-center ${i < 3 ? "border-r border-[#1A1A1A]" : ""}`}>
+                  <div className="text-2xl font-bold text-[#FF6600]">{s.val}</div>
+                  <div className="text-[10px] text-[#555] mt-1 tracking-wider">{s.label}</div>
                 </div>
-                <div className="p-4 border border-border/50 rounded-lg bg-card/50">
-                  <div className="text-2xl font-bold text-primary mb-1">12+</div>
-                  <div className="text-xs text-muted-foreground">Trading Calculators</div>
-                </div>
-                <div className="p-4 border border-border/50 rounded-lg bg-card/50">
-                  <div className="text-2xl font-bold text-primary mb-1">AI</div>
-                  <div className="text-xs text-muted-foreground">Trade Analysis</div>
-                </div>
-              </div>
-            </div>
-          </div>
-        </section>
-
-        {/* Features */}
-        <section id="features" className="py-20 border-t border-border/50">
-          <div className="container mx-auto px-4">
-            <div className="max-w-3xl mx-auto mb-12">
-              <h2 className="text-3xl md:text-4xl font-bold text-foreground mb-4">Everything You Need to Trade</h2>
-              <p className="text-muted-foreground">Comprehensive tools designed for traders at every level.</p>
-            </div>
-            <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {features.map((feature) => {
-                const Icon = feature.icon
-                return (
-                  <Card key={feature.title} className="border-border/50 hover:border-border transition-colors">
-                    <CardContent className="pt-6">
-                      <div className="flex items-start justify-between mb-4">
-                        <Icon className="w-8 h-8 text-primary" />
-                        {feature.title === 'Live Market Data' && (
-                          <div className="flex items-center gap-2">
-                            <span className="text-xs text-muted-foreground font-mono">LIVE</span>
-                            <div className="w-2.5 h-2.5 bg-green-500 rounded-full animate-pulse shadow-lg shadow-green-500/50" />
-                          </div>
-                        )}
-                      </div>
-                      <h3 className="font-semibold text-foreground mb-2">{feature.title}</h3>
-                      <p className="text-sm text-muted-foreground">{feature.description}</p>
-                    </CardContent>
-                  </Card>
-                )
-              })}
-            </div>
-          </div>
-        </section>
-
-        {/* Pricing */}
-        <section id="pricing" className="py-20 border-t border-border/50">
-          <div className="container mx-auto px-4">
-            <div className="max-w-3xl mx-auto mb-12 text-center">
-              <h2 className="text-3xl md:text-4xl font-bold text-foreground mb-4">Simple, Transparent Pricing</h2>
-              <p className="text-muted-foreground">Choose the plan that fits your trading needs.</p>
-            </div>
-
-            <div className="grid md:grid-cols-3 gap-6 max-w-4xl mx-auto">
-              {pricingTiers.map((tier) => (
-                <Card
-                  key={tier.name}
-                  className={`relative border transition-colors ${
-                    tier.popular ? 'border-primary md:scale-105' : 'border-border/50'
-                  }`}
-                >
-                  {tier.popular && (
-                    <div className="absolute -top-3 left-1/2 transform -translate-x-1/2">
-                      <Badge className="bg-primary">Most Popular</Badge>
-                    </div>
-                  )}
-                  <CardHeader>
-                    <CardTitle className="text-2xl">{tier.name}</CardTitle>
-                  </CardHeader>
-                  <CardContent className="space-y-6">
-                    <div>
-                      <div className="text-4xl font-bold text-foreground">{tier.price}</div>
-                      {tier.period && <div className="text-sm text-muted-foreground">{tier.period}</div>}
-                    </div>
-
-                    <ul className="space-y-3">
-                      {tier.features.map((feature) => (
-                        <li key={feature} className="flex items-start gap-2 text-sm">
-                          <Zap className="w-4 h-4 text-primary mt-0.5 flex-shrink-0" />
-                          <span className="text-muted-foreground">{feature}</span>
-                        </li>
-                      ))}
-                    </ul>
-
-                    <Button className="w-full" variant={tier.popular ? 'default' : 'outline'}>
-                      {tier.cta}
-                    </Button>
-                  </CardContent>
-                </Card>
               ))}
             </div>
+          </div>
 
-            <div className="mt-12 p-4 border border-border/50 rounded-lg bg-card/50 max-w-2xl mx-auto">
-              <p className="text-xs text-muted-foreground">
-                <Shield className="w-4 h-4 inline mr-2" />
-                All plans include 14-day free trial. No credit card required.
-              </p>
+          {/* Right Panel — Live Market Preview */}
+          <div className="col-span-12 lg:col-span-5 space-y-3">
+            <div className="border border-[#1A1A1A] bg-[#0D0D0D]">
+              <div className="flex items-center justify-between px-3 py-2 border-b border-[#1A1A1A] bg-[#111]">
+                <span className="text-[10px] text-[#FF6600] tracking-widest font-bold">LIVE MARKET OVERVIEW</span>
+                <span className="flex items-center gap-1 text-[10px] text-[#00D084]">
+                  <span className="w-1.5 h-1.5 bg-[#00D084] rounded-full animate-pulse inline-block"/>
+                  LIVE
+                </span>
+              </div>
+              <div className="divide-y divide-[#1A1A1A]">
+                {TICKER_DATA.map((t, i) => (
+                  <div key={i} className="flex items-center justify-between px-3 py-2.5 hover:bg-[#111] transition-colors">
+                    <span className="text-xs text-[#888] w-20">{t.symbol}</span>
+                    <span className="text-sm font-bold text-white">{t.price}</span>
+                    <span className={`text-xs font-bold w-16 text-right ${t.change.startsWith("+") ? "text-[#00D084]" : "text-[#FF4444]"}`}>
+                      {t.change}
+                    </span>
+                    <div className="w-20 h-1 bg-[#1A1A1A] rounded overflow-hidden">
+                      <div
+                        className={`h-full rounded ${t.change.startsWith("+") ? "bg-[#00D084]" : "bg-[#FF4444]"}`}
+                        style={{ width: `${Math.random() * 40 + 40}%` }}
+                      />
+                    </div>
+                  </div>
+                ))}
+              </div>
             </div>
+
+            {/* AI Signal Preview */}
+            <div className="border border-[#1A1A1A] bg-[#0D0D0D]">
+              <div className="flex items-center justify-between px-3 py-2 border-b border-[#1A1A1A] bg-[#111]">
+                <span className="text-[10px] text-[#FF6600] tracking-widest font-bold">CLAUDE'S NEURAL NETWORK</span>
+                <span className="text-[10px] text-[#555]">AI POWERED</span>
+              </div>
+              <div className="px-3 py-3 space-y-2">
+                {[
+                  { pair: "XAUUSD", signal: "BUY", conf: "87%", entry: "3338.00" },
+                  { pair: "EURUSD", signal: "HOLD", conf: "62%", entry: "1.1340" },
+                  { pair: "NAS100", signal: "BUY", conf: "74%", entry: "19810" },
+                ].map((s, i) => (
+                  <div key={i} className="flex items-center justify-between text-xs">
+                    <span className="text-[#888] w-20">{s.pair}</span>
+                    <span className={`px-2 py-0.5 text-[10px] font-bold tracking-wider ${
+                      s.signal === "BUY" ? "bg-[#00D084]/10 text-[#00D084] border border-[#00D084]/20" :
+                      s.signal === "SELL" ? "bg-[#FF4444]/10 text-[#FF4444] border border-[#FF4444]/20" :
+                      "bg-[#FF6600]/10 text-[#FF6600] border border-[#FF6600]/20"
+                    }`}>{s.signal}</span>
+                    <span className="text-[#555]">Entry: <span className="text-white">{s.entry}</span></span>
+                    <span className="text-[#00D084]">{s.conf}</span>
+                  </div>
+                ))}
+                <div className="pt-2 border-t border-[#1A1A1A]">
+                  <p className="text-[11px] text-[#444] italic">Premium members only. Upgrade to unlock full AI signal access.</p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* Features Grid */}
+        <section id="features" className="mt-16 pt-8 border-t border-[#1A1A1A]">
+          <div className="flex items-center gap-3 mb-8">
+            <span className="text-[10px] text-[#FF6600] tracking-widest border-l-2 border-[#FF6600] pl-3">PLATFORM MODULES</span>
+          </div>
+          <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
+            {[
+              {
+                icon: "📊", tag: "LIVE", title: "MARKET DATA",
+                desc: "Real-time Gold, Forex, Crypto, and Indices with 15-30s refresh"
+              },
+              {
+                icon: "🧮", tag: "TOOLS", title: "12 CALCULATORS",
+                desc: "Pip value, lot size, risk/reward, position sizing & more"
+              },
+              {
+                icon: "🤖", tag: "AI", title: "NEURAL NETWORK",
+                desc: "Claude-powered signals, daily intelligence & market analysis"
+              },
+              {
+                icon: "📓", tag: "TRACK", title: "TRADE JOURNAL",
+                desc: "Log trades, track performance & analyze your patterns"
+              },
+              {
+                icon: "🎓", tag: "LEARN", title: "TRADING ACADEMY",
+                desc: "Beginner to advanced structured lessons with quizzes"
+              },
+              {
+                icon: "🌐", tag: "MACRO", title: "MACRO HUB",
+                desc: "Economic calendar, news feed & global market analysis"
+              },
+            ].map((f, i) => (
+              <div key={i} className="border border-[#1A1A1A] hover:border-[#FF6600]/30 bg-[#0D0D0D] hover:bg-[#0F0F0F] transition-all p-4 group">
+                <div className="flex items-start justify-between mb-3">
+                  <span className="text-xl">{f.icon}</span>
+                  <span className="text-[9px] text-[#FF6600] border border-[#FF6600]/30 px-1.5 py-0.5 tracking-widest">{f.tag}</span>
+                </div>
+                <h3 className="text-sm font-bold text-white mb-1 tracking-wide">{f.title}</h3>
+                <p className="text-[11px] text-[#555] leading-relaxed">{f.desc}</p>
+              </div>
+            ))}
+          </div>
+        </section>
+
+        {/* Pricing Section */}
+        <section id="pricing" className="mt-16 pt-8 border-t border-[#1A1A1A]">
+          <div className="flex items-center gap-3 mb-8">
+            <span className="text-[10px] text-[#FF6600] tracking-widest border-l-2 border-[#FF6600] pl-3">SUBSCRIPTION PLANS</span>
+          </div>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            {[
+              {
+                name: "SNIPER",
+                price: "R199",
+                per: "/mo",
+                badge: null,
+                features: ["300 Credits", "Basic Signals", "Limited Market Data", "Basic AI Access", "Trade Journal"],
+                cta: "GET STARTED",
+                highlight: false,
+              },
+              {
+                name: "EXECUTION",
+                price: "R399",
+                per: "/mo",
+                badge: "MOST POPULAR",
+                features: ["1,200 Credits", "Advanced Signals", "Full Market Data", "Advanced AI + Daily Intel", "All Calculators"],
+                cta: "START WINNING",
+                highlight: true,
+              },
+              {
+                name: "DOMINANCE",
+                price: "R499",
+                per: "/mo",
+                badge: "PREMIUM",
+                features: ["4,000 Credits", "Priority Signals", "Full + Priority Data", "Priority AI + Neural Net", "VIP Community Access"],
+                cta: "GO DOMINANT",
+                highlight: false,
+              },
+            ].map((plan, i) => (
+              <div key={i} className={`border relative ${plan.highlight ? "border-[#FF6600]" : "border-[#1A1A1A]"} bg-[#0D0D0D]`}>
+                {plan.badge && (
+                  <div className={`absolute -top-3 left-1/2 -translate-x-1/2 text-[10px] px-3 py-0.5 tracking-widest font-bold ${plan.highlight ? "bg-[#FF6600] text-white" : "bg-[#222] text-[#FF6600] border border-[#FF6600]/40"}`}>
+                    {plan.badge}
+                  </div>
+                )}
+                <div className="p-5">
+                  <div className="border-b border-[#1A1A1A] pb-4 mb-4">
+                    <h3 className="text-sm font-bold tracking-[0.2em] text-[#888] mb-2">{plan.name}</h3>
+                    <div className="flex items-baseline gap-1">
+                      <span className={`text-4xl font-bold ${plan.highlight ? "text-[#FF6600]" : "text-white"}`}>{plan.price}</span>
+                      <span className="text-[#555] text-sm">{plan.per}</span>
+                    </div>
+                  </div>
+                  <ul className="space-y-2.5 mb-6">
+                    {plan.features.map((f, j) => (
+                      <li key={j} className="flex items-center gap-2 text-xs">
+                        <span className="text-[#FF6600] text-[10px]">▶</span>
+                        <span className="text-[#888]">{f}</span>
+                      </li>
+                    ))}
+                  </ul>
+                  <a href="/auth/sign-up" className={`block text-center text-xs font-bold py-2.5 tracking-widest transition-colors ${plan.highlight ? "bg-[#FF6600] hover:bg-[#FF7722] text-white" : "border border-[#333] hover:border-[#555] text-[#888] hover:text-white"}`}>
+                    {plan.cta}
+                  </a>
+                </div>
+              </div>
+            ))}
+          </div>
+          <div className="mt-6 border border-[#1A1A1A] bg-[#0D0D0D] p-4 text-center">
+            <p className="text-[11px] text-[#555]">
+              ▶ All plans include 14-day free trial — No credit card required
+            </p>
           </div>
         </section>
       </main>
 
-      <LegalFooter />
+      {/* Footer */}
+      <footer className="border-t border-[#1A1A1A] mt-16 py-8 bg-[#0A0A0A]">
+        <div className="max-w-7xl mx-auto px-4">
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-[11px] text-[#444] mb-6">
+            <div><span className="text-red-500">⚠</span> Trading involves substantial risk. You may lose all your investment.</div>
+            <div><span className="text-yellow-500">⚠</span> TradeDaddy does not provide financial advice. Education only.</div>
+            <div><span className="text-blue-500">⚠</span> Signals are not guaranteed to be profitable. Past performance ≠ future results.</div>
+            <div><span className="text-cyan-500">⚠</span> You alone are responsible for all trading decisions.</div>
+          </div>
+          <div className="flex flex-wrap gap-4 text-[11px] justify-center border-t border-[#1A1A1A] pt-4">
+            {["Terms of Service", "Privacy Policy", "Risk Disclosure", "Signal Disclaimer", "Legal"].map((link) => (
+              <a key={link} href="#" className="text-[#555] hover:text-[#FF6600] transition-colors">{link}</a>
+            ))}
+          </div>
+          <p className="text-center text-[11px] text-[#333] mt-4">© TradeDaddy 2026. All Rights Reserved. Jurisdiction: South Africa</p>
+        </div>
+      </footer>
     </div>
   )
 }
