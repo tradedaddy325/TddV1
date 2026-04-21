@@ -10,8 +10,8 @@ import {
 
 const NAV = [
   { label: "Dashboard", icon: LayoutDashboard, href: "/dashboard" },
-  { label: "Macro Desk", icon: Globe, href: "/macro-desk", locked: true },
-  { label: "Predictive Markets", icon: TrendingUp, href: "/predictive-markets" },
+  { label: "Macro Desk", icon: Globe, href: "/macro" },
+  { label: "Predictive Markets", icon: TrendingUp, href: "/markets" },
   { label: "Market Psychology", icon: Brain, href: "/market-psychology" },
   { label: "Strings", icon: MessageCircle, href: "/strings" },
   {
@@ -25,17 +25,17 @@ const NAV = [
     ],
   },
   {
-    label: "Trading Tools", icon: Zap, href: "/trading-tools",
+    label: "Trading Tools", icon: Zap, href: "/tools",
     children: [
-      { label: "Risk Calculator", href: "/trading-tools/risk-calculator" },
-      { label: "Trading Sessions", href: "/trading-tools/sessions" },
-      { label: "Economic Calendar", href: "/trading-tools/economic-calendar" },
-      { label: "Market Heatmap", href: "/trading-tools/heatmap" },
-      { label: "Market News", href: "/trading-tools/news" },
-      { label: "Charting", href: "/trading-tools/charting" },
-      { label: "Trade Journal", href: "/trading-tools/journal" },
-      { label: "Copy Trade Daddy's Strategy", href: "/trading-tools/copy-strategy" },
-      { label: "Trade Copier Setup", href: "/trading-tools/copier-setup" },
+      { label: "Risk Calculator", href: "/tools/risk-calculator" },
+      { label: "Trading Sessions", href: "/tools/sessions" },
+      { label: "Economic Calendar", href: "/tools/economic-calendar" },
+      { label: "Market Heatmap", href: "/tools/heatmap" },
+      { label: "Market News", href: "/tools/news" },
+      { label: "Charting", href: "/tools/charting" },
+      { label: "Trade Journal", href: "/tools/journal" },
+      { label: "Copy Trade Daddy's Strategy", href: "/tools/copy-strategy" },
+      { label: "Trade Copier Setup", href: "/tools/copier-setup" },
     ],
   },
   { label: "Learn", icon: BookOpen, href: "/learn" },

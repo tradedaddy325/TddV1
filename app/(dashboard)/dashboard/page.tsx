@@ -20,12 +20,12 @@ const SIGNALS = [
 ]
 
 const QUICK_LINKS = [
-  { label: "Risk Calculator", href: "/trading-tools/risk-calculator", icon: "⚡" },
-  { label: "Trade Journal", href: "/trading-tools/journal", icon: "📓" },
-  { label: "Economic Calendar", href: "/trading-tools/economic-calendar", icon: "📅" },
-  { label: "Market Heatmap", href: "/trading-tools/heatmap", icon: "🔥" },
+  { label: "Risk Calculator", href: "/tools/risk-calculator", icon: "⚡" },
+  { label: "Trade Journal", href: "/tools/journal", icon: "📓" },
+  { label: "Economic Calendar", href: "/tools/economic-calendar", icon: "📅" },
+  { label: "Market Heatmap", href: "/tools/heatmap", icon: "🔥" },
   { label: "AI Signals", href: "/signals/ai", icon: "🤖" },
-  { label: "Charting", href: "/trading-tools/charting", icon: "📈" },
+  { label: "Charting", href: "/tools/charting", icon: "📈" },
 ]
 
 export default function DashboardPage() {
@@ -92,8 +92,61 @@ export default function DashboardPage() {
       {/* Main grid */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
 
-        {/* AI Signals */}
-        <div className="lg:col-span-2 border border-[#1A1A1A] bg-[#0D0D0D]">
+        {/* AI Tip of the Day & Top Setups */}
+        <div className="lg:col-span-2 space-y-4">
+          {/* AI Tip of the Day */}
+          <div className="border border-[#1A1A1A] bg-[#0D0D0D] p-4">
+            <div className="flex items-center gap-2 mb-3">
+              <span className="text-[10px] text-[#FF6600] tracking-widest font-mono">AI TIP OF THE DAY</span>
+              <span className="text-[10px] px-2 py-0.5 border border-[#FF6600]/30 text-[#FF6600] rounded font-mono">Psychology</span>
+            </div>
+            <h3 className="text-xl font-bold mb-2">Patience is Your Edge</h3>
+            <p className="text-[12px] text-[#999] leading-relaxed">
+              In uncertain market conditions, the best trade is often no trade. Wait for clean setups with clear invalidation levels. Protect your capital first — opportunities are always available tomorrow.
+            </p>
+          </div>
+
+          {/* Top Setups Today */}
+          <div className="border border-[#1A1A1A] bg-[#0D0D0D]">
+            <div className="flex items-center justify-between px-4 py-3 border-b border-[#1A1A1A]">
+              <span className="text-[10px] text-[#00C853] tracking-widest font-mono">TOP SETUPS TODAY</span>
+              <Link href="/signals/setups" className="text-[10px] text-[#333] hover:text-[#00C853] font-mono tracking-wider transition-colors">
+                ALL SETUPS →
+              </Link>
+            </div>
+            <div className="divide-y divide-[#1A1A1A]">
+              {[
+                { pair: "EURUSD", setup: "Short", risk: "Medium", entry: "1.1340", tp: "1.1280", sl: "1.1400", desc: "Dollar strength amid risk-off sentiment favors downside" },
+                { pair: "GBPUSD", setup: "Neutral", risk: "High", entry: "1.2650", tp: "1.2580", sl: "1.2700", desc: "Range-bound pending UK economic releases" },
+                { pair: "XAUUSD", setup: "Long", risk: "Low", entry: "3338.00", tp: "3365.00", sl: "3310.00", desc: "Safe haven demand supporting gold at current levels" },
+              ].map((s, i) => (
+                <div key={i} className="p-4 hover:bg-[#111] transition-colors">
+                  <div className="flex items-start justify-between mb-2">
+                    <div className="flex items-center gap-3">
+                      <span className="text-sm font-bold font-mono">{s.pair}</span>
+                      <span className={`px-2 py-1 text-[10px] font-bold tracking-wider rounded border ${
+                        s.setup === "Long" ? "bg-[#00C853]/10 text-[#00C853] border-[#00C853]/20" :
+                        s.setup === "Short" ? "bg-[#FF4444]/10 text-[#FF4444] border-[#FF4444]/20" :
+                        "bg-[#FF6600]/10 text-[#FF6600] border-[#FF6600]/20"
+                      }`}>{s.setup}</span>
+                      <span className={`px-2 py-1 text-[10px] font-bold tracking-wider rounded border ${
+                        s.risk === "Low" ? "border-[#00C853]/20 text-[#00C853]" :
+                        s.risk === "Medium" ? "border-[#FF6600]/20 text-[#FF6600]" :
+                        "border-[#FF4444]/20 text-[#FF4444]"
+                      }`}>{s.risk}</span>
+                    </div>
+                  </div>
+                  <p className="text-[11px] text-[#666] mb-2">{s.desc}</p>
+                  <div className="flex items-center gap-4 text-[10px] font-mono text-[#555]">
+                    <span>E: <span className="text-white">{s.entry}</span></span>
+                    <span>TP: <span className="text-[#00C853]">{s.tp}</span></span>
+                    <span>SL: <span className="text-[#FF4444]">{s.sl}</span></span>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
           <div className="flex items-center justify-between px-4 py-3 border-b border-[#1A1A1A]">
             <span className="text-[10px] text-[#00C853] tracking-widest font-mono">CLAUDE'S NEURAL NETWORK</span>
             <Link href="/signals/ai" className="text-[10px] text-[#333] hover:text-[#00C853] font-mono tracking-wider transition-colors">
@@ -170,9 +223,7 @@ export default function DashboardPage() {
                 NAS100 tech rally driven by positive earnings beats. Watch Fed speakers today at 14:00 EST for rate guidance.
               </p>
             </div>
-            <Link href="/neural-network/daily-intelligence" className="flex items-center gap-1 text-[10px] text-[#333] hover:text-[#00C853] font-mono tracking-wider transition-colors mt-2">
-              FULL BRIEFING →
-            </Link>
+            <Link href="/trading-tools/journal" className="text-[10px] text-[#333] hover:text-[#00C853] font-mono tracking-wider transition-colors">
           </div>
         </div>
 
