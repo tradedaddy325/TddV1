@@ -4,184 +4,156 @@ import { useState } from "react"
 import Link from "next/link"
 import { usePathname } from "next/navigation"
 import {
-  LayoutDashboard,
-  BrainCircuit,
-  TrendingUp,
-  Calculator,
-  GraduationCap,
-  Users,
-  User,
-  MessageSquare,
-  ChevronDown,
-  ChevronRight,
+  LayoutDashboard, Globe, TrendingUp, Brain, MessageCircle,
+  Zap, BookOpen, Users, User, X, ChevronDown, ChevronRight, Lock,
 } from "lucide-react"
 
-const NAV_ITEMS = [
+const NAV = [
+  { label: "Dashboard", icon: LayoutDashboard, href: "/dashboard" },
+  { label: "Macro Desk", icon: Globe, href: "/macro-desk", locked: true },
+  { label: "Predictive Markets", icon: TrendingUp, href: "/predictive-markets" },
+  { label: "Market Psychology", icon: Brain, href: "/market-psychology" },
+  { label: "Strings", icon: MessageCircle, href: "/strings" },
   {
-    label: "Dashboard",
-    icon: LayoutDashboard,
-    href: "/dashboard",
-    children: null,
-  },
-  {
-    label: "Claude's Neural Network",
-    icon: BrainCircuit,
-    href: "/neural-network",
+    label: "Signals", icon: TrendingUp, href: "/signals",
     children: [
-      { label: "Daily Intelligence", href: "/neural-network/daily-intelligence" },
-      { label: "AI Signals", href: "/neural-network/signals" },
-      { label: "Market Psychology", href: "/neural-network/psychology" },
-      { label: "Macro Terminal", href: "/neural-network/macro" },
-    ],
-  },
-  {
-    label: "Signals",
-    icon: TrendingUp,
-    href: "/signals",
-    children: [
+      { label: "Signals & Setups", href: "/signals/setups" },
       { label: "AI Signals", href: "/signals/ai" },
       { label: "News Signals", href: "/signals/news" },
-      { label: "Setups", href: "/signals/setups" },
-      { label: "Earnings", href: "/signals/earnings" },
-      { label: "Gaps", href: "/signals/gaps" },
+      { label: "Gap Signals", href: "/signals/gaps" },
+      { label: "Earnings Signals", href: "/signals/earnings" },
     ],
   },
   {
-    label: "Trading Tools",
-    icon: Calculator,
-    href: "/trading-tools",
+    label: "Trading Tools", icon: Zap, href: "/trading-tools",
     children: [
-      { label: "All Calculators", href: "/trading-tools/calculators" },
+      { label: "Risk Calculator", href: "/trading-tools/risk-calculator" },
+      { label: "Trading Sessions", href: "/trading-tools/sessions" },
+      { label: "Economic Calendar", href: "/trading-tools/economic-calendar" },
+      { label: "Market Heatmap", href: "/trading-tools/heatmap" },
+      { label: "Market News", href: "/trading-tools/news" },
+      { label: "Charting", href: "/trading-tools/charting" },
       { label: "Trade Journal", href: "/trading-tools/journal" },
-      { label: "Position Sizer", href: "/trading-tools/position-sizer" },
-      { label: "Risk Manager", href: "/trading-tools/risk" },
+      { label: "Copy Trade Daddy's Strategy", href: "/trading-tools/copy-strategy" },
+      { label: "Trade Copier Setup", href: "/trading-tools/copier-setup" },
     ],
   },
+  { label: "Learn", icon: BookOpen, href: "/learn" },
+  { label: "Community", icon: Users, href: "/community" },
   {
-    label: "Learn",
-    icon: GraduationCap,
-    href: "/learn",
+    label: "Profile", icon: User, href: "/profile",
     children: [
-      { label: "Trading Academy", href: "/learn/academy" },
-      { label: "Course Library", href: "/learn/courses" },
-      { label: "Quizzes", href: "/learn/quizzes" },
+      { label: "My Account", href: "/profile" },
+      { label: "Subscription & Billing", href: "/profile?tab=subscription" },
+      { label: "Credits", href: "/profile?tab=credits" },
+      { label: "Security", href: "/profile?tab=security" },
     ],
   },
-  {
-    label: "Community",
-    icon: Users,
-    href: "/community",
-    children: [
-      { label: "Members", href: "/community/members" },
-      { label: "Leaderboard", href: "/community/leaderboard" },
-    ],
-  },
-  {
-    label: "Profile",
-    icon: User,
-    href: "/profile",
-    children: null,
-  },
-  {
-    label: "Traders Talk Room",
-    icon: MessageSquare,
-    href: "/chat",
-    children: null,
-    badge: 2,
-  },
+  { label: "Traders Talk Room", icon: MessageCircle, href: "/chat", badge: 2 },
 ]
 
-export default function Sidebar() {
+export default function Sidebar({ onClose, mobile }: { onClose?: () => void; mobile?: boolean }) {
   const pathname = usePathname()
-  const [expanded, setExpanded] = useState<string[]>(["Claude's Neural Network"])
+  const [open, setOpen] = useState<string[]>([])
 
-  const toggle = (label: string) => {
-    setExpanded((prev) =>
-      prev.includes(label) ? prev.filter((l) => l !== label) : [...prev, label]
-    )
-  }
+  const toggle = (l: string) =>
+    setOpen((p) => (p.includes(l) ? p.filter((x) => x !== l) : [...p, l]))
 
-  const isActive = (href: string) => pathname === href || pathname?.startsWith(href + "/")
+  const active = (href: string) =>
+    pathname === href || (href !== "/dashboard" && pathname?.startsWith(href + "/"))
 
   return (
-    <aside className="w-[240px] min-h-screen bg-[#0D0D0D] border-r border-[#1A1A1A] flex flex-col font-mono">
-      {/* Logo */}
-      <div className="flex items-center gap-2.5 px-4 py-4 border-b border-[#1A1A1A]">
-        <div className="w-7 h-7 bg-[#FF6600] flex items-center justify-center shrink-0">
-          <TrendingUp className="w-4 h-4 text-white" />
-        </div>
-        <span className="text-sm font-bold tracking-[0.15em] text-white">TRADEDADDY</span>
+    <aside className="w-[255px] min-h-screen bg-[#0B0B0B] border-r border-[#1A1A1A] flex flex-col">
+      {/* Header */}
+      <div className="flex items-center justify-between px-4 py-[14px] border-b border-[#1A1A1A]">
+        {mobile ? (
+          <>
+            <span className="text-xs font-bold tracking-[0.25em] text-white">MENU</span>
+            <button onClick={onClose} className="text-[#555] hover:text-white">
+              <X className="w-4 h-4" />
+            </button>
+          </>
+        ) : (
+          <>
+            <div className="flex items-center gap-2">
+              <div className="w-6 h-6 bg-[#00C853] flex items-center justify-center">
+                <TrendingUp className="w-3.5 h-3.5 text-black" />
+              </div>
+              <span className="text-[13px] font-bold tracking-[0.12em] text-white">TRADEDADDY</span>
+            </div>
+          </>
+        )}
       </div>
 
-      {/* Nav */}
-      <nav className="flex-1 py-2 overflow-y-auto">
-        {NAV_ITEMS.map((item) => {
+      {/* Nav list */}
+      <nav className="flex-1 overflow-y-auto py-1">
+        {NAV.map((item) => {
           const Icon = item.icon
-          const active = isActive(item.href)
-          const open = expanded.includes(item.label)
-          const hasChildren = item.children && item.children.length > 0
+          const isActive = active(item.href)
+          const isOpen = open.includes(item.label)
+          const hasSub = !!(item as any).children?.length
 
           return (
             <div key={item.label}>
-              {/* Main Item */}
-              <div
-                className={`flex items-center gap-3 px-4 py-2.5 cursor-pointer transition-colors group ${
-                  active
-                    ? "bg-[#FF6600]/10 border-l-2 border-[#FF6600]"
-                    : "border-l-2 border-transparent hover:bg-[#111] hover:border-l-2 hover:border-[#FF6600]/30"
-                }`}
-                onClick={() => {
-                  if (hasChildren) toggle(item.label)
-                }}
-              >
-                <Icon
-                  className={`w-4 h-4 shrink-0 ${active ? "text-[#FF6600]" : "text-[#555] group-hover:text-[#888]"}`}
-                />
-                <span
-                  className={`flex-1 text-[12px] tracking-wide truncate ${active ? "text-white font-bold" : "text-[#888] group-hover:text-[#aaa]"}`}
+              {hasSub ? (
+                <button
+                  onClick={() => toggle(item.label)}
+                  className={`w-full flex items-center gap-3 px-4 py-[11px] border-l-[3px] transition-colors text-left group ${
+                    isActive
+                      ? "border-[#00C853] bg-[#00C853]/[0.07]"
+                      : "border-transparent hover:bg-[#141414]"
+                  }`}
                 >
-                  {item.label}
-                </span>
-
-                {/* Badge */}
-                {item.badge && (
-                  <span className="bg-[#FF4444] text-white text-[9px] font-bold w-4 h-4 rounded-full flex items-center justify-center shrink-0">
-                    {item.badge}
+                  <Icon className={`w-[17px] h-[17px] shrink-0 ${isActive ? "text-[#00C853]" : "text-[#4A4A4A] group-hover:text-[#777]"}`} />
+                  <span className={`flex-1 text-[13px] font-medium ${isActive ? "text-white" : "text-[#7A7A7A] group-hover:text-[#aaa]"}`}>
+                    {item.label}
                   </span>
-                )}
-
-                {/* Chevron */}
-                {hasChildren && (
-                  <span className={`text-[#444] transition-transform ${open ? "rotate-0" : ""}`}>
-                    {open ? (
-                      <ChevronDown className="w-3.5 h-3.5 text-[#444]" />
-                    ) : (
-                      <ChevronRight className="w-3.5 h-3.5 text-[#444]" />
-                    )}
+                  {(item as any).locked && <Lock className="w-3 h-3 text-[#333]" />}
+                  {isOpen
+                    ? <ChevronDown className="w-3.5 h-3.5 text-[#3A3A3A]" />
+                    : <ChevronRight className="w-3.5 h-3.5 text-[#3A3A3A]" />}
+                </button>
+              ) : (
+                <Link
+                  href={item.href}
+                  onClick={onClose}
+                  className={`flex items-center gap-3 px-4 py-[11px] border-l-[3px] transition-colors group ${
+                    isActive
+                      ? "border-[#00C853] bg-[#00C853]/[0.07]"
+                      : "border-transparent hover:bg-[#141414]"
+                  }`}
+                >
+                  <Icon className={`w-[17px] h-[17px] shrink-0 ${isActive ? "text-[#00C853]" : "text-[#4A4A4A] group-hover:text-[#777]"}`} />
+                  <span className={`flex-1 text-[13px] font-medium ${isActive ? "text-white" : "text-[#7A7A7A] group-hover:text-[#aaa]"}`}>
+                    {item.label}
                   </span>
-                )}
-              </div>
+                  {(item as any).locked && <Lock className="w-3 h-3 text-[#333]" />}
+                  {(item as any).badge && (
+                    <span className="bg-[#FF3B30] text-white text-[9px] font-bold min-w-[18px] h-[18px] rounded-full flex items-center justify-center px-1 leading-none">
+                      {(item as any).badge}
+                    </span>
+                  )}
+                </Link>
+              )}
 
-              {/* Sub Items */}
-              {hasChildren && open && (
-                <div className="bg-[#0A0A0A] border-l border-[#1A1A1A] ml-4">
-                  {item.children!.map((child) => {
-                    const childActive = pathname === child.href
-                    return (
-                      <Link
-                        key={child.href}
-                        href={child.href}
-                        className={`flex items-center gap-2 pl-6 pr-4 py-2 text-[11px] tracking-wide transition-colors ${
-                          childActive
-                            ? "text-[#FF6600] bg-[#FF6600]/5"
-                            : "text-[#555] hover:text-[#888] hover:bg-[#111]"
-                        }`}
-                      >
-                        <span className={`w-1 h-1 rounded-full shrink-0 ${childActive ? "bg-[#FF6600]" : "bg-[#333]"}`} />
-                        {child.label}
-                      </Link>
-                    )
-                  })}
+              {/* Sub-items */}
+              {hasSub && isOpen && (
+                <div className="ml-[43px] border-l border-[#1E1E1E]">
+                  {(item as any).children.map((c: { label: string; href: string }) => (
+                    <Link
+                      key={c.href}
+                      href={c.href}
+                      onClick={onClose}
+                      className={`flex items-center gap-2 pl-3.5 pr-4 py-[9px] text-[12px] transition-colors ${
+                        pathname === c.href
+                          ? "text-[#00C853]"
+                          : "text-[#4A4A4A] hover:text-[#888]"
+                      }`}
+                    >
+                      <span className={`w-[5px] h-[5px] rounded-full shrink-0 ${pathname === c.href ? "bg-[#00C853]" : "bg-[#242424]"}`} />
+                      {c.label}
+                    </Link>
+                  ))}
                 </div>
               )}
             </div>
@@ -189,17 +161,17 @@ export default function Sidebar() {
         })}
       </nav>
 
-      {/* Bottom User Card */}
+      {/* User footer */}
       <div className="border-t border-[#1A1A1A] p-3">
-        <Link href="/profile" className="flex items-center gap-2.5 hover:bg-[#111] p-2 transition-colors">
-          <div className="w-7 h-7 bg-[#FF6600] flex items-center justify-center text-[10px] font-bold text-white shrink-0">
+        <Link href="/profile" className="flex items-center gap-2.5 p-2 hover:bg-[#141414] rounded transition-colors">
+          <div className="w-8 h-8 bg-[#00C853] flex items-center justify-center text-[11px] font-bold text-black shrink-0">
             MB
           </div>
           <div className="flex-1 min-w-0">
-            <p className="text-[11px] text-white font-bold truncate">Mohammed B.</p>
-            <p className="text-[10px] text-[#555] truncate">EXECUTION PLAN</p>
+            <p className="text-[12px] text-white font-semibold truncate">Mohammed B.</p>
+            <p className="text-[10px] text-[#3A3A3A] truncate tracking-wider">EXECUTION PLAN</p>
           </div>
-          <div className="w-2 h-2 bg-[#00D084] rounded-full shrink-0" />
+          <div className="w-2 h-2 bg-[#00C853] rounded-full" />
         </Link>
       </div>
     </aside>
