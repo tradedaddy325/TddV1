@@ -147,40 +147,6 @@ export default function DashboardPage() {
             </div>
           </div>
         </div>
-          <div className="flex items-center justify-between px-4 py-3 border-b border-[#1A1A1A]">
-            <span className="text-[10px] text-[#00C853] tracking-widest font-mono">CLAUDE'S NEURAL NETWORK</span>
-            <Link href="/signals/ai" className="text-[10px] text-[#333] hover:text-[#00C853] font-mono tracking-wider transition-colors">
-              VIEW ALL →
-            </Link>
-          </div>
-          <div className="divide-y divide-[#1A1A1A]">
-            {SIGNALS.map((s) => (
-              <div key={s.pair} className="px-4 py-3 hover:bg-[#111] transition-colors">
-                <div className="flex items-center gap-4">
-                  <span className="text-sm font-bold w-16 font-mono">{s.pair}</span>
-                  <span className={`px-2 py-0.5 text-[10px] font-bold tracking-wider font-mono border ${
-                    s.signal === "BUY" ? "bg-[#00C853]/10 text-[#00C853] border-[#00C853]/20" :
-                    s.signal === "SELL" ? "bg-[#FF4444]/10 text-[#FF4444] border-[#FF4444]/20" :
-                    "bg-[#FF6600]/10 text-[#FF6600] border-[#FF6600]/20"
-                  }`}>{s.signal}</span>
-                  <div className="flex-1 flex items-center gap-2">
-                    <div className="h-1 bg-[#1A1A1A] flex-1 rounded overflow-hidden">
-                      <div className={`h-full rounded ${
-                        s.signal === "BUY" ? "bg-[#00C853]" : s.signal === "SELL" ? "bg-[#FF4444]" : "bg-[#FF6600]"
-                      }`} style={{ width: `${s.conf}%` }} />
-                    </div>
-                    <span className="text-[11px] text-[#444] font-mono w-8">{s.conf}%</span>
-                  </div>
-                  <div className="hidden md:flex items-center gap-4 text-[11px] font-mono">
-                    <span className="text-[#333]">E: <span className="text-[#666]">{s.entry}</span></span>
-                    <span className="text-[#00C853]/50">TP: <span className="text-[#00C853]">{s.tp}</span></span>
-                    <span className="text-[#FF4444]/50">SL: <span className="text-[#FF4444]">{s.sl}</span></span>
-                  </div>
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
 
         {/* Quick Access */}
         <div className="border border-[#1A1A1A] bg-[#0D0D0D]">
@@ -223,7 +189,9 @@ export default function DashboardPage() {
                 NAS100 tech rally driven by positive earnings beats. Watch Fed speakers today at 14:00 EST for rate guidance.
               </p>
             </div>
-            <Link href="/trading-tools/journal" className="text-[10px] text-[#333] hover:text-[#00C853] font-mono tracking-wider transition-colors">
+            <Link href="/tools/journal" className="text-[10px] text-[#333] hover:text-[#00C853] font-mono tracking-wider transition-colors">
+              FULL ANALYSIS →
+            </Link>
           </div>
         </div>
 
