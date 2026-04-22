@@ -79,40 +79,32 @@ export default function ProfilePage() {
     try {
       console.log("[v0] Starting Yoco payment:", { amountRands, description, metadata })
       
-      // Create checkout session via Yoco API
-      const res = await fetch("https://payments.yoco.com/api/checkouts", {
+      // Call backend API to create Yoco checkout
+      const res = await fetch("/api/payments/yoco", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
-          Authorization: `Bearer ${process.env.NEXT_PUBLIC_YOCO_PUBLIC_KEY}`,
         },
         body: JSON.stringify({
-          amount: amountRands * 100, // Convert to cents
+          amountInCents: amountRands * 100,
           currency: "ZAR",
           description,
           metadata,
-          successUrl: `${window.location.origin}/profile?payment=success&tab=${
-            metadata.type === "subscription" ? "subscription" : "credits"
-          }`,
-          cancelUrl: `${window.location.origin}/profile?payment=cancelled&tab=${
-            metadata.type === "subscription" ? "subscription" : "credits"
-          }`,
         }),
       })
 
       const data = await res.json()
-      console.log("[v0] Checkout created:", data)
+      console.log("[v0] Payment response:", data)
+
+      if (!res.ok) {
+        throw new Error(data.error || "Payment failed")
+      }
 
       if (data.redirectUrl) {
         // Redirect to Yoco's hosted payment page
         window.location.href = data.redirectUrl
-      } else if (data.id) {
-        // Fallback: Show redirect message
-        alert("Redirecting to Yoco payment page...")
-        // Some Yoco implementations might need manual redirect
-        window.location.href = `https://checkout.yoco.com/${data.id}`
       } else {
-        throw new Error(data.error?.message || "Failed to create checkout")
+        throw new Error("No redirect URL from payment provider")
       }
     } catch (error) {
       console.error("[v0] Payment error:", error)

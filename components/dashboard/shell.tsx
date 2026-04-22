@@ -23,15 +23,17 @@ export function DashboardShell({ children, profile }: DashboardShellProps) {
 
         {/* Mobile Sidebar */}
         {sidebarOpen && (
-          <div className="lg:hidden fixed inset-0 z-40 bg-black/50">
-            <div className="w-64 h-screen bg-[#0A0A0A] border-r border-[#1A1A1A] overflow-y-auto">
-              <Sidebar />
-            </div>
+          <>
+            {/* Overlay Background */}
             <div 
-              className="flex-1"
+              className="lg:hidden fixed inset-0 z-30 bg-black/50"
               onClick={() => setSidebarOpen(false)}
             />
-          </div>
+            {/* Sidebar Container */}
+            <div className="lg:hidden fixed left-0 top-0 h-screen w-64 bg-[#0A0A0A] border-r border-[#1A1A1A] overflow-y-auto z-40">
+              <Sidebar />
+            </div>
+          </>
         )}
 
         {/* Main Content */}

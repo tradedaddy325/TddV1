@@ -3,11 +3,11 @@ import { createClient } from "@/lib/supabase/server"
 
 export async function POST(req: NextRequest) {
   try {
-    const { token, amountInCents, currency, description, metadata } = await req.json()
+    const { amountInCents, currency, description, metadata } = await req.json()
 
-    if (!token || !amountInCents) {
+    if (!amountInCents) {
       return NextResponse.json(
-        { success: false, error: "Missing required fields" },
+        { success: false, error: "Missing amount" },
         { status: 400 }
       )
     }
@@ -30,42 +30,45 @@ export async function POST(req: NextRequest) {
       )
     }
 
-    // Charge via Yoco REST API
-    const yocoRes = await fetch("https://payments.yoco.com/api/checkouts", {
+    console.log("[v0] Creating Yoco checkout:", { amountInCents, metadata })
+
+    // Create checkout via Yoco REST API using SECRET key (server-side only)
+    const yocoRes = await fetch("https://api.yoco.com/v1/checkouts", {
       method: "POST",
       headers: {
-        "Content-Type": "application/json",
+        "Content-Type": "application/x-www-form-urlencoded",
         Authorization: `Bearer ${process.env.YOCO_SECRET_KEY}`,
       },
-      body: JSON.stringify({
-        amount: amountInCents,
+      body: new URLSearchParams({
+        amount: String(amountInCents),
         currency: currency || "ZAR",
         description,
-        metadata: {
-          ...metadata,
-          timestamp: new Date().toISOString(),
-        },
-      }),
+        metadata: JSON.stringify(metadata),
+        successUrl: `${process.env.NEXT_PUBLIC_APP_URL || "https://tradedaddy.co.za"}/profile?payment=success&tab=${
+          metadata.type === "subscription" ? "subscription" : "credits"
+        }`,
+        cancelUrl: `${process.env.NEXT_PUBLIC_APP_URL || "https://tradedaddy.co.za"}/profile?payment=cancelled&tab=${
+          metadata.type === "subscription" ? "subscription" : "credits"
+        }`,
+      }).toString(),
     })
 
     const yocoData = await yocoRes.json()
+    console.log("[v0] Yoco response:", yocoData)
 
     if (!yocoRes.ok) {
       console.error("[v0] Yoco error:", yocoData)
       return NextResponse.json(
-        { success: false, error: yocoData.message || "Payment failed" },
+        { success: false, error: yocoData.message || "Yoco API error" },
         { status: 400 }
       )
     }
 
-    console.log(`[v0] Payment initiated: ${yocoData.id} for user ${metadata.userId}`)
-
-    // Success! Webhook will handle credit/subscription updates
-    // We don't process credits here - wait for webhook confirmation
+    // Return the redirect URL to Yoco's hosted checkout
     return NextResponse.json({
       success: true,
+      redirectUrl: yocoData.redirectUrl || `https://checkout.yoco.com/${yocoData.id}`,
       chargeId: yocoData.id,
-      message: "Payment initiated. Your credits/subscription will be updated once payment is confirmed.",
     })
   } catch (error) {
     console.error("[v0] Payment route error:", error)
