@@ -55,7 +55,6 @@ export default function ProfilePage() {
   const [coupon, setCoupon] = useState("")
   const [couponMsg, setCouponMsg] = useState<{ text: string; ok: boolean } | null>(null)
   const [payLoading, setPayLoading] = useState<string | null>(null)
-  const [yocoReady, setYocoReady] = useState(false)
 
   const user = {
     name: "Mohammed B.",
@@ -68,70 +67,77 @@ export default function ProfilePage() {
     nextRenewal: "May 1, 2026",
   }
 
-  // Load Yoco SDK
-  useEffect(() => {
-    if (typeof window === "undefined") return
-    if (window.YocoSDK) { setYocoReady(true); return }
-    const script = document.createElement("script")
-    script.src = "https://js.yoco.com/sdk/v1/yoco-sdk-web.js"
-    script.onload = () => setYocoReady(true)
-    document.head.appendChild(script)
-  }, [])
+  // Load Yoco SDK script - NOT NEEDED anymore since we use REST API
+  // Removed: yocoReady state and SDK loading useEffect
 
   const handleYocoPay = async (amountRands: number, description: string, metadata: object) => {
-    if (!yocoReady || typeof window === "undefined" || !window.YocoSDK) {
-      alert("Payment system loading, please try again.")
-      return
-    }
     setPayLoading(description)
     try {
-      const yoco = new window.YocoSDK({
-        publicKey: process.env.NEXT_PUBLIC_YOCO_PUBLIC_KEY || "pk_test_placeholder",
-      })
-      yoco.showPopup({
-        amountInCents: amountRands * 100,
-        currency: "ZAR",
-        name: "TradeDaddy",
-        description,
-        callback: async (result: any) => {
-          setPayLoading(null)
-          if (result.error) {
-            alert("Payment failed: " + result.error.message)
-            return
-          }
-          // Send token to your backend
-          const res = await fetch("/api/payments/yoco", {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({
-              token: result.id,
-              amountInCents: amountRands * 100,
-              currency: "ZAR",
-              description,
-              metadata,
-            }),
-          })
-          const data = await res.json()
-          if (data.success) {
-            alert("Payment successful! " + description)
-            window.location.reload()
-          } else {
-            alert("Payment processing failed. Please contact support.")
-          }
+      console.log("[v0] Starting Yoco payment:", { amountRands, description, metadata })
+      
+      // Create checkout session via Yoco API
+      const res = await fetch("https://payments.yoco.com/api/checkouts", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${process.env.NEXT_PUBLIC_YOCO_PUBLIC_KEY}`,
         },
+        body: JSON.stringify({
+          amount: amountRands * 100, // Convert to cents
+          currency: "ZAR",
+          description,
+          metadata,
+          successUrl: `${window.location.origin}/profile?payment=success&tab=${
+            metadata.type === "subscription" ? "subscription" : "credits"
+          }`,
+          cancelUrl: `${window.location.origin}/profile?payment=cancelled&tab=${
+            metadata.type === "subscription" ? "subscription" : "credits"
+          }`,
+        }),
       })
-    } catch (e) {
+
+      const data = await res.json()
+      console.log("[v0] Checkout created:", data)
+
+      if (data.redirectUrl) {
+        // Redirect to Yoco's hosted payment page
+        window.location.href = data.redirectUrl
+      } else if (data.id) {
+        // Fallback: Show redirect message
+        alert("Redirecting to Yoco payment page...")
+        // Some Yoco implementations might need manual redirect
+        window.location.href = `https://checkout.yoco.com/${data.id}`
+      } else {
+        throw new Error(data.error?.message || "Failed to create checkout")
+      }
+    } catch (error) {
+      console.error("[v0] Payment error:", error)
+      alert("Payment failed: " + String(error))
       setPayLoading(null)
-      console.error(e)
     }
   }
 
-  const applyCoupon = () => {
-    const valid = ["TRADEDAD50", "PREMIUM100", "WELCOME200"]
-    if (valid.includes(coupon.toUpperCase())) {
-      setCouponMsg({ text: "Code applied! Credits added to your account.", ok: true })
-    } else {
-      setCouponMsg({ text: "Invalid or expired code.", ok: false })
+  const applyCoupon = async () => {
+    if (!coupon.trim()) {
+      setCouponMsg({ text: "Please enter a code", ok: false })
+      return
+    }
+    setCouponMsg(null)
+    try {
+      const res = await fetch("/api/credits/redeem-code", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ code: coupon }),
+      })
+      const data = await res.json()
+      if (data.success) {
+        setCouponMsg({ text: `✓ Added ${data.creditsAdded} credits!`, ok: true })
+        setCoupon("")
+      } else {
+        setCouponMsg({ text: data.error || "Invalid code", ok: false })
+      }
+    } catch (e) {
+      setCouponMsg({ text: "Error applying code", ok: false })
     }
   }
 
