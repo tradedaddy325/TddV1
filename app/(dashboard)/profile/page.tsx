@@ -70,7 +70,11 @@ export default function ProfilePage() {
   // Load Yoco SDK script - NOT NEEDED anymore since we use REST API
   // Removed: yocoReady state and SDK loading useEffect
 
-  const handleYocoPay = async (amountRands: number, description: string, metadata: object) => {
+  const handleYocoPay = async (
+    amountRands: number,
+    description: string,
+    metadata: { type: "subscription" | "credits"; [key: string]: any }
+  ) => {
     setPayLoading(description)
     try {
       console.log("[v0] Starting Yoco payment:", { amountRands, description, metadata })
