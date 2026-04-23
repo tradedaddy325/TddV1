@@ -76,7 +76,7 @@ export default function Sidebar({ onClose, mobile }: { onClose?: () => void; mob
         ) : (
           <>
             <div className="flex items-center gap-2">
-              <div className="w-6 h-6 bg-[#00C853] flex items-center justify-center">
+              <div className="w-6 h-6 bg-[#FF6600] flex items-center justify-center">
                 <TrendingUp className="w-3.5 h-3.5 text-black" />
               </div>
               <span className="text-[13px] font-bold tracking-[0.12em] text-white">TRADEDADDY</span>
@@ -100,11 +100,11 @@ export default function Sidebar({ onClose, mobile }: { onClose?: () => void; mob
                   onClick={() => toggle(item.label)}
                   className={`w-full flex items-center gap-3 px-4 py-[11px] border-l-[3px] transition-colors text-left group ${
                     isActive
-                      ? "border-[#00C853] bg-[#00C853]/[0.07]"
+                      ? "border-[#FF6600] bg-[#FF6600]/[0.07]"
                       : "border-transparent hover:bg-[#141414]"
                   }`}
                 >
-                  <Icon className={`w-[17px] h-[17px] shrink-0 ${isActive ? "text-[#00C853]" : "text-[#4A4A4A] group-hover:text-[#777]"}`} />
+                  <Icon className={`w-[17px] h-[17px] shrink-0 ${isActive ? "text-[#FF6600]" : "text-[#4A4A4A] group-hover:text-[#777]"}`} />
                   <span className={`flex-1 text-[13px] font-medium ${isActive ? "text-white" : "text-[#7A7A7A] group-hover:text-[#aaa]"}`}>
                     {item.label}
                   </span>
@@ -119,11 +119,11 @@ export default function Sidebar({ onClose, mobile }: { onClose?: () => void; mob
                   onClick={onClose}
                   className={`flex items-center gap-3 px-4 py-[11px] border-l-[3px] transition-colors group ${
                     isActive
-                      ? "border-[#00C853] bg-[#00C853]/[0.07]"
+                      ? "border-[#FF6600] bg-[#FF6600]/[0.07]"
                       : "border-transparent hover:bg-[#141414]"
                   }`}
                 >
-                  <Icon className={`w-[17px] h-[17px] shrink-0 ${isActive ? "text-[#00C853]" : "text-[#4A4A4A] group-hover:text-[#777]"}`} />
+                  <Icon className={`w-[17px] h-[17px] shrink-0 ${isActive ? "text-[#FF6600]" : "text-[#4A4A4A] group-hover:text-[#777]"}`} />
                   <span className={`flex-1 text-[13px] font-medium ${isActive ? "text-white" : "text-[#7A7A7A] group-hover:text-[#aaa]"}`}>
                     {item.label}
                   </span>
@@ -146,11 +146,11 @@ export default function Sidebar({ onClose, mobile }: { onClose?: () => void; mob
                       onClick={onClose}
                       className={`flex items-center gap-2 pl-3.5 pr-4 py-[9px] text-[12px] transition-colors ${
                         pathname === c.href
-                          ? "text-[#00C853]"
+                          ? "text-[#FF6600]"
                           : "text-[#4A4A4A] hover:text-[#888]"
                       }`}
                     >
-                      <span className={`w-[5px] h-[5px] rounded-full shrink-0 ${pathname === c.href ? "bg-[#00C853]" : "bg-[#242424]"}`} />
+                      <span className={`w-[5px] h-[5px] rounded-full shrink-0 ${pathname === c.href ? "bg-[#FF6600]" : "bg-[#242424]"}`} />
                       {c.label}
                     </Link>
                   ))}
@@ -164,14 +164,14 @@ export default function Sidebar({ onClose, mobile }: { onClose?: () => void; mob
       {/* User footer */}
       <div className="border-t border-[#1A1A1A] p-3">
         <Link href="/profile" className="flex items-center gap-2.5 p-2 hover:bg-[#141414] rounded transition-colors">
-          <div className="w-8 h-8 bg-[#00C853] flex items-center justify-center text-[11px] font-bold text-black shrink-0">
+          <div className="w-8 h-8 bg-[#FF6600] flex items-center justify-center text-[11px] font-bold text-black shrink-0">
             MB
           </div>
           <div className="flex-1 min-w-0">
             <p className="text-[12px] text-white font-semibold truncate">Mohammed B.</p>
             <p className="text-[10px] text-[#3A3A3A] truncate tracking-wider">EXECUTION PLAN</p>
           </div>
-          <div className="w-2 h-2 bg-[#00C853] rounded-full" />
+          <div className="w-2 h-2 bg-[#FF6600] rounded-full" />
         </Link>
       </div>
     </aside>

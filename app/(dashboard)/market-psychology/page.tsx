@@ -169,22 +169,22 @@ export default function MarketPsychologyPage() {
   const fgLabel = fgIndex > 75 ? "EXTREME GREED" : fgIndex > 55 ? "GREED" : fgIndex < 25 ? "EXTREME FEAR" : fgIndex < 45 ? "FEAR" : "NEUTRAL"
 
   return (
-    <div className="min-h-screen bg-[#0A0A0A] text-white p-4 md:p-6 space-y-4">
+    <div className="min-h-screen bg-[#0A0A0A] text-white p-3 md:p-6 space-y-4 overflow-x-hidden">
 
       {/* Top bar */}
-      <div className="flex items-center justify-between border border-[#1A1A1A] bg-[#0D0D0D] px-4 py-3">
+      <div className="flex flex-col md:flex-row items-start md:items-center justify-between border border-[#1A1A1A] bg-[#0D0D0D] px-3 md:px-4 py-2.5 md:py-3 gap-2">
         <div>
-          <p className="text-[10px] text-[#333] font-mono tracking-widest">CLAUDE'S NEURAL NETWORK</p>
-          <p className="text-sm font-bold">MARKET PSYCHOLOGY</p>
+          <p className="text-[9px] md:text-[10px] text-[#333] font-mono tracking-widest">CLAUDE'S NEURAL NETWORK</p>
+          <p className="text-xs md:text-sm font-bold">MARKET PSYCHOLOGY</p>
         </div>
-        <div className="flex items-center gap-3">
+        <div className="flex items-center gap-2">
           {lastRefresh && (
-            <span className="text-[10px] text-[#333] font-mono hidden md:block">UPDATED {lastRefresh}</span>
+            <span className="text-[8px] md:text-[10px] text-[#333] font-mono hidden md:block whitespace-nowrap">UPDATED {lastRefresh}</span>
           )}
           <button
             onClick={() => { fetchAIBriefing(); fetchPsychData() }}
             disabled={loadingBriefing || loadingPsych}
-            className="text-[10px] border border-[#1A1A1A] hover:border-[#00C853]/30 text-[#444] hover:text-[#00C853] px-3 py-1.5 font-mono tracking-widest transition-colors disabled:opacity-50"
+            className="text-[8px] md:text-[10px] border border-[#1A1A1A] hover:border-[#FF6600]/30 text-[#444] hover:text-[#FF6600] px-2 md:px-3 py-1 md:py-1.5 font-mono tracking-widest transition-colors disabled:opacity-50 whitespace-nowrap"
           >
             {loadingPsych ? "REFRESHING..." : "↻ REFRESH"}
           </button>
@@ -192,11 +192,11 @@ export default function MarketPsychologyPage() {
       </div>
 
       {/* Fear & Greed Index + AI Briefing */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-3 md:gap-4">
         {/* Fear & Greed Gauge */}
-        <div className="border border-[#1A1A1A] bg-[#0D0D0D] p-5 flex flex-col items-center justify-center">
-          <span className="text-[10px] text-[#00C853] tracking-widest font-mono block mb-4 self-start">FEAR & GREED INDEX</span>
-          <div className="relative w-32 h-32 mb-3">
+        <div className="border border-[#1A1A1A] bg-[#0D0D0D] p-3 md:p-5 flex flex-col items-center justify-center">
+          <span className="text-[8px] md:text-[10px] text-[#FF6600] tracking-widest font-mono block mb-3 self-start">FEAR & GREED INDEX</span>
+          <div className="relative w-24 md:w-32 h-24 md:h-32 mb-2 md:mb-3">
             <svg viewBox="0 0 120 120" className="w-full h-full -rotate-90">
               <circle cx="60" cy="60" r="50" fill="none" stroke="#1A1A1A" strokeWidth="10" />
               <circle
@@ -208,46 +208,46 @@ export default function MarketPsychologyPage() {
               />
             </svg>
             <div className="absolute inset-0 flex flex-col items-center justify-center rotate-0">
-              <span className="text-3xl font-bold" style={{ color: fgColor }}>{fgIndex}</span>
-              <span className="text-[9px] font-mono text-[#444] mt-0.5">/ 100</span>
+              <span className="text-2xl md:text-3xl font-bold" style={{ color: fgColor }}>{fgIndex}</span>
+              <span className="text-[7px] md:text-[9px] font-mono text-[#444] mt-0.5">/ 100</span>
             </div>
           </div>
-          <span className="text-sm font-bold font-mono" style={{ color: fgColor }}>{fgLabel}</span>
-          <p className="text-[10px] text-[#333] font-mono mt-1">COMPOSITE INDEX</p>
+          <span className="text-xs md:text-sm font-bold font-mono" style={{ color: fgColor }}>{fgLabel}</span>
+          <p className="text-[8px] md:text-[10px] text-[#333] font-mono mt-1">COMPOSITE INDEX</p>
         </div>
 
         {/* AI Briefing */}
-        <div className="md:col-span-2 border border-[#1A1A1A] bg-[#0D0D0D] p-5">
-          <span className="text-[10px] text-[#00C853] tracking-widest font-mono block mb-4">AI PSYCHOLOGY BRIEFING</span>
+        <div className="md:col-span-2 border border-[#1A1A1A] bg-[#0D0D0D] p-3 md:p-5 overflow-y-auto max-h-64 md:max-h-none">
+          <span className="text-[8px] md:text-[10px] text-[#FF6600] tracking-widest font-mono block mb-3">AI PSYCHOLOGY BRIEFING</span>
           {loadingBriefing ? (
             <div className="space-y-2 animate-pulse">
               {[...Array(4)].map((_, i) => (
-                <div key={i} className="h-3 bg-[#1A1A1A] rounded" style={{ width: `${85 - i * 10}%` }} />
+                <div key={i} className="h-2 md:h-3 bg-[#1A1A1A] rounded" style={{ width: `${85 - i * 10}%` }} />
               ))}
             </div>
           ) : briefing ? (
-            <div className="space-y-3">
-              <div className="border-l-2 border-[#00C853] pl-3">
-                <p className="text-[11px] text-[#888] leading-relaxed">{briefing.overallMood}</p>
+            <div className="space-y-2 md:space-y-3">
+              <div className="border-l-2 border-[#FF6600] pl-2 md:pl-3">
+                <p className="text-[9px] md:text-[11px] text-[#888] leading-relaxed">{briefing.overallMood}</p>
               </div>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-                <div className="bg-[#111] border border-[#1A1A1A] p-3">
-                  <p className="text-[9px] text-[#00C853] font-mono tracking-widest mb-1">TOP OPPORTUNITY</p>
-                  <p className="text-[11px] text-[#888]">{briefing.topOpportunity}</p>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-2 md:gap-3">
+                <div className="bg-[#111] border border-[#1A1A1A] p-2 md:p-3">
+                  <p className="text-[7px] md:text-[9px] text-[#FF6600] font-mono tracking-widest mb-1">TOP OPPORTUNITY</p>
+                  <p className="text-[9px] md:text-[11px] text-[#888]">{briefing.topOpportunity}</p>
                 </div>
-                <div className="bg-[#111] border border-[#FF4444]/10 p-3">
-                  <p className="text-[9px] text-[#FF4444] font-mono tracking-widest mb-1">KEY RISK</p>
-                  <p className="text-[11px] text-[#888]">{briefing.topRisk}</p>
+                <div className="bg-[#111] border border-[#FF4444]/10 p-2 md:p-3">
+                  <p className="text-[7px] md:text-[9px] text-[#FF4444] font-mono tracking-widest mb-1">KEY RISK</p>
+                  <p className="text-[9px] md:text-[11px] text-[#888]">{briefing.topRisk}</p>
                 </div>
               </div>
-              <div className="border-l-2 border-[#FF8C00] pl-3">
-                <p className="text-[9px] text-[#FF8C00] font-mono tracking-widest mb-1">MARKET PHASE</p>
-                <p className="text-[11px] text-[#888]">{briefing.marketPhase}</p>
+              <div className="border-l-2 border-[#FF6600] pl-2 md:pl-3">
+                <p className="text-[7px] md:text-[9px] text-[#FF6600] font-mono tracking-widest mb-1">MARKET PHASE</p>
+                <p className="text-[9px] md:text-[11px] text-[#888]">{briefing.marketPhase}</p>
               </div>
             </div>
           ) : (
-            <div className="border-l-2 border-[#00C853] pl-3">
-              <p className="text-[11px] text-[#555] font-mono italic">Loading AI briefing...</p>
+            <div className="border-l-2 border-[#FF6600] pl-2 md:pl-3">
+              <p className="text-[9px] md:text-[11px] text-[#555] font-mono italic">Loading AI briefing...</p>
             </div>
           )}
         </div>
@@ -255,8 +255,8 @@ export default function MarketPsychologyPage() {
 
       {/* Instrument selector */}
       <div className="border border-[#1A1A1A] bg-[#0D0D0D]">
-        <div className="px-4 py-2.5 border-b border-[#1A1A1A]">
-          <span className="text-[10px] text-[#00C853] tracking-widest font-mono">SELECT INSTRUMENT</span>
+        <div className="px-3 md:px-4 py-2 md:py-2.5 border-b border-[#1A1A1A]">
+          <span className="text-[8px] md:text-[10px] text-[#FF6600] tracking-widest font-mono">SELECT INSTRUMENT</span>
         </div>
         <div className="flex overflow-x-auto">
           {INSTRUMENTS.map((inst) => {
@@ -266,15 +266,15 @@ export default function MarketPsychologyPage() {
               <button
                 key={inst}
                 onClick={() => setSelected(inst)}
-                className={`flex-shrink-0 px-4 py-3 border-b-2 transition-colors text-center min-w-[90px] ${
+                className={`flex-shrink-0 px-3 md:px-4 py-2.5 md:py-3 border-b-2 transition-colors text-center min-w-[70px] md:min-w-[90px] ${
                   isSelected
-                    ? "border-[#00C853] bg-[#00C853]/5"
+                    ? "border-[#FF6600] bg-[#FF6600]/5"
                     : "border-transparent hover:bg-[#111]"
                 }`}
               >
-                <div className={`text-xs font-bold font-mono ${isSelected ? "text-white" : "text-[#555]"}`}>{inst}</div>
+                <div className={`text-[8px] md:text-xs font-bold font-mono ${isSelected ? "text-white" : "text-[#555]"}`}>{inst}</div>
                 {d && (
-                  <div className={`text-[9px] font-mono mt-0.5 ${sentimentColor(d.sentiment)}`}>
+                  <div className={`text-[7px] md:text-[9px] font-mono mt-0.5 ${sentimentColor(d.sentiment)}`}>
                     {d.sentiment}
                   </div>
                 )}
@@ -286,29 +286,29 @@ export default function MarketPsychologyPage() {
 
       {/* Detail panel */}
       {current && (
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-3 md:gap-4">
           {/* Sentiment + positioning */}
-          <div className="border border-[#1A1A1A] bg-[#0D0D0D] p-5">
-            <div className="flex items-center justify-between mb-4">
-              <span className="text-[10px] text-[#00C853] tracking-widest font-mono">SENTIMENT — {current.instrument}</span>
-              <span className={`text-[10px] font-bold px-2 py-0.5 border font-mono ${sentimentBg(current.sentiment)}`}>
+          <div className="border border-[#1A1A1A] bg-[#0D0D0D] p-3 md:p-5 overflow-y-auto max-h-96 md:max-h-none">
+            <div className="flex items-start md:items-center justify-between mb-3 md:mb-4 flex-col md:flex-row gap-2">
+              <span className="text-[8px] md:text-[10px] text-[#FF6600] tracking-widest font-mono">SENTIMENT — {current.instrument}</span>
+              <span className={`text-[7px] md:text-[10px] font-bold px-2 py-0.5 border font-mono ${sentimentBg(current.sentiment)} whitespace-nowrap`}>
                 {current.sentiment}
               </span>
             </div>
 
             {/* Score bar */}
-            <div className="mb-5">
-              <div className="flex justify-between text-[10px] font-mono mb-1.5">
-                <span className="text-[#00C853]">FEAR</span>
+            <div className="mb-4 md:mb-5">
+              <div className="flex justify-between text-[7px] md:text-[10px] font-mono mb-1 md:mb-1.5">
+                <span className="text-[#FF6600]">FEAR</span>
                 <span className="text-[#888]">Score: {current.score}</span>
                 <span className="text-[#FF4444]">GREED</span>
               </div>
-              <div className="h-3 bg-[#111] border border-[#1A1A1A] relative overflow-hidden">
+              <div className="h-2 md:h-3 bg-[#111] border border-[#1A1A1A] relative overflow-hidden">
                 <div
                   className="absolute top-0 left-0 h-full transition-all"
                   style={{
                     width: `${current.score}%`,
-                    background: `linear-gradient(to right, #00C853, #FF8C00, #FF4444)`,
+                    background: `linear-gradient(to right, #FF6600, #FF8C00, #FF4444)`,
                   }}
                 />
                 <div
@@ -319,17 +319,17 @@ export default function MarketPsychologyPage() {
             </div>
 
             {/* Retail positioning */}
-            <div className="mb-4">
-              <p className="text-[10px] text-[#333] font-mono tracking-widest mb-2">RETAIL POSITIONING</p>
-              <div className="flex h-6 overflow-hidden border border-[#1A1A1A]">
+            <div className="mb-3 md:mb-4">
+              <p className="text-[7px] md:text-[10px] text-[#333] font-mono tracking-widest mb-1.5 md:mb-2">RETAIL POSITIONING</p>
+              <div className="flex h-5 md:h-6 overflow-hidden border border-[#1A1A1A]">
                 <div
-                  className="h-full bg-[#00C853] flex items-center justify-center text-[10px] font-bold text-black font-mono transition-all"
+                  className="h-full bg-[#FF6600] flex items-center justify-center text-[7px] md:text-[10px] font-bold text-black font-mono transition-all"
                   style={{ width: `${current.retailLong}%` }}
                 >
                   {current.retailLong > 20 ? `${current.retailLong}% LONG` : ""}
                 </div>
                 <div
-                  className="h-full bg-[#FF4444] flex items-center justify-center text-[10px] font-bold text-white font-mono transition-all"
+                  className="h-full bg-[#FF4444] flex items-center justify-center text-[7px] md:text-[10px] font-bold text-white font-mono transition-all"
                   style={{ width: `${current.retailShort}%` }}
                 >
                   {current.retailShort > 20 ? `${current.retailShort}% SHORT` : ""}
@@ -338,46 +338,46 @@ export default function MarketPsychologyPage() {
             </div>
 
             {/* Trend */}
-            <div className="flex items-center justify-between border-t border-[#1A1A1A] pt-3">
-              <span className="text-[10px] text-[#333] font-mono tracking-wider">TREND BIAS</span>
-              <span className={`text-sm font-bold font-mono ${
-                current.trend === "BULLISH" ? "text-[#00C853]" :
+            <div className="flex items-center justify-between border-t border-[#1A1A1A] pt-2 md:pt-3">
+              <span className="text-[7px] md:text-[10px] text-[#333] font-mono tracking-wider">TREND BIAS</span>
+              <span className={`text-xs md:text-sm font-bold font-mono ${
+                current.trend === "BULLISH" ? "text-[#FF6600]" :
                 current.trend === "BEARISH" ? "text-[#FF4444]" : "text-[#888]"
               }`}>{current.trend}</span>
             </div>
           </div>
 
           {/* AI Analysis */}
-          <div className="border border-[#1A1A1A] bg-[#0D0D0D] p-5">
-            <span className="text-[10px] text-[#00C853] tracking-widest font-mono block mb-4">
+          <div className="border border-[#1A1A1A] bg-[#0D0D0D] p-3 md:p-5 overflow-y-auto max-h-96 md:max-h-none">
+            <span className="text-[8px] md:text-[10px] text-[#FF6600] tracking-widest font-mono block mb-3 md:mb-4">
               AI ANALYSIS — {current.instrument}
             </span>
 
             {/* Key levels */}
-            <div className="grid grid-cols-2 gap-3 mb-4">
-              <div className="bg-[#111] border border-[#1A1A1A] p-3">
-                <p className="text-[9px] text-[#00C853] font-mono tracking-widest mb-1">SUPPORT</p>
-                <p className="text-base font-bold font-mono">{current.keyLevels.support}</p>
+            <div className="grid grid-cols-2 gap-2 md:gap-3 mb-3 md:mb-4">
+              <div className="bg-[#111] border border-[#1A1A1A] p-2 md:p-3">
+                <p className="text-[7px] md:text-[9px] text-[#FF6600] font-mono tracking-widest mb-0.5 md:mb-1">SUPPORT</p>
+                <p className="text-sm md:text-base font-bold font-mono">{current.keyLevels.support}</p>
               </div>
-              <div className="bg-[#111] border border-[#1A1A1A] p-3">
-                <p className="text-[9px] text-[#FF4444] font-mono tracking-widest mb-1">RESISTANCE</p>
-                <p className="text-base font-bold font-mono">{current.keyLevels.resistance}</p>
+              <div className="bg-[#111] border border-[#1A1A1A] p-2 md:p-3">
+                <p className="text-[7px] md:text-[9px] text-[#FF4444] font-mono tracking-widest mb-0.5 md:mb-1">RESISTANCE</p>
+                <p className="text-sm md:text-base font-bold font-mono">{current.keyLevels.resistance}</p>
               </div>
             </div>
 
             {/* Bias */}
-            <div className="border-l-2 border-[#00C853] pl-3 mb-4">
-              <p className="text-[9px] text-[#333] font-mono tracking-widest mb-1">SMART MONEY BIAS</p>
-              <p className="text-[12px] text-[#888] leading-relaxed">{current.biasStatement}</p>
+            <div className="border-l-2 border-[#FF6600] pl-2 md:pl-3 mb-3 md:mb-4">
+              <p className="text-[7px] md:text-[9px] text-[#333] font-mono tracking-widest mb-0.5 md:mb-1">SMART MONEY BIAS</p>
+              <p className="text-[9px] md:text-[12px] text-[#888] leading-relaxed">{current.biasStatement}</p>
             </div>
 
             {/* Retail traps */}
             <div>
-              <p className="text-[9px] text-[#FF4444] font-mono tracking-widest mb-2">⚠ RETAIL TRAPS TO AVOID</p>
-              <div className="space-y-1.5">
+              <p className="text-[7px] md:text-[9px] text-[#FF4444] font-mono tracking-widest mb-1.5 md:mb-2">⚠ RETAIL TRAPS TO AVOID</p>
+              <div className="space-y-1">
                 {current.traps.map((trap, i) => (
-                  <div key={i} className="flex items-start gap-2 text-[11px]">
-                    <span className="text-[#FF4444] mt-0.5 shrink-0 text-[10px]">▶</span>
+                  <div key={i} className="flex items-start gap-2 text-[8px] md:text-[11px]">
+                    <span className="text-[#FF4444] mt-0.5 shrink-0 text-[8px] md:text-[10px]">▶</span>
                     <span className="text-[#555]">{trap}</span>
                   </div>
                 ))}
@@ -389,15 +389,15 @@ export default function MarketPsychologyPage() {
 
       {/* All instruments overview table */}
       <div className="border border-[#1A1A1A] bg-[#0D0D0D]">
-        <div className="px-4 py-3 border-b border-[#1A1A1A]">
-          <span className="text-[10px] text-[#00C853] tracking-widest font-mono">ALL INSTRUMENTS OVERVIEW</span>
+        <div className="px-3 md:px-4 py-2 md:py-3 border-b border-[#1A1A1A]">
+          <span className="text-[8px] md:text-[10px] text-[#FF6600] tracking-widest font-mono">ALL INSTRUMENTS OVERVIEW</span>
         </div>
         <div className="overflow-x-auto">
-          <table className="w-full text-xs font-mono">
+          <table className="w-full text-[7px] md:text-xs font-mono">
             <thead>
               <tr className="border-b border-[#1A1A1A]">
                 {["INSTRUMENT", "SENTIMENT", "SCORE", "RETAIL LONG", "RETAIL SHORT", "TREND"].map((h) => (
-                  <th key={h} className="px-4 py-2.5 text-left text-[10px] text-[#333] tracking-wider font-normal">{h}</th>
+                  <th key={h} className="px-2 md:px-4 py-2 md:py-2.5 text-left text-[7px] md:text-[10px] text-[#333] tracking-wider font-normal whitespace-nowrap">{h}</th>
                 ))}
               </tr>
             </thead>
@@ -406,26 +406,26 @@ export default function MarketPsychologyPage() {
                 <tr
                   key={d.instrument}
                   onClick={() => setSelected(d.instrument)}
-                  className={`cursor-pointer transition-colors hover:bg-[#111] ${selected === d.instrument ? "bg-[#00C853]/5" : ""}`}
+                  className={`cursor-pointer transition-colors hover:bg-[#111] ${selected === d.instrument ? "bg-[#FF6600]/5" : ""}`}
                 >
-                  <td className="px-4 py-3 font-bold text-white">{d.instrument}</td>
-                  <td className="px-4 py-3">
-                    <span className={`text-[10px] px-1.5 py-0.5 border ${sentimentBg(d.sentiment)}`}>
+                  <td className="px-2 md:px-4 py-2 md:py-3 font-bold text-white">{d.instrument}</td>
+                  <td className="px-2 md:px-4 py-2 md:py-3">
+                    <span className={`text-[7px] md:text-[10px] px-1 md:px-1.5 py-0.5 border ${sentimentBg(d.sentiment)}`}>
                       {d.sentiment}
                     </span>
                   </td>
-                  <td className="px-4 py-3">
-                    <div className="flex items-center gap-2">
-                      <div className="w-16 h-1.5 bg-[#1A1A1A]">
-                        <div className="h-full bg-[#00C853]" style={{ width: `${d.score}%` }} />
+                  <td className="px-2 md:px-4 py-2 md:py-3">
+                    <div className="flex items-center gap-1 md:gap-2">
+                      <div className="w-12 md:w-16 h-1 md:h-1.5 bg-[#1A1A1A]">
+                        <div className="h-full bg-[#FF6600]" style={{ width: `${d.score}%` }} />
                       </div>
-                      <span className="text-[#555]">{d.score}</span>
+                      <span className="text-[#555] text-[7px] md:text-xs whitespace-nowrap">{d.score}</span>
                     </div>
                   </td>
-                  <td className="px-4 py-3 text-[#00C853]">{d.retailLong}%</td>
-                  <td className="px-4 py-3 text-[#FF4444]">{d.retailShort}%</td>
-                  <td className={`px-4 py-3 font-bold ${
-                    d.trend === "BULLISH" ? "text-[#00C853]" :
+                  <td className="px-2 md:px-4 py-2 md:py-3 text-[#FF6600] whitespace-nowrap">{d.retailLong}%</td>
+                  <td className="px-2 md:px-4 py-2 md:py-3 text-[#FF4444] whitespace-nowrap">{d.retailShort}%</td>
+                  <td className={`px-2 md:px-4 py-2 md:py-3 font-bold whitespace-nowrap ${
+                    d.trend === "BULLISH" ? "text-[#FF6600]" :
                     d.trend === "BEARISH" ? "text-[#FF4444]" : "text-[#888]"
                   }`}>{d.trend}</td>
                 </tr>
