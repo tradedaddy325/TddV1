@@ -417,8 +417,7 @@ export default function HomePage() {
           </div>
           <div className="mt-6 border border-[#1A1A1A] bg-[#0D0D0D] p-4 text-center">
             <p className="text-[11px] text-[#555]">
-              ▶ All plans include 14-day free trial — No credit card required ·{" "}
-              <Link href="/pricing" className="text-[#FF6600] hover:underline">View full pricing details →</Link>
+              ▶ Choose your trading terminal plan and start today
             </p>
           </div>
         </section>
@@ -433,8 +432,8 @@ export default function HomePage() {
             <div><span className="text-cyan-500">⚠</span> You alone are responsible for all trading decisions.</div>
           </div>
           <div className="flex flex-wrap gap-4 text-[11px] justify-center border-t border-[#1A1A1A] pt-4">
-            <Link href="/legal/terms" className="text-[#555] hover:text-[#FF6600] transition-colors">Terms of Service</Link>
-            <Link href="/legal/privacy" className="text-[#555] hover:text-[#FF6600] transition-colors">Privacy Policy</Link>
+            <Link href="/legal/legal" className="text-[#555] hover:text-[#FF6600] transition-colors">Terms of Service</Link>
+            <Link href="/legal/legal" className="text-[#555] hover:text-[#FF6600] transition-colors">Privacy Policy</Link>
             <Link href="/legal/risk" className="text-[#555] hover:text-[#FF6600] transition-colors">Risk Disclosure</Link>
             <Link href="/legal/disclaimer" className="text-[#555] hover:text-[#FF6600] transition-colors">Signal Disclaimer</Link>
             <Link href="/legal/legal" className="text-[#555] hover:text-[#FF6600] transition-colors">Legal</Link>
