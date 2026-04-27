@@ -159,6 +159,7 @@ async function fetchTwelveDataWithChange(symbols: string[]): Promise<Record<stri
         price: price.toFixed(getDecimals(ourSymbol)).toString(),
         changePercent: change.toFixed(2),
         source: "twelvedata",
+        cachedAt: Date.now(),
       }
     }
 
