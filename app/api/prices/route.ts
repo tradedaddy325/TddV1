@@ -210,7 +210,7 @@ async function fetchFrankfurterForex(symbols: string[]): Promise<Record<string, 
       try {
         const price = map[sym]?.()
         if (price) {
-          result[sym] = { price, changePercent: "0.00", source: "frankfurter" }
+          result[sym] = { price, changePercent: "0.00", source: "frankfurter", cachedAt: Date.now() }
         }
       } catch {
         // skip
@@ -246,7 +246,7 @@ async function fetchAlphaVantage(symbol: string): Promise<CachedPrice | null> {
       const json = await res.json()
       const rate = json?.["Realtime Currency Exchange Rate"]?.["5. Exchange Rate"]
       if (rate) {
-        return { price: parseFloat(rate).toFixed(getDecimals(symbol)).toString(), changePercent: "0.00", source: "alphavantage" }
+        return { price: parseFloat(rate).toFixed(getDecimals(symbol)).toString(), changePercent: "0.00", source: "alphavantage", cachedAt: Date.now() }
       }
     }
 
@@ -256,7 +256,7 @@ async function fetchAlphaVantage(symbol: string): Promise<CachedPrice | null> {
       const json = await res.json()
       const rate = json?.["Realtime Currency Exchange Rate"]?.["5. Exchange Rate"]
       if (rate) {
-        return { price: parseFloat(rate).toFixed(2).toString(), changePercent: "0.00", source: "alphavantage" }
+        return { price: parseFloat(rate).toFixed(2).toString(), changePercent: "0.00", source: "alphavantage", cachedAt: Date.now() }
       }
     }
   } catch (err) {
