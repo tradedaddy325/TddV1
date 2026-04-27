@@ -94,7 +94,7 @@ async function fetchTwelveData(symbols: string[]): Promise<Record<string, Cached
     if (symbols.length === 1) {
       const sym = symbols[0]
       if (json.price) {
-        result[sym] = { price: parseFloat(json.price).toFixed(getDecimals(sym)).toString(), changePercent: "0.00", source: "twelvedata" }
+        result[sym] = { price: parseFloat(json.price).toFixed(getDecimals(sym)).toString(), changePercent: "0.00", source: "twelvedata", cachedAt: Date.now() }
       }
       return result
     }
@@ -108,6 +108,7 @@ async function fetchTwelveData(symbols: string[]): Promise<Record<string, Cached
           price: parseFloat(entry.price).toFixed(getDecimals(ourSymbol)).toString(),
           changePercent: "0.00",
           source: "twelvedata",
+          cachedAt: Date.now(),
         }
       }
     }
@@ -221,7 +222,7 @@ async function fetchFrankfurterForex(symbols: string[]): Promise<Record<string, 
   }
 }
 
-// ─── Alpha Vantage fallback (if key exists) ───────────────────────────────────
+// ─── Alpha Vantage fallback (if key exists) ───────��───────────────────────────
 
 async function fetchAlphaVantage(symbol: string): Promise<CachedPrice | null> {
   const apiKey = process.env.ALPHA_VANTAGE_API_KEY
