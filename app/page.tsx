@@ -3,6 +3,7 @@
 import { useEffect, useState, useCallback } from "react"
 import Link from "next/link"
 import LandingTicker from "@/components/LandingTicker"
+import LiveMarketOverview from "@/components/LiveMarketOverview"
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -184,7 +185,7 @@ export default function HomePage() {
 
           {/* Right panel */}
           <div className="col-span-12 lg:col-span-5 space-y-3">
-            <MarketOverview prices={prices} lastUpdated={lastUpdated} />
+            <LiveMarketOverview />
 
             {/* AI signals teaser */}
             <div className="border border-[#1A1A1A] bg-[#0D0D0D]">
