@@ -74,102 +74,10 @@ const NAV_LINKS = [
   { href: "/about", label: "About" },
 ]
 
-function Nav({ activeHref }: { activeHref: string }) {
-  return (
-    <nav className="flex items-center gap-0 text-[11px]">
-      {NAV_LINKS.map((link) => (
-        <Link
-          key={link.href}
-          href={link.href}
-          className={`px-4 py-2.5 border-b-2 transition-colors tracking-wider ${
-            activeHref === link.href
-              ? "border-[#FF6600] text-white"
-              : "border-transparent text-[#555] hover:text-[#888]"
-          }`}
-        >
-          {link.label}
-        </Link>
-      ))}
-    </nav>
-  )
-}
-
-// ─── Ticker strip ─────────────────────────────────────────────────────────────
-
-function Ticker({ prices }: { prices: Price[] }) {
-  const items = prices.length > 0 ? prices : []
-  // Duplicate for seamless loop
-  const doubled = [...items, ...items]
-
-  return (
-    <div className="bg-[#111] border-b border-[#222] overflow-hidden h-8 flex items-center">
-      <div
-        className="flex gap-0 shrink-0"
-        style={{ animation: "scroll 30s linear infinite" }}
-      >
-        {doubled.map((p, i) => (
-          <span
-            key={`${p.symbol}-${i}`}
-            className="flex items-center gap-2 px-4 text-xs border-r border-[#222] h-8 whitespace-nowrap"
-          >
-            <span className="text-[#888]">{p.symbol}</span>
-            <span className="text-white">{p.price}</span>
-            <span style={{ color: p.changeColor }}>{p.change}</span>
-          </span>
-        ))}
-      </div>
-      <style>{`@keyframes scroll { from { transform: translateX(0); } to { transform: translateX(-50%); } }`}</style>
-    </div>
-  )
-}
-
-// ─── Market overview panel ────────────────────────────────────────────────────
-
-function MarketOverview({ prices, lastUpdated }: { prices: Price[]; lastUpdated: Date | null }) {
-  return (
-    <div className="border border-[#1A1A1A] bg-[#0D0D0D]">
-      <div className="flex items-center justify-between px-3 py-2 border-b border-[#1A1A1A] bg-[#111]">
-        <span className="text-[10px] text-[#FF6600] tracking-widest font-bold">LIVE MARKET OVERVIEW</span>
-        <span className="flex items-center gap-1 text-[10px] text-[#00D084]">
-          <span className="w-1.5 h-1.5 bg-[#00D084] rounded-full animate-pulse inline-block" />
-          {lastUpdated ? `UPDATED ${lastUpdated.toLocaleTimeString("en-ZA", { hour: "2-digit", minute: "2-digit", second: "2-digit" })}` : "LIVE"}
-        </span>
-      </div>
-      <div className="divide-y divide-[#1A1A1A]">
-        {prices.length === 0
-          ? SYMBOLS.map((sym) => (
-              <div key={sym} className="flex items-center justify-between px-3 py-2.5 animate-pulse">
-                <span className="text-xs text-[#888] w-20">{sym}</span>
-                <span className="text-sm font-bold text-[#333]">———</span>
-                <span className="text-xs font-bold w-16 text-right text-[#333]">+0.00%</span>
-                <div className="w-20 h-1 bg-[#1A1A1A] rounded overflow-hidden" />
-              </div>
-            ))
-          : prices.map((p) => (
-              <div key={p.symbol} className="flex items-center justify-between px-3 py-2.5 hover:bg-[#111] transition-colors">
-                <span className="text-xs text-[#888] w-20">{p.symbol}</span>
-                <span className="text-sm font-bold text-white">{p.price}</span>
-                <span className="text-xs font-bold w-16 text-right" style={{ color: p.changeColor }}>
-                  {p.change}
-                </span>
-                <div className="w-20 h-1 bg-[#1A1A1A] rounded overflow-hidden">
-                  <div
-                    className="h-full rounded"
-                    style={{ width: `${p.barWidth}%`, backgroundColor: p.barColor }}
-                  />
-                </div>
-              </div>
-            ))}
-      </div>
-    </div>
-  )
-}
-
 // ─── Main page ────────────────────────────────────────────────────────────────
 
 export default function HomePage() {
   const { prices, lastUpdated } = useLivePrices()
-  const pathname = usePathname()
 
   return (
     <div className="min-h-screen bg-[#0A0A0A] text-white font-mono overflow-x-hidden">
@@ -177,30 +85,46 @@ export default function HomePage() {
 
       <header className="border-b border-[#222] bg-[#0D0D0D]">
         <div className="max-w-7xl mx-auto px-4">
+          {/* Top bar */}
           <div className="flex items-center justify-between py-3 border-b border-[#1A1A1A]">
-            <Link href="/" className="flex items-center gap-3">
-              <div className="w-7 h-7 bg-[#FF6600] flex items-center justify-center">
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2.5">
+            <Link href="/" className="flex items-center gap-2">
+              <div className="w-7 h-7 bg-[#FF6600] flex items-center justify-center shrink-0">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2.5">
                   <path d="M16 7h6v6" />
                   <path d="m22 7-8.5 8.5-5-5L2 17" />
                 </svg>
               </div>
               <span className="text-sm font-bold tracking-[0.2em] text-white">TRADEDADDY</span>
-              <span className="text-[10px] text-[#FF6600] border border-[#FF6600]/40 px-1.5 py-0.5 tracking-wider">TERMINAL</span>
+              <span className="hidden sm:inline text-[10px] text-[#FF6600] border border-[#FF6600]/40 px-1.5 py-0.5 tracking-wider">TERMINAL</span>
             </Link>
-            <div className="flex items-center gap-6 text-[11px] text-[#555]">
+
+            {/* Desktop: markets open + buttons */}
+            <div className="hidden md:flex items-center gap-4 text-[11px] text-[#555]">
               <span className="text-[#00D084]">● MARKETS OPEN</span>
             </div>
+
             <div className="flex items-center gap-2">
-              <Link href="/auth/login" className="text-xs text-[#888] hover:text-white px-3 py-1.5 border border-[#333] hover:border-[#555] transition-colors">
+              <Link href="/auth/login" className="text-xs text-[#888] hover:text-white px-3 py-1.5 border border-[#333] hover:border-[#555] transition-colors hidden sm:block">
                 LOGIN
               </Link>
-              <Link href="/auth/sign-up" className="text-xs bg-[#FF6600] hover:bg-[#FF7722] px-4 py-1.5 text-white transition-colors font-bold tracking-wide">
+              <Link href="/auth/sign-up" className="text-xs bg-[#FF6600] hover:bg-[#FF7722] px-3 py-1.5 sm:px-4 text-white transition-colors font-bold tracking-wide whitespace-nowrap">
                 GET ACCESS
               </Link>
             </div>
           </div>
-          <Nav activeHref={pathname} />
+
+          {/* Nav — scrollable on mobile */}
+          <div className="overflow-x-auto" style={{ scrollbarWidth: "none" }}>
+            <nav className="flex items-center gap-0 text-[11px] min-w-max">
+              <Link href="/features" className="px-3 sm:px-4 py-2.5 border-b-2 transition-colors tracking-wider border-transparent text-[#555] hover:text-[#888] whitespace-nowrap">Features</Link>
+              <Link href="/pricing" className="px-3 sm:px-4 py-2.5 border-b-2 transition-colors tracking-wider border-transparent text-[#555] hover:text-[#888] whitespace-nowrap">Pricing</Link>
+              <Link href="/signals" className="px-3 sm:px-4 py-2.5 border-b-2 transition-colors tracking-wider border-transparent text-[#555] hover:text-[#888] whitespace-nowrap">Signals</Link>
+              <Link href="/academy" className="px-3 sm:px-4 py-2.5 border-b-2 transition-colors tracking-wider border-transparent text-[#555] hover:text-[#888] whitespace-nowrap">Academy</Link>
+              <Link href="/about" className="px-3 sm:px-4 py-2.5 border-b-2 transition-colors tracking-wider border-transparent text-[#555] hover:text-[#888] whitespace-nowrap">About</Link>
+              {/* Mobile-only login link in nav */}
+              <Link href="/auth/login" className="px-3 py-2.5 border-b-2 border-transparent text-[#555] hover:text-[#888] whitespace-nowrap sm:hidden">Login</Link>
+            </nav>
+          </div>
         </div>
       </header>
 
