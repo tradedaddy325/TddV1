@@ -2,7 +2,7 @@
 
 import { useEffect, useState, useCallback } from "react"
 import Link from "next/link"
-import { usePathname } from "next/navigation"
+import LandingTicker from "@/components/LandingTicker"
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -81,7 +81,7 @@ export default function HomePage() {
 
   return (
     <div className="min-h-screen bg-[#0A0A0A] text-white font-mono overflow-x-hidden">
-      <Ticker prices={prices} />
+      <LandingTicker />
 
       <header className="border-b border-[#222] bg-[#0D0D0D]">
         <div className="max-w-7xl mx-auto px-4">
