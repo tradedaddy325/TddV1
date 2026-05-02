@@ -4,6 +4,7 @@ import { Analytics } from '@vercel/analytics/next'
 import { SpeedInsights } from '@vercel/speed-insights/next'
 import { BootScreen } from '@/components/boot-screen'
 import { TermsAcceptanceModal } from '@/components/terms-acceptance-modal'
+import MobileNavigation from '@/components/layout/MobileNavigation'
 import './globals.css'
 
 const _geist = Geist({ subsets: ["latin"] });
@@ -42,6 +43,7 @@ export default function RootLayout({
         <BootScreen />
         <TermsAcceptanceModal />
         {children}
+        <MobileNavigation />
         {process.env.NODE_ENV === 'production' && <Analytics />}
         <SpeedInsights />
       </body>
