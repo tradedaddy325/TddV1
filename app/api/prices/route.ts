@@ -36,7 +36,7 @@ export async function GET(request: NextRequest) {
       priceData = await fetchPriceData(symbol, !fresh, parsedTTL);
     } else {
       // Multiple symbols
-      const symbols = symbolsStr.split(",").map((s) => s.trim());
+      const symbols = (symbolsStr as string).split(",").map((s) => s.trim());
       priceData = await fetchMultiplePrices(symbols, !fresh, parsedTTL);
     }
 
