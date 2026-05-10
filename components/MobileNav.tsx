@@ -9,7 +9,6 @@ import {
   User,
   Grid,
   MoreVertical,
-  DollarSign,
 } from "lucide-react";
 import Link from "next/link";
 
@@ -22,13 +21,12 @@ interface MobileNavItem {
 
 /**
  * Mobile Navigation Items
- * Layout: Dashboard | Signals | +AddTrade | Vault | Profile
+ * Layout: Dashboard | Signals | +AddTrade | Profile
  * 
  * Matches the design from IMG_9602.jpg:
  * - Grid icon (Dashboard)
  * - TrendingUp icon (Signals) 
  * - + button centered and highlighted (Add Trade)
- * - Dollar icon (Vault/Payouts)
  * - Three dots (Profile/More)
  */
 const navItems: MobileNavItem[] = [
@@ -47,11 +45,6 @@ const navItems: MobileNavItem[] = [
     label: "Add Trade",
     href: "/journal",
     isCenter: true,
-  },
-  {
-    icon: DollarSign,
-    label: "Vault",
-    href: "/vault",
   },
   {
     icon: MoreVertical,
