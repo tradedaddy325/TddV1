@@ -1,205 +1,111 @@
-'use client'
+"use client";
 
-import { useState } from 'react'
-import Link from 'next/link'
-import { useRouter } from 'next/navigation'
-import { createClient } from '@/lib/supabase/client'
-import { Button } from '@/components/ui/button'
-import { Input } from '@/components/ui/input'
-import { Label } from '@/components/ui/label'
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
-import { Alert, AlertDescription } from '@/components/ui/alert'
-import { TrendingUp, Loader2, AlertCircle } from 'lucide-react'
+import Link from "next/link";
+import { usePathname } from "next/navigation";
 
-export default function SignUpPage() {
-  const router = useRouter()
+interface NavItem {
+  href: string;
+  label: string;
+  icon: string;
+  badge?: string;
+}
 
-  const [displayName, setDisplayName] = useState('')
-  const [email, setEmail] = useState('')
-  const [password, setPassword] = useState('')
-  const [confirmPassword, setConfirmPassword] = useState('')
-  const [error, setError] = useState<string | null>(null)
-  const [isLoading, setIsLoading] = useState(false)
+const NAV_ITEMS: NavItem[] = [
+  { href: "/dashboard",      label: "Dashboard",           icon: "⚡" },
+  { href: "/dashboard/terminal", label: "Terminal",        icon: "📟" },
+  { href: "/journal",        label: "Trade Journal",       icon: "📒", badge: "NEW" },
+  { href: "/education",      label: "Education Suite",     icon: "📚", badge: "NEW" },
+  { href: "/dashboard/chatbot",  label: "Trade Daddy Chatbot", icon: "🤖" },
+  { href: "/dashboard/markets",  label: "Markets",         icon: "📈" },
+  { href: "/dashboard/analytics","label": "Analytics",     icon: "📊" },
+  { href: "/dashboard/signals",  label: "Signals",         icon: "🎯" },
+  { href: "/dashboard/risk",     label: "Risk Manager",    icon: "🛡" },
+  { href: "/dashboard/screener", label: "Screener",        icon: "🔍" },
+  { href: "/dashboard/settings", label: "Settings",        icon: "⚙️" },
+];
 
-  const handleSignUp = async (e: React.FormEvent) => {
-    e.preventDefault()
-    setIsLoading(true)
-    setError(null)
-
-    if (password !== confirmPassword) {
-      setError('Passwords do not match')
-      setIsLoading(false)
-      return
-    }
-
-    if (password.length < 8) {
-      setError('Password must be at least 8 characters')
-      setIsLoading(false)
-      return
-    }
-
-    const supabase = createClient()
-
-    const { error } = await supabase.auth.signUp({
-      email,
-      password,
-      options: {
-        emailRedirectTo: process.env.NEXT_PUBLIC_DEV_SUPABASE_REDIRECT_URL ||
-          `${window.location.origin}/dashboard`,
-        data: {
-          display_name: displayName,
-        },
-      },
-    })
-
-    if (error) {
-      setError(error.message)
-      setIsLoading(false)
-      return
-    }
-
-    // Wrap router operations to ensure they happen after initialization
-    setTimeout(() => {
-      router.push('/auth/sign-up-success')
-    }, 0)
-  }
+export default function SideNav() {
+  const pathname = usePathname();
 
   return (
-    <div className="min-h-screen flex items-center justify-center p-4 bg-background">
-      <div className="w-full max-w-md">
-        {/* Logo */}
-        <div className="flex items-center justify-center gap-2 mb-8">
-          <div className="flex items-center justify-center w-10 h-10 bg-primary rounded">
-            <TrendingUp className="w-6 h-6 text-primary-foreground" />
-          </div>
-          <span className="text-2xl font-bold text-primary glow-green">TRADEDADDY</span>
+    <nav
+      style={{
+        width: 220,
+        background: "#0a0a0d",
+        borderRight: "1px solid rgba(255,255,255,0.06)",
+        display: "flex",
+        flexDirection: "column",
+        fontFamily: "'JetBrains Mono', monospace",
+        height: "100vh",
+        position: "sticky",
+        top: 0,
+        overflowY: "auto",
+      }}
+    >
+      {/* Logo */}
+      <div style={{ padding: "20px 16px 16px", borderBottom: "1px solid rgba(255,255,255,0.05)" }}>
+        <div style={{ fontSize: 16, fontWeight: 800 }}>
+          <span style={{ color: "#00ff88" }}>TRADE</span>
+          <span style={{ color: "#e0e0e0" }}> DADDY</span>
         </div>
-
-        <Card className="bg-card border-border">
-          <CardHeader className="text-center">
-            <CardTitle className="text-xl text-foreground">Create Account</CardTitle>
-            <CardDescription className="text-muted-foreground">
-              Join the trading terminal
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
-            <form onSubmit={handleSignUp} className="space-y-4">
-              {error && (
-                <Alert variant="destructive">
-                  <AlertCircle className="h-4 w-4" />
-                  <AlertDescription>{error}</AlertDescription>
-                </Alert>
-              )}
-
-              <div className="space-y-2">
-                <Label htmlFor="displayName" className="text-foreground">Display Name</Label>
-                <Input
-                  id="displayName"
-                  type="text"
-                  placeholder="TradeMaster"
-                  value={displayName}
-                  onChange={(e) => setDisplayName(e.target.value)}
-                  required
-                  className="bg-input border-border"
-                />
-              </div>
-
-              <div className="space-y-2">
-                <Label htmlFor="email" className="text-foreground">Email</Label>
-                <Input
-                  id="email"
-                  type="email"
-                  placeholder="trader@example.com"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  required
-                  className="bg-input border-border"
-                />
-              </div>
-
-              <div className="space-y-2">
-                <Label htmlFor="password" className="text-foreground">Password</Label>
-                <Input
-                  id="password"
-                  type="password"
-                  placeholder="Min. 8 characters"
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  required
-                  className="bg-input border-border"
-                />
-              </div>
-
-              <div className="space-y-2">
-                <Label htmlFor="confirmPassword" className="text-foreground">Confirm Password</Label>
-                <Input
-                  id="confirmPassword"
-                  type="password"
-                  placeholder="Confirm your password"
-                  value={confirmPassword}
-                  onChange={(e) => setConfirmPassword(e.target.value)}
-                  required
-                  className="bg-input border-border"
-                />
-              </div>
-
-              <Button
-                type="submit"
-                className="w-full"
-                disabled={isLoading}
-              >
-                {isLoading ? (
-                  <>
-                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                    Creating Account...
-                  </>
-                ) : (
-                  'Create Account'
-                )}
-              </Button>
-            </form>
-
-            <div className="mt-6 text-center">
-              <p className="text-sm text-muted-foreground">
-                Already have an account?{' '}
-                <Link
-                  href="/auth/login"
-                  className="text-primary hover:underline"
-                >
-                  Login
-                </Link>
-              </p>
-            </div>
-
-            {/* Benefits */}
-            <div className="mt-6 pt-6 border-t border-border">
-              <p className="text-xs text-muted-foreground text-center mb-3">
-                What you get:
-              </p>
-              <ul className="text-xs text-muted-foreground space-y-1">
-                <li className="flex items-center gap-2">
-                  <span className="text-primary">+</span> 100 free credits to start
-                </li>
-                <li className="flex items-center gap-2">
-                  <span className="text-primary">+</span> Access to all calculators
-                </li>
-                <li className="flex items-center gap-2">
-                  <span className="text-primary">+</span> Trade journal & analytics
-                </li>
-                <li className="flex items-center gap-2">
-                  <span className="text-primary">+</span> Academy basics
-                </li>
-              </ul>
-            </div>
-          </CardContent>
-        </Card>
-
-        {/* Terminal decoration */}
-        <div className="mt-8 text-center text-xs text-muted-foreground font-mono">
-          <p>TRADEDADDY Terminal v1.0</p>
-          <p className="text-primary/50">[INITIALIZING NEW USER SEQUENCE]</p>
-        </div>
+        <div style={{ fontSize: 9, color: "#333", letterSpacing: "0.1em", marginTop: 2 }}>TRADING PLATFORM</div>
       </div>
-    </div>
-  )
+
+      {/* Nav items */}
+      <div style={{ padding: "12px 8px", flex: 1 }}>
+        {NAV_ITEMS.map(({ href, label, icon, badge }) => {
+          const isActive = pathname === href || pathname.startsWith(href + "/");
+          return (
+            <Link
+              key={href}
+              href={href}
+              style={{
+                display: "flex",
+                alignItems: "center",
+                gap: 10,
+                padding: "9px 10px",
+                borderRadius: 8,
+                marginBottom: 2,
+                textDecoration: "none",
+                background: isActive ? "rgba(0,255,136,0.08)" : "transparent",
+                border: `1px solid ${isActive ? "rgba(0,255,136,0.2)" : "transparent"}`,
+                transition: "all 0.1s",
+              }}
+              onMouseEnter={(e) => {
+                if (!isActive) (e.currentTarget as HTMLAnchorElement).style.background = "rgba(255,255,255,0.03)";
+              }}
+              onMouseLeave={(e) => {
+                if (!isActive) (e.currentTarget as HTMLAnchorElement).style.background = "transparent";
+              }}
+            >
+              <span style={{ fontSize: 14, minWidth: 18, textAlign: "center" }}>{icon}</span>
+              <span style={{
+                fontSize: 11,
+                fontWeight: isActive ? 700 : 500,
+                color: isActive ? "#00ff88" : "#666",
+                letterSpacing: "0.03em",
+                flex: 1,
+              }}>
+                {label}
+              </span>
+              {badge && (
+                <span style={{
+                  fontSize: 8,
+                  fontWeight: 800,
+                  letterSpacing: "0.06em",
+                  color: "#00ff88",
+                  background: "rgba(0,255,136,0.12)",
+                  border: "1px solid rgba(0,255,136,0.25)",
+                  borderRadius: 4,
+                  padding: "1px 5px",
+                }}>
+                  {badge}
+                </span>
+              )}
+            </Link>
+          );
+        })}
+      </div>
+    </nav>
+  );
 }
